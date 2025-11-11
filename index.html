@@ -38,44 +38,34 @@
             border-bottom: 2px solid #007bff;
             padding-bottom: 5px;
         }
-        
+
         /* ستايل فورمات الأدمن */
-        #admin-search-form, #admin-balance-form {
+        #admin-search-form, #admin-update-balance-form {
             display: flex;
             gap: 10px;
             margin-top: 0.5rem;
         }
 
-        #admin-search-form input, #admin-balance-form input {
+        #admin-search-form input, #admin-update-balance-form input {
             flex-grow: 1; /* خلي الانبوت ياخد باقي المساحة */
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        
-        /* ستايل الزراير */
-        #admin-search-form button, #admin-balance-form button, #admin-delete-user-btn {
+
+        #admin-search-form button, #admin-update-balance-form button {
             padding: 10px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             color: white;
             background-color: #007bff;
-            font-weight: bold;
         }
 
-        #admin-balance-form button.add {
-             background-color: #28a745; /* لون أخضر للإضافة */
+        #admin-update-balance-form button {
+             background-color: #28a745; /* لون أخضر للـ update */
         }
-        #admin-balance-form button.subtract {
-             background-color: #ffc107; /* لون برتقالي للخصم */
-        }
-        #admin-delete-user-btn {
-            background-color: #dc3545; /* لون أحمر للحذف */
-            width: 100%;
-            margin-top: 1rem;
-        }
-        
+
         /* كارت المستخدم اللي بنبحث عنه */
         #admin-searched-user-card {
             display: none; 
@@ -87,9 +77,8 @@
         }
         #admin-searched-user-card p {
             margin: 0.5rem 0;
-            font-size: 1.1em;
         }
-        
+
     </style>
 </head>
 <body>
@@ -118,10 +107,10 @@
                 <input type="text" id="family" placeholder="Family" required>
                 <input type="email" id="signup-email" placeholder="Email" required>
                 <input type="password" id="signup-password" placeholder="Password" required>
-                
+
                 <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
                 <input type="file" id="avatar-file" accept="image/png, image/jpeg">
-                
+
                 <button type="submit">Sign Up</button>
             </form>
         </div>
@@ -130,6 +119,7 @@
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
 
     <div class="admin-panel-container">
+        
         <div id="admin-panel" style="display: none;">
             
             <h2>لوحة تحكم الأدمن</h2>
@@ -140,32 +130,23 @@
                     <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
                     <button type="submit">بحث</button>
                 </form>
+                
                 <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
 
-                
-                <div id="admin-searched-user-card">
+                <div id="admin-searched-user-card" style="display: none;">
                     <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
                     
-                    <hr>
-                    <h4>تعديل الرصيد</h4>
-                    <form id="admin-balance-form">
-                        <input type="number" id="admin-balance-amount" placeholder="أدخل الكمية" required min="1">
-                        <button type="button" id="admin-add-btn" class="add">إضافة</button>
-                        <button type="button" id="admin-subtract-btn" class="subtract">خصم</button>
-                    </form>
-                    <p id="admin-balance-message" style="color: green; margin-top: 10px;"></p>
-                    
-                    <hr>
-                    <h4>حذف المستخدم</h4>
-                    <button type="button" id="admin-delete-user-btn">حذف هذا المستخدم (لا يمكن التراجع)</button>
-                </div>
-            </div>
+                    <hr style="margin: 1rem 0;">
 
-        </div>
-    </div>
-    <script src="app.js"></script>
-</body>
-</html>
+                    <h4>تعديل الرصيد</h4>
+                    <form id="admin-update-balance-form">
+                        <input type="number" id="admin-balance-amount" placeholder="الكمية (اكتب سالب للخصم)" required>
+                        <button type="submit">تحديث الرصيد</button>
+                    </form>
+                    <p id="admin-balance-message" style="color: green;"></p>
+
+                    <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
+                    <button id="admin-delete-user-btn" style="background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius:
