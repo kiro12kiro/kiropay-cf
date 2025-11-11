@@ -11,10 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const userAvatarImg = document.getElementById("user-avatar");
   const DEFAULT_AVATAR_URL = "https://via.placeholder.com/100";
 
-  // 🛑 --- عناصر لوحة الأدمن (الجديدة) ---
+  // --- عناصر لوحة الأدمن ---
   const adminPanelDiv = document.getElementById("admin-panel");
-  // (هنا هنمسك عناصر البحث والتعديل لما نحتاجها)
-
 
   // --- فورم اللوجن (مُعدل لإظهار لوحة الأدمن) ---
   loginForm.addEventListener("submit", async (event) => {
@@ -22,9 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.textContent = "جاري تسجيل الدخول...";
     messageDiv.style.color = "blue";
     
-    // 🛑 بنخفي لوحة الأدمن مع كل محاولة لوجن جديدة
-    // بنضيف علامة "؟" عشان لو العنصر مش موجود الكود ميضربش
-    adminPanelDiv?.style.display = "none"; 
+    // بنخفي لوحة الأدمن مع كل محاولة لوجن جديدة
+    if (adminPanelDiv) {
+        adminPanelDiv.style.display = "none";
+    }
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -48,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userBalanceP.textContent = `Balance: $${user.balance}`;
         userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
         
-        // 🛑🛑 --- السحر كله هنا --- 🛑🛑
+        // --- السحر كله هنا ---
         // بنشوف الـ role اللي راجع
         if (user.role === 'admin' && adminPanelDiv) {
           messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
@@ -84,10 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // 3. ابعت الفورم (المتصفح هيحط الـ Content-Type الصح لوحده)
       const response = await fetch(`/signup`, {
         method: "POST",
-        body: formData, // مش بنحول لـ JSON
+        body: formData,
       });
 
       const data = await response.json();
@@ -105,7 +103,5 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.style.color = "red";
     }
   });
-  
-  // (هنا هنضيف الأكواد الخاصة بزراير الأدمن لاحقاً)
 
 });
