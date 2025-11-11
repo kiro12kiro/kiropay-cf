@@ -1,21 +1,109 @@
+/* General Body Styles */
 body {
-  font-family: Arial, sans-serif; background-color: #f0f2f5;
-  display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    direction: rtl; /* For Right-to-Left languages */
+    text-align: right; /* For Right-to-Left languages */
+
+    /* 🛑🛑 أكواد الباكجراند هنا 🛑🛑 */
+    background-image: url('/hero1.jpg'); /* ⬅️ غير الاسم ده باسم صورتك */
+    background-size: cover; /* عشان الصورة تغطي الشاشة كلها */
+    background-position: center center; /* عشان الصورة تكون متوسّطة */
+    background-attachment: fixed; /* عشان الصورة تفضل ثابتة لما تعمل سكرول */
+    background-repeat: no-repeat; /* عشان الصورة متتكررش */
+    /* 🛑🛑 نهاية أكواد الباكجراند 🛑🛑 */
 }
+
 .container {
-  background-color: #ffffff; padding: 2rem; border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9); /* خلفية بيضاء شفافة عشان الكلام يبان */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-h1 { color: #333; }
-h3 { margin-top: 1.5rem; color: #555; }
-.card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; background-color: #fafafa; }
-.card-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; border: 2px solid #eee; }
-.card p { margin: 0.5rem 0; color: #444; text-align: left; }
-form { display: flex; flex-direction: column; gap: 0.75rem; }
-input { padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-button {
-  padding: 0.75rem; border: none; border-radius: 4px; background-color: #007bff;
-  color: white; font-size: 1rem; cursor: pointer; transition: background-color 0.2s;
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
-button:hover { background-color: #0056b3; }
-#message { margin-top: 1rem; font-size: 0.9rem; font-weight: bold; }
+
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 200px;
+}
+
+.card-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.form-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-container form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-container h3 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.form-container input[type="email"],
+.form-container input[type="password"],
+.form-container input[type="text"],
+.form-container input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.form-container button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.form-container button:hover {
+    background-color: #0056b3;
+}
+
+#message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
