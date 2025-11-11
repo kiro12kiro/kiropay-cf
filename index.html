@@ -120,10 +120,11 @@
             margin: 0.5rem 0;
         }
 
-        /* ستايلات صور الواجهة */
+        /* ستايلات صور الواجهة (عشان تكون فوق بعض) */
         .hero-images-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 20px;
             padding: 20px;
             max-width: 1200px;
@@ -134,8 +135,9 @@
         }
 
         .hero-image {
-            width: 100%;
-            height: 200px;
+            width: 90%;
+            max-width: 800px;
+            height: auto;
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -185,9 +187,10 @@
     
     <div class="hero-images-container">
         
-        <img src="/hero1.jpg" alt="صورة توضيحية 1" class="hero-image">
         <img src="/hero2.png" alt="صورة توضيحية 2" class="hero-image">
         </div>
+
+
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
