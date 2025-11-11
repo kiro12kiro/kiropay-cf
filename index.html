@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KiroPay Project</title>
     <link rel="stylesheet" href="style.css">
-    
+
     <style>
         /* ستايلات لوحة الأدمن */
         .admin-panel-container {
@@ -40,30 +40,40 @@
         }
         
         /* ستايل فورمات الأدمن */
-        #admin-search-form, #admin-update-balance-form {
+        #admin-search-form, #admin-balance-form {
             display: flex;
             gap: 10px;
             margin-top: 0.5rem;
         }
 
-        #admin-search-form input, #admin-update-balance-form input {
+        #admin-search-form input, #admin-balance-form input {
             flex-grow: 1; /* خلي الانبوت ياخد باقي المساحة */
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-
-        #admin-search-form button, #admin-update-balance-form button {
+        
+        /* ستايل الزراير */
+        #admin-search-form button, #admin-balance-form button, #admin-delete-user-btn {
             padding: 10px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             color: white;
             background-color: #007bff;
+            font-weight: bold;
         }
-        
-        #admin-update-balance-form button {
-             background-color: #28a745; /* لون أخضر للـ update */
+
+        #admin-balance-form button.add {
+             background-color: #28a745; /* لون أخضر للإضافة */
+        }
+        #admin-balance-form button.subtract {
+             background-color: #ffc107; /* لون برتقالي للخصم */
+        }
+        #admin-delete-user-btn {
+            background-color: #dc3545; /* لون أحمر للحذف */
+            width: 100%;
+            margin-top: 1rem;
         }
         
         /* كارت المستخدم اللي بنبحث عنه */
@@ -77,6 +87,7 @@
         }
         #admin-searched-user-card p {
             margin: 0.5rem 0;
+            font-size: 1.1em;
         }
         
     </style>
@@ -124,11 +135,13 @@
             <h2>لوحة تحكم الأدمن</h2>
             
             <div class="admin-section">
-                <h4>البحث عن مستخدم (بالإيميل)</h4>
+                <h4>البحث عن مستخدم (بالاسم)</h4>
                 <form id="admin-search-form">
-                    <input type="email" id="admin-search-email" placeholder="أدخل إيميل المستخدم" required>
+                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
                     <button type="submit">بحث</button>
                 </form>
+                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
+
                 
                 <div id="admin-searched-user-card">
                     <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
@@ -136,15 +149,22 @@
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
                     
-                    <form id="admin-update-balance-form">
-                        <input type="number" id="admin-new-balance" placeholder="الرصيد الجديد" required>
-                        <button type="submit">تحديث الرصيد</button>
+                    <hr>
+                    <h4>تعديل الرصيد</h4>
+                    <form id="admin-balance-form">
+                        <input type="number" id="admin-balance-amount" placeholder="أدخل الكمية" required min="1">
+                        <button type="button" id="admin-add-btn" class="add">إضافة</button>
+                        <button type="button" id="admin-subtract-btn" class="subtract">خصم</button>
                     </form>
+                    <p id="admin-balance-message" style="color: green; margin-top: 10px;"></p>
+                    
+                    <hr>
+                    <h4>حذف المستخدم</h4>
+                    <button type="button" id="admin-delete-user-btn">حذف هذا المستخدم (لا يمكن التراجع)</button>
                 </div>
-                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
             </div>
-            
-            </div>
+
+        </div>
     </div>
     <script src="app.js"></script>
 </body>
