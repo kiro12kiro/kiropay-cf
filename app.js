@@ -3,18 +3,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  
+  // 🛑 زرار تسجيل الخروج الجديد
+  const logoutBtn = document.getElementById("logout-btn");
 
   // --- عناصر كارت المستخدم (اللي عامل لوجن) ---
   const userNameP = document.getElementById("user-name");
   const userFamilyP = document.getElementById("user-family");
   const userBalanceP = document.getElementById("user-balance");
   const userAvatarImg = document.getElementById("user-avatar");
-  const DEFAULT_AVATAR_URL = "https://via.placeholder.com/100";
+  
+  // 🛑 دي الصورة اللي إنت رفعتها على GitHub
+  const DEFAULT_AVATAR_URL = "/default-avatar.png"; // (اتأكد إن الاسم ده مطابق لاسم الصورة اللي رفعتها)
 
   // --- عناصر لوحة الأدمن ---
   const adminPanelDiv = document.getElementById("admin-panel");
   const adminSearchForm = document.getElementById("admin-search-form");
-  const adminSearchInput = document.getElementById("admin-search-name"); // 🛑 ده الـ ID الجديد
+  const adminSearchInput = document.getElementById("admin-search-name");
   const adminSearchMessage = document.getElementById("admin-search-message");
   
   // --- عناصر كارت المستخدم (اللي بـ نبحث عنه) ---
@@ -24,33 +29,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchedUserEmail = document.getElementById("searched-user-email");
   const searchedUserBalance = document.getElementById("searched-user-balance");
 
-  // --- عناصر فورم تعديل الرصيد ---
-  const updateBalanceForm = document.getElementById("admin-update-balance-form");
+  // 🛑 عناصر فورم تعديل الرصيد (الجديدة) ---
   const balanceAmountInput = document.getElementById("admin-balance-amount");
+  const addBalanceBtn = document.getElementById("admin-add-balance-btn");
+  const subtractBalanceBtn = document.getElementById("admin-subtract-balance-btn");
   const balanceMessage = document.getElementById("admin-balance-message");
+
 
   // --- عناصر زرار الحذف ---
   const deleteUserBtn = document.getElementById("admin-delete-user-btn");
   const deleteMessage = document.getElementById("admin-delete-message");
 
-  // متغير عشان نخزن فيه إيميل المستخدم اللي بنبحث عنه
   let currentSearchedUserEmail = null;
 
-  // --- فورم اللوجن (زي ما هو) ---
+  // --- فورم اللوجن ---
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري تسجيل الدخول...";
     messageDiv.style.color = "blue";
     
-    if (adminPanelDiv) {
-        adminPanelDiv.style.display = "none";
-    }
-    if (searchedUserCard) {
-        searchedUserCard.style.display = "none";
-    }
-    if (adminSearchMessage) {
-        adminSearchMessage.textContent = "";
-    }
+    if (adminPanelDiv) adminPanelDiv.style.display = "none";
+    if (searchedUserCard) searchedUserCard.style.display = "none";
+    if (adminSearchMessage) adminSearchMessage.textContent = "";
+    
+    // 🛑 إخفاء زرار تسجيل الخروج (عشان لو كان ظاهر من لوجن قديم)
+    if (logoutBtn) logoutBtn.style.display = "none";
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -72,7 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
+        // 🛑 بيستخدم صورتك أو الصورة الافتراضية
         userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
+        
+        // 🛑 إظهار زرار تسجيل الخروج
+        if (logoutBtn) logoutBtn.style.display = "block";
         
         if (user.role === 'admin' && adminPanelDiv) {
           messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
@@ -88,6 +95,15 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.style.color = "red";
     }
   });
+
+  // --- 🛑 برمجة زرار تسجيل الخروج ---
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        // أسهل طريقة لـ "تسجيل الخروج" هي إننا نعمل ريلود للصفحة
+        // ده هيرجع كل حاجة لوضعها الطبيعي (قبل اللوجن)
+        location.reload();
+    });
+  }
 
   // --- فورم التسجيل (زي ما هو) ---
   signupForm.addEventListener("submit", async (event) => {
@@ -124,17 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 
-  // 🛑🛑 --- الإضافات الجديدة للأدمن هنا --- 🛑🛑
+  // --- أكواد الأدمن ---
   // 
 
-  // --- 1. فورم البحث بالاسم ---
-  // بنتأكد إن الفورم موجود قبل ما نضيف عليه أوامر
+  // --- 1. فورم البحث بالاسم (زي ما هو) ---
   if (adminSearchForm) {
     adminSearchForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const nameToSearch = adminSearchInput.value;
         adminSearchMessage.textContent = "جاري البحث...";
-        searchedUserCard.style.display = "none"; // اخفي الكارت القديم
+        searchedUserCard.style.display = "none";
         
         try {
             const response = await fetch(`/admin-search`, {
@@ -142,22 +157,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: nameToSearch }),
             });
-            
             const data = await response.json();
-            
             if(response.ok) {
                 adminSearchMessage.textContent = "";
                 const user = data.user;
-                // املى الكارت بالبيانات الجديدة
                 searchedUserName.textContent = user.name;
                 searchedUserFamily.textContent = user.family;
                 searchedUserEmail.textContent = user.email;
                 searchedUserBalance.textContent = user.balance;
-                
-                // 🛑 بنخزن الإيميل عشان نعرف هنعدل مين
                 currentSearchedUserEmail = user.email; 
-                
-                searchedUserCard.style.display = "block"; // اظهر الكارت
+                searchedUserCard.style.display = "block";
             } else {
                 adminSearchMessage.textContent = data.error;
                 currentSearchedUserEmail = null;
@@ -168,51 +177,70 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- 2. فورم تعديل الرصيد (إضافة وخصم) ---
-  if (updateBalanceForm) {
-    updateBalanceForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const amount = balanceAmountInput.value;
-        
-        if (!currentSearchedUserEmail) {
-            balanceMessage.textContent = "لا يوجد مستخدم للبحث عنه";
-            balanceMessage.style.color = "red";
-            return;
-        }
+  // --- 🛑 2. برمجة زراير تعديل الرصيد (الجديدة) ---
+  
+  // دي "دالة مساعدة" عشان نبعت للـ API (عشان منكررش الكود مرتين)
+  const handleUpdateBalance = async (amount) => {
+    if (!currentSearchedUserEmail) {
+        balanceMessage.textContent = "لا يوجد مستخدم للبحث عنه";
+        balanceMessage.style.color = "red";
+        return;
+    }
+    
+    if (isNaN(amount) || amount === 0) {
+        balanceMessage.textContent = "الرجاء إدخال كمية صحيحة";
+        balanceMessage.style.color = "red";
+        return;
+    }
 
-        balanceMessage.textContent = "جاري تحديث الرصيد...";
-        balanceMessage.style.color = "blue";
+    balanceMessage.textContent = "جاري تحديث الرصيد...";
+    balanceMessage.style.color = "blue";
+    
+    try {
+        const response = await fetch(`/admin-update-balance`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                email: currentSearchedUserEmail, 
+                amount: amount // الكمية (موجبة أو سالبة)
+            }),
+        });
         
-        try {
-            const response = await fetch(`/admin-update-balance`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    email: currentSearchedUserEmail, 
-                    amount: parseFloat(amount) // حوله لرقم
-                }),
-            });
-            
-            const data = await response.json();
-            
-            if(response.ok) {
-                balanceMessage.textContent = `تم تحديث الرصيد! الرصيد الجديد: ${data.new_balance}`;
-                balanceMessage.style.color = "green";
-                // حدث الرصيد في الكارت كمان
-                searchedUserBalance.textContent = data.new_balance;
-                balanceAmountInput.value = ""; // فضي الخانة
-            } else {
-                balanceMessage.textContent = data.error;
-                balanceMessage.style.color = "red";
-            }
-        } catch (err) {
-            balanceMessage.textContent = "خطأ في الاتصال بالـ API بتاع الرصيد.";
+        const data = await response.json();
+        
+        if(response.ok) {
+            balanceMessage.textContent = `تم تحديث الرصيد! الرصيد الجديد: ${data.new_balance}`;
+            balanceMessage.style.color = "green";
+            searchedUserBalance.textContent = data.new_balance;
+            balanceAmountInput.value = ""; // فضي الخانة
+        } else {
+            balanceMessage.textContent = data.error;
             balanceMessage.style.color = "red";
         }
+    } catch (err) {
+        balanceMessage.textContent = "خطأ في الاتصال بالـ API بتاع الرصيد.";
+        balanceMessage.style.color = "red";
+    }
+  };
+
+  // زرار الإضافة
+  if (addBalanceBtn) {
+    addBalanceBtn.addEventListener("click", () => {
+        const amount = parseFloat(balanceAmountInput.value);
+        handleUpdateBalance(amount); // هيبعت الرقم زي ما هو (موجب)
     });
   }
 
-  // --- 3. زرار حذف المستخدم ---
+  // زرار الخصم
+  if (subtractBalanceBtn) {
+    subtractBalanceBtn.addEventListener("click", () => {
+        // هيحول الرقم لسالب لو كان موجب
+        const amount = -Math.abs(parseFloat(balanceAmountInput.value)); 
+        handleUpdateBalance(amount); // هيبعت الرقم بالسالب
+    });
+  }
+
+  // --- 3. زرار حذف المستخدم (زي ما هو) ---
   if (deleteUserBtn) {
     deleteUserBtn.addEventListener("click", async () => {
         if (!currentSearchedUserEmail) {
@@ -222,9 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const confirmDelete = confirm(`هل أنت متأكد أنك تريد حذف المستخدم: ${currentSearchedUserEmail}؟ \nهذه العملية لا يمكن التراجع عنها.`);
         
-        if (!confirmDelete) {
-            return; // لو داس "Cancel"
-        }
+        if (!confirmDelete) return; 
         
         deleteMessage.textContent = "جاري حذف المستخدم...";
         
@@ -234,13 +260,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: currentSearchedUserEmail }),
             });
-            
             const data = await response.json();
-            
             if(response.ok) {
                 deleteMessage.textContent = data.message;
                 deleteMessage.style.color = "green";
-                // اخفي الكارت لإن المستخدم اتمسح
                 searchedUserCard.style.display = "none";
                 currentSearchedUserEmail = null;
             } else {
