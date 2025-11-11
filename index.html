@@ -54,7 +54,7 @@
             background-color: #007bff;
         }
 
-        /* 🛑 ستايلات جديدة لزراير الإضافة والخصم */
+        /* ستايلات لزراير الإضافة والخصم */
         #admin-balance-controls {
             display: flex;
             gap: 10px;
@@ -82,7 +82,7 @@
             color: #333;
         }
         
-        /* 🛑 ستايل زرار الحذف */
+        /* ستايل زرار الحذف */
         #admin-delete-user-btn {
             background-color: #dc3545; /* أحمر */
             color: white;
@@ -90,13 +90,13 @@
             padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
-            width: 100%; /* خليه بعرض الكارت */
+            width: 100%;
             margin-top: 1rem;
         }
 
-        /* 🛑 ستايل زرار تسجيل الخروج */
+        /* ستايل زرار تسجيل الخروج */
         #logout-btn {
-            display: none; /* مخفي في الأول */
+            display: none;
             background-color: #6c757d;
             color: white;
             border: none;
@@ -105,7 +105,7 @@
             cursor: pointer;
             margin: 1rem auto;
             width: 90%;
-            max-width: 400px; /* خليه مناسب للموبايل */
+            max-width: 400px;
         }
         
         #admin-searched-user-card {
@@ -119,6 +119,28 @@
         #admin-searched-user-card p {
             margin: 0.5rem 0;
         }
+
+        /* ستايلات صور الواجهة */
+        .hero-images-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
     </style>
 </head>
 <body>
@@ -160,6 +182,12 @@
 
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
 
+    
+    <div class="hero-images-container">
+        
+        <img src="/hero1.jpg" alt="صورة توضيحية 1" class="hero-image">
+        <img src="/hero2.png" alt="صورة توضيحية 2" class="hero-image">
+        </div>
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
@@ -190,6 +218,7 @@
                         <button id="admin-subtract-balance-btn">خصم (-)</button>
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
+                    
                     <hr style="margin: 1rem 0;">
 
                     <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
