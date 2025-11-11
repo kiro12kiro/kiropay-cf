@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- عناصر لوحة الأدمن ---
   const adminPanelDiv = document.getElementById("admin-panel");
   const adminSearchForm = document.getElementById("admin-search-form");
-  const adminSearchInput = document.getElementById("admin-search-name");
+  const adminSearchInput = document.getElementById("admin-search-name"); // 🛑 ده الـ ID الجديد
   const adminSearchMessage = document.getElementById("admin-search-message");
   
   // --- عناصر كارت المستخدم (اللي بـ نبحث عنه) ---
@@ -45,11 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (adminPanelDiv) {
         adminPanelDiv.style.display = "none";
     }
-    // بنخفي كارت البحث القديم مع كل لوجن
     if (searchedUserCard) {
         searchedUserCard.style.display = "none";
     }
-    adminSearchMessage.textContent = "";
+    if (adminSearchMessage) {
+        adminSearchMessage.textContent = "";
+    }
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -127,126 +128,130 @@ document.addEventListener("DOMContentLoaded", () => {
   // 
 
   // --- 1. فورم البحث بالاسم ---
-  adminSearchForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const nameToSearch = adminSearchInput.value;
-    adminSearchMessage.textContent = "جاري البحث...";
-    searchedUserCard.style.display = "none"; // اخفي الكارت القديم
-    
-    try {
-        const response = await fetch(`/admin-search`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: nameToSearch }),
-        });
+  // بنتأكد إن الفورم موجود قبل ما نضيف عليه أوامر
+  if (adminSearchForm) {
+    adminSearchForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const nameToSearch = adminSearchInput.value;
+        adminSearchMessage.textContent = "جاري البحث...";
+        searchedUserCard.style.display = "none"; // اخفي الكارت القديم
         
-        const data = await response.json();
-        
-        if(response.ok) {
-            adminSearchMessage.textContent = "";
-            const user = data.user;
-            // املى الكارت بالبيانات الجديدة
-            searchedUserName.textContent = user.name;
-            searchedUserFamily.textContent = user.family;
-            searchedUserEmail.textContent = user.email;
-            searchedUserBalance.textContent = user.balance;
+        try {
+            const response = await fetch(`/admin-search`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: nameToSearch }),
+            });
             
-            // 🛑 بنخزن الإيميل عشان نعرف هنعدل مين
-            currentSearchedUserEmail = user.email; 
+            const data = await response.json();
             
-            searchedUserCard.style.display = "block"; // اظهر الكارت
-        } else {
-            adminSearchMessage.textContent = data.error;
-            currentSearchedUserEmail = null;
+            if(response.ok) {
+                adminSearchMessage.textContent = "";
+                const user = data.user;
+                // املى الكارت بالبيانات الجديدة
+                searchedUserName.textContent = user.name;
+                searchedUserFamily.textContent = user.family;
+                searchedUserEmail.textContent = user.email;
+                searchedUserBalance.textContent = user.balance;
+                
+                // 🛑 بنخزن الإيميل عشان نعرف هنعدل مين
+                currentSearchedUserEmail = user.email; 
+                
+                searchedUserCard.style.display = "block"; // اظهر الكارت
+            } else {
+                adminSearchMessage.textContent = data.error;
+                currentSearchedUserEmail = null;
+            }
+        } catch (err) {
+            adminSearchMessage.textContent = "خطأ في الاتصال بالـ API بتاع البحث.";
         }
-    } catch (err) {
-        adminSearchMessage.textContent = "خطأ في الاتصال بالـ API بتاع البحث.";
-    }
-  });
+    });
+  }
 
   // --- 2. فورم تعديل الرصيد (إضافة وخصم) ---
-  updateBalanceForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const amount = balanceAmountInput.value;
-    
-    // اتأكد إننا بنعدل المستخدم الصح
-    if (!currentSearchedUserEmail) {
-        balanceMessage.textContent = "لا يوجد مستخدم للبحث عنه";
-        balanceMessage.style.color = "red";
-        return;
-    }
+  if (updateBalanceForm) {
+    updateBalanceForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const amount = balanceAmountInput.value;
+        
+        if (!currentSearchedUserEmail) {
+            balanceMessage.textContent = "لا يوجد مستخدم للبحث عنه";
+            balanceMessage.style.color = "red";
+            return;
+        }
 
-    balanceMessage.textContent = "جاري تحديث الرصيد...";
-    balanceMessage.style.color = "blue";
-    
-    try {
-        const response = await fetch(`/admin-update-balance`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                email: currentSearchedUserEmail, 
-                amount: parseFloat(amount) // حوله لرقم عشري
-            }),
-        });
+        balanceMessage.textContent = "جاري تحديث الرصيد...";
+        balanceMessage.style.color = "blue";
         
-        const data = await response.json();
-        
-        if(response.ok) {
-            balanceMessage.textContent = `تم تحديث الرصيد! الرصيد الجديد: ${data.new_balance}`;
-            balanceMessage.style.color = "green";
-            // حدث الرصيد في الكارت كمان
-            searchedUserBalance.textContent = data.new_balance;
-            balanceAmountInput.value = ""; // فضي الخانة
-        } else {
-            balanceMessage.textContent = data.error;
+        try {
+            const response = await fetch(`/admin-update-balance`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    email: currentSearchedUserEmail, 
+                    amount: parseFloat(amount) // حوله لرقم
+                }),
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                balanceMessage.textContent = `تم تحديث الرصيد! الرصيد الجديد: ${data.new_balance}`;
+                balanceMessage.style.color = "green";
+                // حدث الرصيد في الكارت كمان
+                searchedUserBalance.textContent = data.new_balance;
+                balanceAmountInput.value = ""; // فضي الخانة
+            } else {
+                balanceMessage.textContent = data.error;
+                balanceMessage.style.color = "red";
+            }
+        } catch (err) {
+            balanceMessage.textContent = "خطأ في الاتصال بالـ API بتاع الرصيد.";
             balanceMessage.style.color = "red";
         }
-    } catch (err) {
-        balanceMessage.textContent = "خطأ في الاتصال بالـ API بتاع الرصيد.";
-        balanceMessage.style.color = "red";
-    }
-  });
+    });
+  }
 
   // --- 3. زرار حذف المستخدم ---
-  deleteUserBtn.addEventListener("click", async () => {
-    // اتأكد إننا بنحذف المستخدم الصح
-    if (!currentSearchedUserEmail) {
-        deleteMessage.textContent = "لا يوجد مستخدم للبحث عنه";
-        return;
-    }
+  if (deleteUserBtn) {
+    deleteUserBtn.addEventListener("click", async () => {
+        if (!currentSearchedUserEmail) {
+            deleteMessage.textContent = "لا يوجد مستخدم للبحث عنه";
+            return;
+        }
 
-    // رسالة تأكيد قبل الحذف
-    const confirmDelete = confirm(`هل أنت متأكد أنك تريد حذف المستخدم: ${currentSearchedUserEmail}؟ \nهذه العملية لا يمكن التراجع عنها.`);
-    
-    if (!confirmDelete) {
-        return; // لو داس "Cancel"
-    }
-    
-    deleteMessage.textContent = "جاري حذف المستخدم...";
-    
-    try {
-        const response = await fetch(`/admin-delete-user`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: currentSearchedUserEmail }),
-        });
+        const confirmDelete = confirm(`هل أنت متأكد أنك تريد حذف المستخدم: ${currentSearchedUserEmail}؟ \nهذه العملية لا يمكن التراجع عنها.`);
         
-        const data = await response.json();
+        if (!confirmDelete) {
+            return; // لو داس "Cancel"
+        }
         
-        if(response.ok) {
-            deleteMessage.textContent = data.message;
-            deleteMessage.style.color = "green";
-            // اخفي الكارت لإن المستخدم اتمسح
-            searchedUserCard.style.display = "none";
-            currentSearchedUserEmail = null;
-        } else {
-            deleteMessage.textContent = data.error;
+        deleteMessage.textContent = "جاري حذف المستخدم...";
+        
+        try {
+            const response = await fetch(`/admin-delete-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: currentSearchedUserEmail }),
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                deleteMessage.textContent = data.message;
+                deleteMessage.style.color = "green";
+                // اخفي الكارت لإن المستخدم اتمسح
+                searchedUserCard.style.display = "none";
+                currentSearchedUserEmail = null;
+            } else {
+                deleteMessage.textContent = data.error;
+                deleteMessage.style.color = "red";
+            }
+        } catch (err) {
+            deleteMessage.textContent = "خطأ في الاتصال بالـ API بتاع الحذف.";
             deleteMessage.style.color = "red";
         }
-    } catch (err) {
-        deleteMessage.textContent = "خطأ في الاتصال بالـ API بتاع الحذف.";
-        deleteMessage.style.color = "red";
-    }
-  });
+    });
+  }
 
 });
