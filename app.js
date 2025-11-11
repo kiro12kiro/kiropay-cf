@@ -6,8 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const userNameP = document.getElementById("user-name");
   const userFamilyP = document.getElementById("user-family");
   const userBalanceP = document.getElementById("user-balance");
+  const userAvatarImg = document.getElementById("user-avatar"); // 🛑 مسكنا الصورة
 
-  // --- فورم اللوجن ---
+  // 🛑 الصورة الافتراضية
+  const DEFAULT_AVATAR_URL = "https://via.placeholder.com/100";
+
+  // --- فورم اللوجن (مُعدل لعرض الصورة) ---
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري تسجيل الدخول...";
@@ -17,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password").value;
 
     try {
-      // 🛑 بيكلم الـ API اللي في functions/login.js
       const response = await fetch(`/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,14 +29,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
 
-      if (response.ok) { // اتأكد إن الـ status code هو 2xx
+      if (response.ok) {
         messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
         messageDiv.style.color = "green";
-        // املى بيانات الكارت
+        
         const user = data.user;
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
+        
+        // 🛑 السطر الجديد: عرض الصورة
+        // لو المستخدم معندوش صورة (null) هنستخدم الافتراضية
+        userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
+        
       } else {
         messageDiv.textContent = `فشل: ${data.error}`;
         messageDiv.style.color = "red";
@@ -44,31 +52,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فورم التسجيل ---
+  // --- فورم التسجيل (مُعدل لرفع الصورة) ---
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري إنشاء حساب...";
     messageDiv.style.color = "blue";
 
-    const name = document.getElementById("name").value;
-    const family = document.getElementById("family").value;
-    const email = document.getElementById("signup-email").value;
-    const password = document.getElementById("signup-password").value;
+    // 1. مبنستخدمش JSON، بنستخدم FormData عشان نبعت الملف
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('family', document.getElementById('family').value);
+    formData.append('email', document.getElementById('signup-email').value);
+    formData.append('password', document.getElementById('signup-password').value);
+    
+    // 2. ضيف الملف (لو موجود)
+    const avatarFile = document.getElementById('avatar-file').files[0];
+    if (avatarFile) {
+      formData.append('avatar', avatarFile);
+    }
 
     try {
-      // 🛑 بيكلم الـ API اللي في functions/signup.js
+      // 3. ابعت الفورم (المتصفح هيحط الـ Content-Type الصح لوحده)
       const response = await fetch(`/signup`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, family, email, password }),
+        body: formData, // مش بنحول لـ JSON
       });
 
       const data = await response.json();
 
-      if (response.ok) { // اتأأكد إن الـ status code هو 2xx
+      if (response.ok) {
         messageDiv.textContent = "تم إنشاء الحساب! تقدر تعمل لوجن دلوقتي.";
         messageDiv.style.color = "green";
-        signupForm.reset(); // فضي الفورم
+        signupForm.reset();
       } else {
         messageDiv.textContent = `فشل: ${data.error}`;
         messageDiv.style.color = "red";
