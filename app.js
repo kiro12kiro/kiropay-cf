@@ -14,21 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const userAvatarImg = document.getElementById("user-avatar");
   const DEFAULT_AVATAR_URL = "/default-avatar.png";
 
-  // 🛑🛑 المتغيرات الجديدة لتغيير الصورة 🛑🛑
+  // --- عناصر تغيير الصورة ---
   const avatarUploadInput = document.getElementById("avatar-upload-input");
   const avatarOverlayLabel = document.getElementById("avatar-overlay-label");
-  const signupAvatarFile = document.getElementById("signup-avatar-file"); // الزرار بتاع الـ Signup
-  let loggedInUserEmail = null; // هنخزن ايميل اليوزر اللي عامل لوجن هنا
+  const signupAvatarFile = document.getElementById("signup-avatar-file"); 
+  let loggedInUserEmail = null; 
 
-  /*
-   * 🛑🛑 بيانات Cloudinary بتاعتك 🛑🛑
-  */
+  // --- بيانات Cloudinary ---
   const CLOUDINARY_CLOUD_NAME = "Dhbanzq4n"; 
   const CLOUDINARY_UPLOAD_PRESET = "kiropay_upload"; 
   const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 
-  // (باقي عناصر الأدمن زي ما هي)
+  // --- عناصر لوحة الأدمن (الكاملة) ---
   const adminPanelDiv = document.getElementById("admin-panel");
   const adminSearchForm = document.getElementById("admin-search-form");
   const adminSearchInput = document.getElementById("admin-search-name");
@@ -91,9 +89,8 @@ document.addEventListener("DOMContentLoaded", () => {
         formContainer.style.display = "none";
         logoutBtn.style.display = "block";
 
-        // 🛑 الإضافة: اظهر زرار تغيير الصورة وخزن الايميل
-        avatarOverlayLabel.style.display = "flex"; // اظهر الزرار
-        loggedInUserEmail = user.email; // خزن الايميل
+        avatarOverlayLabel.style.display = "flex"; 
+        loggedInUserEmail = user.email; 
         
         if (user.role === 'admin') {
           messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
@@ -110,17 +107,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فورم التسجيل (Signup) (النسخة الجديدة) ---
+  // --- فورم التسجيل (Signup) ---
   signupForm.addEventListener("submit", async (event) => {
       event.preventDefault(); 
       messageDiv.textContent = "جاري إنشاء حساب...";
       messageDiv.style.color = "blue";
       
       const avatarFile = signupAvatarFile.files[0];
-      let finalAvatarUrl = DEFAULT_AVATAR_URL; // الصورة الافتراضية
+      let finalAvatarUrl = DEFAULT_AVATAR_URL; 
 
       try {
-          // 1. لو اليوزر رفع صورة، ارفعها الأول
           if (avatarFile && avatarFile.size > 0) {
               messageDiv.textContent = "جاري رفع الصورة...";
               
@@ -139,24 +135,20 @@ document.addEventListener("DOMContentLoaded", () => {
                   throw new Error(uploadData.error.message || 'فشل رفع الصورة');
               }
               
-              finalAvatarUrl = uploadData.secure_url; // اللينك الجديد
-              messageDiv.textContent = "جاري إنشاء الحساب..."; // رجع الرسالة
+              finalAvatarUrl = uploadData.secure_url; 
+              messageDiv.textContent = "جاري إنشاء الحساب..."; 
           }
 
-          // 2. حضر البيانات للباك إند
           const dataToFunctions = new FormData();
           dataToFunctions.append('name', document.getElementById('name').value);
           dataToFunctions.append('family', document.getElementById('family').value); 
           dataToFunctions.append('email', document.getElementById('signup-email').value);
           dataToFunctions.append('password', document.getElementById('signup-password').value);
-          
-          // 🛑 ابعت اللينك (سواء الافتراضي أو الجديد)
           dataToFunctions.append('profile_image_url', finalAvatarUrl);
 
-          // 3. كلم الباك إند بتاعنا (functions/signup)
           const response = await fetch(`/signup`, {
               method: "POST",
-              body: dataToFunctions, // ابعت الـ FormData
+              body: dataToFunctions, 
           });
 
           const data = await response.json();
@@ -192,22 +184,19 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.textContent = "تم تسجيل الخروج.";
     messageDiv.style.color = "blue";
 
-    // 🛑 الإضافة: اخفي زرار تغيير الصورة
     avatarOverlayLabel.style.display = "none";
-    loggedInUserEmail = null; // امسح الايميل
+    loggedInUserEmail = null; 
   });
 
 
-  // 🛑🛑 الكود الجديد بتاع "تغيير الصورة" 🛑🛑
+  // --- كود "تغيير الصورة" ---
   avatarUploadInput.addEventListener("change", async () => {
       const file = avatarUploadInput.files[0];
-      if (!file) return; // لو اليوزر داس "cancel"
+      if (!file) return; 
       
-      // 1. اعرض رسالة "جاري الرفع"
       avatarOverlayLabel.textContent = "جاري الرفع...";
       
       try {
-          // 2. ارفع الصورة الجديدة لـ Cloudinary
           const formData_upload = new FormData();
           formData_upload.append('file', file);
           formData_upload.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -223,15 +212,14 @@ document.addEventListener("DOMContentLoaded", () => {
               throw new Error(uploadData.error.message || 'فشل رفع الصورة');
           }
           
-          const newUrl = uploadData.secure_url; // اللينك الجديد
+          const newUrl = uploadData.secure_url; 
 
-          // 3. كلم الـ API الجديد بتاعنا (functions/update-avatar)
           const updateResponse = await fetch(`/update-avatar`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                  email: loggedInUserEmail, // الايميل اللي خزنّاه
-                  newAvatarUrl: newUrl       // اللينك الجديد
+                  email: loggedInUserEmail, 
+                  newAvatarUrl: newUrl       
               }),
           });
           
@@ -241,12 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
               throw new Error(updateData.error.message || 'فشل تحديث الداتا بيز');
           }
 
-          // 4. حدث الصورة في الكارت
           userAvatarImg.src = newUrl;
-          avatarOverlayLabel.textContent = "تغيير الصورة"; // رجع الكلمة زي ما كانت
+          avatarOverlayLabel.textContent = "تغيير الصورة"; 
 
       } catch (err) {
-          alert("حدث خطأ: " + err.message); // اعرض "alert" لليوزر
+          alert("حدث خطأ: " + err.message); 
           avatarOverlayLabel.textContent = "تغيير الصورة";
       }
   });
@@ -254,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 
   // --- أكواد الأدمن (البحث والدروب ليست) ---
-  // (كل أكواد الأدمن زي ما هي متتغيرش)
   // 
 
   // --- 1. فورم البحث بالاسم ---
@@ -481,6 +467,27 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span>${user.name} (${user.email})</span>
                         <strong>الرصيد: ${user.balance}</strong>
                     `;
+                    
+                    // 🛑🛑 التعديل الجديد هنا 🛑🛑
+                    // (ده الكود اللي طلبته)
+                    
+                    // 1. ضيف كلاس للـ CSS
+                    userElement.classList.add('clickable-user');
+                    
+                    // 2. ضيف أمر الضغط
+                    userElement.addEventListener('click', () => {
+                        // 3. الـ API بتاع الأسر مش بيرجع "family"
+                        // فإحنا بنضيفها يدوي
+                        user.family = familyName;
+                        
+                        // 4. نادي الفانكشن اللي بتملى كارت التعديل
+                        populateAdminCard(user);
+                        
+                        // 5. (اختياري) اطلع لفوق عشان تشوف الكارت
+                        adminSearchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    // 🛑 نهاية التعديل 🛑
+
                     adminFamilyResultsDiv.appendChild(userElement);
                 });
                 
