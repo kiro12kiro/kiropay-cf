@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.textContent = "جاري تسجيل الدخول...";
     messageDiv.style.color = "blue";
     
-    // إخفاء كل حاجة
+    // إخفاء كل حاجة (زي ما هو)
     adminPanelDiv.style.display = "none";
     transactionList.innerHTML = ""; 
     leaderboardContainer.style.display = "none"; 
@@ -88,20 +88,21 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.style.color = "green";
         
         const user = data.user;
-        // (ملء الكارت)
+        
+        // 🛑 (ملء الكارت) - ده أساسي للأدمن واليوزر
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
         userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL; 
         
-        // (إظهار الكارت)
+        // 🛑 (إظهار الكارت) - ده أساسي للأدمن واليوزر
         cardContainer.style.display = "flex";
         formContainer.style.display = "none";
         logoutBtn.style.display = "block";
         avatarOverlayLabel.style.display = "flex"; 
         loggedInUserEmail = user.email; 
         
-        // (جلب السجل - ده مشترك للكل)
+        // 🛑 (جلب السجل - ده مشترك للكل)
         await loadTransactionHistory(user.email); 
 
         // 🛑🛑 التعديل الجديد هنا 🛑🛑
@@ -130,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- فانكشن سجل المعاملات (زي ما هي) ---
   async function loadTransactionHistory(email) {
-    // ( ... الكود زي ما هو ... )
     transactionList.innerHTML = ""; 
     try {
       const response = await fetch(`/get-transactions`, {
@@ -167,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- فانكشن لوحة الصدارة (زي ما هي) ---
   async function loadLeaderboards() {
-    // ( ... الكود زي ما هو ... )
     topChampionsList.innerHTML = "<li>جاري التحميل...</li>";
     familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
     familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
