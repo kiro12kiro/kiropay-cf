@@ -12,7 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const userFamilyP = document.getElementById("user-family");
   const userBalanceP = document.getElementById("user-balance");
   const userAvatarImg = document.getElementById("user-avatar");
-  const DEFAULT_AVATAR_URL = "https://via.placeholder.com/100";
+  
+  // 🛑🛑 التعديل الثاني هنا 🛑🛑
+  // تم تغيير "https://via.placeholder.com/100"
+  const DEFAULT_AVATAR_URL = "/default-avatar.png";
 
   // --- عناصر لوحة الأدمن (الكاملة) ---
   const adminPanelDiv = document.getElementById("admin-panel");
@@ -37,16 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const deleteUserBtn = document.getElementById("admin-delete-user-btn");
   const deleteMessage = document.getElementById("admin-delete-message");
   
-  // 🛑🛑 المتغيرات الجديدة بتاعة قسم الأسر 🛑🛑
-  const familyButtons = document.querySelectorAll(".family-btn"); // بيجيب كل الزراير
+  const familyButtons = document.querySelectorAll(".family-btn"); 
   const adminFamilyResultsDiv = document.getElementById("admin-family-results");
   const adminFamilyMessage = document.getElementById("admin-family-message");
-  // 🛑 نهاية الإضافة
 
   let currentSearchedUserEmail = null;
   let currentSearchResults = []; 
 
-  // --- فورم اللوجن (زي ما هو) ---
+  // --- فورم اللوجن ---
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري تسجيل الدخول...";
@@ -56,7 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
     searchedUserCard.style.display = "none";
     adminResultsListDiv.style.display = "none";
     adminSearchMessage.textContent = "";
-    // 🛑 بنخفي نتايج الأسر مع كل لوجن
     adminFamilyResultsDiv.style.display = "none";
     adminFamilyMessage.textContent = "";
 
@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
+        // 🛑 الكود ده دلوقتي هيستخدم الصورة الافتراضية صح
         userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
         
         cardContainer.style.display = "flex";
@@ -101,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فورم التسجيل (زي ما هو) ---
+  // --- فورم التسجيل ---
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري إنشاء حساب...";
@@ -117,6 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (avatarFile) {
       formData.append('avatar', avatarFile);
     }
+    
+    // 🛑 ملحوظة: إحنا لسه معملناش الكود بتاع "رفع الصورة" في الباك إند
+    // بس الكود ده هيخلي الصورة الافتراضية تظهر
 
     try {
       const response = await fetch(`/signup`, {
@@ -140,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- زرار تسجيل الخروج (زي ما هو) ---
+  // --- زرار تسجيل الخروج ---
   logoutBtn.addEventListener("click", () => {
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
@@ -150,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
+    // 🛑 رجع الصورة الافتراضية لما نعمل لوج أوت
     userAvatarImg.src = DEFAULT_AVATAR_URL;
     
     loginForm.reset();
@@ -161,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- أكواد الأدمن (البحث والدروب ليست) ---
   // 
 
-  // --- 1. فورم البحث بالاسم (زي ما هو) ---
+  // --- 1. فورم البحث بالاسم ---
   adminSearchForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const nameToSearch = adminSearchInput.value;
@@ -220,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فانكشن ملء الكارت (زي ما هي) ---
+  // --- فانكشن ملء الكارت ---
   function populateAdminCard(user) {
     searchedUserName.textContent = user.name;
     searchedUserFamily.textContent = user.family;
@@ -237,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // --- كود الدروب ليست (زي ما هو) ---
+  // --- كود الدروب ليست ---
   adminSelectUser.addEventListener("change", () => {
     const selectedEmail = adminSelectUser.value;
 
@@ -253,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- فانكشن تعديل الرصيد (زي ما هي) ---
+  // --- فانكشن تعديل الرصيد ---
   async function handleBalanceUpdate(amount) {
     if (!currentSearchedUserEmail) {
       balanceMessage.textContent = "لا يوجد مستخدم للبحث عنه";
@@ -293,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- زراير الرصيد (زي ما هي) ---
+  // --- زراير الرصيد ---
   addBalanceBtn.addEventListener("click", () => {
     const amount = parseFloat(balanceAmountInput.value);
     handleBalanceUpdate(amount);
@@ -304,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- زرار حذف المستخدم (زي ما هو) ---
+  // --- زرار حذف المستخدم ---
   deleteUserBtn.addEventListener("click", async () => {
     if (!currentSearchedUserEmail) {
       deleteMessage.textContent = "لا يوجد مستخدم للبحث عنه";
@@ -343,27 +348,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // ---------------------------------------------
-  // 🛑🛑 الكود الجديد بتاع زراير الأسر 🛑🛑
-  // ---------------------------------------------
-  
-  // بنلف على كل الزراير اللي ليها كلاس "family-btn"
+  // --- كود زراير الأسر ---
   familyButtons.forEach(button => {
     
-    // بنضيف "event listener" لكل زرار
     button.addEventListener("click", async () => {
         
-        // 1. اقرأ اسم الأسرة من الزرار
         const familyName = button.dataset.family;
         
-        // 2. اعرض رسالة "جاري التحميل"
         adminFamilyMessage.textContent = `جاري تحميل بيانات "${familyName}"...`;
         adminFamilyMessage.style.color = "blue";
-        adminFamilyResultsDiv.style.display = "none"; // اخفي النتايج القديمة
-        adminFamilyResultsDiv.innerHTML = ""; // فضي النتايج القديمة
+        adminFamilyResultsDiv.style.display = "none"; 
+        adminFamilyResultsDiv.innerHTML = ""; 
         
         try {
-            // 3. كلم الـ API الجديد
             const response = await fetch(`/admin-get-family`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -380,20 +377,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const users = data.users;
             
-            // 4. اعرض النتايج
             if (users.length === 0) {
-                // لو الأسرة فاضية
                 adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
                 adminFamilyMessage.style.color = "black";
             } else {
-                // لو فيه مستخدمين
                 adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
                 adminFamilyMessage.style.color = "green";
                 
-                // املى لستة النتايج
                 users.forEach(user => {
                     const userElement = document.createElement("p");
-                    // اعرض الاسم والايميل في ناحية، والرصيد في الناحية التانية
                     userElement.innerHTML = `
                         <span>${user.name} (${user.email})</span>
                         <strong>الرصيد: ${user.balance}</strong>
@@ -401,7 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     adminFamilyResultsDiv.appendChild(userElement);
                 });
                 
-                adminFamilyResultsDiv.style.display = "block"; // اظهر اللستة
+                adminFamilyResultsDiv.style.display = "block"; 
             }
             
         } catch (err) {
