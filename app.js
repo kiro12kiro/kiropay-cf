@@ -82,8 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const quizMessage = document.getElementById("quiz-message");
     let currentSearchResults = [];
     let currentSearchedUser = null; 
-    let currentQuizId = null;
-    let selectedOption = null;
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
@@ -243,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             transactionList.innerHTML = "";
             if (data.transactions && data.transactions.length > 0) {
-                // ... (الكود زي ما هو)
+                // ... (ملء السجل)
             } else {
                 transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة.</li>`;
             }
@@ -280,7 +278,17 @@ document.addEventListener("DOMContentLoaded", () => {
             
             topChampionsList.innerHTML = ""; 
             if (championsData.champions && championsData.champions.length > 0) {
-                // ... (ملء الأبطال)
+                championsData.champions.forEach((user, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'champion-card';
+                    card.innerHTML = `
+                        <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
+                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
+                        <span class="name">${user.name}</span>
+                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                    `;
+                    topChampionsList.appendChild(card);
+                });
             } else {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
@@ -302,7 +310,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 item.list.innerHTML = '';
                 if (data.users && data.users.length > 0) {
-                    // ... (ملء القائمة)
+                    data.users.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        item.list.appendChild(li);
+                    });
                 } else {
                     item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
@@ -341,8 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
                     adminAnnouncementText.value = data.message;
                 }
-            } else {
-                userAnnouncementBox.style.display = "none";
             }
         } catch (err) {
             console.error("Load Announcement Error:", err);
@@ -358,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // 🛑🛑 زرار تسجيل الخروج (مُصحح) 🛑🛑
+    // 🛑🛑 زرار تسجيل الخروج (مُصحح نهائياً) 🛑🛑
     logoutBtn.addEventListener("click", () => {
         resetUI();
         loginForm.reset();
@@ -388,11 +398,80 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault(); 
             event.stopPropagation();
             const name = adminSearchInput.value.trim();
-            // ... (باقي كود البحث)
+
+            adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
+            adminSearchMessage.style.color = "blue";
+            adminResultsListDiv.innerHTML = "";
+            adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
+            searchedUserCard.style.display = "none";
+            currentSearchedUser = null;
+
+            if (!name) {
+                adminSearchMessage.textContent = "الرجاء إدخال اسم للبحث.";
+                adminSearchMessage.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin-search`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: name }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                
+                if (!response.ok) {
+                    adminSearchMessage.textContent = `فشل البحث: ${data.error || "خطأ غير محدد"}`;
+                    adminSearchMessage.style.color = "red";
+                    return;
+                }
+
+                currentSearchResults = data.users;
+
+                if (currentSearchResults.length === 0) {
+                    adminSearchMessage.textContent = `لم يتم العثور على مستخدمين بالاسم "${name}".`;
+                    adminSearchMessage.style.color = "black";
+                    adminResultsListDiv.style.display = "none";
+                } else if (currentSearchResults.length === 1) {
+                    adminSearchMessage.textContent = `تم العثور على مستخدم واحد.`;
+                    adminSearchMessage.style.color = "green";
+                    populateAdminCard(currentSearchResults[0]);
+                    adminResultsListDiv.style.display = "none";
+                } else {
+                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
+                    adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
+                    adminSearchMessage.style.color = "orange";
+
+                    currentSearchResults.forEach(user => {
+                        const option = document.createElement("option");
+                        option.value = user.email;
+                        option.textContent = `${user.name} (${user.family})`;
+                        adminSelectUser.appendChild(option);
+                    });
+                    
+                    adminResultsListDiv.style.display = "block";
+                    adminSelectUser.value = currentSearchResults[0].email;
+                    populateAdminCard(currentSearchResults[0]);
+                }
+            } catch (err) {
+                adminSearchMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                adminSearchMessage.style.color = "red";
+                console.error("Admin Search Error:", err);
+            }
         });
 
         // --- فانكشن ملء الكارت ---
-        function populateAdminCard(user) { /* ... */ }
+        function populateAdminCard(user) {
+            searchedUserName.textContent = `الاسم: ${user.name}`;
+            searchedUserFamily.textContent = `العائلة: ${user.family}`;
+            searchedUserEmail.textContent = `الإيميل: ${user.email}`;
+            searchedUserBalance.textContent = `الرصيد: $${user.balance}`;
+            searchedUserCard.style.display = "block";
+            currentSearchedUser = user; 
+            balanceMessage.textContent = "";
+            deleteMessage.textContent = "";
+        }
 
         // --- كود الدروب ليست ---
         adminSelectUser.addEventListener("change", () => {
@@ -432,7 +511,46 @@ document.addEventListener("DOMContentLoaded", () => {
         adminQuizForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
-            // ... (باقي الكود)
+            
+            const question = document.getElementById("quiz-question").value.trim();
+            const optionA = document.getElementById("quiz-opt-a").value.trim();
+            const optionB = document.getElementById("quiz-opt-b").value.trim();
+            const optionC = document.getElementById("quiz-opt-c").value.trim();
+            const answer = document.getElementById("quiz-correct-opt").value.trim();
+            const pointsInput = document.getElementById("quiz-points").value;
+            const points = parseInt(pointsInput);
+
+            if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || !pointsInput.trim()) {
+                adminQuizMessage.textContent = "الرجاء ملء جميع الحقول بشكل صحيح.";
+                adminQuizMessage.style.color = "red";
+                return;
+            }
+
+            adminQuizMessage.textContent = "جاري إضافة السؤال...";
+            adminQuizMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-create-quiz`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question, optionA, optionB, optionC, answer, points }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    adminQuizMessage.textContent = `تم إضافة السؤال بنجاح!`;
+                    adminQuizMessage.style.color = "green";
+                    adminQuizForm.reset(); 
+                } else {
+                    adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                    adminQuizMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminQuizMessage.textContent = "خطأ في الاتصال بالـ API لإضافة الكويز.";
+                adminQuizMessage.style.color = "red";
+                console.error("Quiz Creation Error:", err);
+            }
         });
 
         // 🛑 كود فورم الإعلانات (مُصحح) 🛑
