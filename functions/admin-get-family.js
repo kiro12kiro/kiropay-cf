@@ -1,7 +1,7 @@
 /*
  * API Endpoint: /admin-get-family
- * (جديد)
- * وظيفته يجيب كل المستخدمين اللي في أسرة معينة
+ * (ملف جديد)
+ * وظيفته: يجيب كل المستخدمين اللي تبع أسرة معينة
  */
 export async function onRequestPost(context) {
   try {
@@ -16,14 +16,16 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑 هنجيب الاسم والرصيد (زي ما طلبت)
-    const ps = db.prepare("SELECT name, balance FROM users WHERE family = ? ORDER BY name ASC");
+    // 🛑 هنجيب الاسم والايميل والرصيد (مش محتاجين الباسورد)
+    const ps = db.prepare(
+      "SELECT name, email, balance FROM users WHERE family = ?"
+    );
     const results = await ps.bind(familyName).all();
 
-    // لو مفيش ولا واحد
+    // لو الأسرة فاضية
     if (!results.results || results.results.length === 0) {
-      return new Response(JSON.stringify({ error: "لا يوجد مستخدمين مسجلين في هذه الأسرة" }), {
-        status: 404,
+      return new Response(JSON.stringify({ users: [] }), { // رجع لستة فاضية
+        status: 200, 
         headers: { "Content-Type": "application/json" },
       });
     }
