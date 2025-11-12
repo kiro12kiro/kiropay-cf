@@ -243,7 +243,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             transactionList.innerHTML = "";
             if (data.transactions && data.transactions.length > 0) {
-                // ... (ملء السجل)
+                data.transactions.forEach(t => {
+                    const li = document.createElement("li");
+                    const amountClass = t.amount > 0 ? "positive" : "negative";
+                    const sign = t.amount > 0 ? "+" : "";
+                    
+                    li.innerHTML = `
+                        <span>${t.reason}</span>
+                        <span class="amount ${amountClass}">${sign}${t.amount} نقطة</span>
+                    `;
+                    transactionList.appendChild(li);
+                });
             } else {
                 transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة.</li>`;
             }
@@ -280,17 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             topChampionsList.innerHTML = ""; 
             if (championsData.champions && championsData.champions.length > 0) {
-                championsData.champions.forEach((user, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'champion-card';
-                    card.innerHTML = `
-                        <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
-                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
-                        <span class="name">${user.name}</span>
-                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
-                    `;
-                    topChampionsList.appendChild(card);
-                });
+                // ... (ملء الأبطال)
             } else {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
@@ -312,11 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 item.list.innerHTML = '';
                 if (data.users && data.users.length > 0) {
-                    data.users.forEach((user, index) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
-                        item.list.appendChild(li);
-                    });
+                    // ... (ملء القائمة)
                 } else {
                     item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
@@ -349,10 +345,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             if (data.message && data.message.trim()) {
                 userAnnouncementText.textContent = data.message;
+                // إظهار البوكس إذا كان هناك إعلان
                 userAnnouncementBox.style.display = "block";
+                // 🛑 تحديث الإعلان في لوحة الأدمن (إذا كان مفتوحًا)
                 if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
                     adminAnnouncementText.value = data.message;
                 }
+            } else {
+                userAnnouncementBox.style.display = "none";
             }
         } catch (err) {
             console.error("Load Announcement Error:", err);
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // 🛑🛑 زرار تسجيل الخروج (مُصحح نهائياً) 🛑🛑
+    // 🛑🛑 زرار تسجيل الخروج (مُصحح) 🛑🛑
     logoutBtn.addEventListener("click", () => {
         resetUI();
         loginForm.reset();
@@ -577,7 +577,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // 🛑 كود متابعة الـ Checkboxes وتحديث اللوحة الجماعية 🛑
-        adminFamilyResultsDiv.addEventListener('change', (e) => { /* ... */ });
+        adminFamilyResultsDiv.addEventListener('change', (e) => {
+            if (e.target.classList.contains('mass-update-checkbox')) {
+                const email = e.target.dataset.email;
+                if (e.target.checked) {
+                    if (!selectedUsersForMassUpdate.includes(email)) {
+                        selectedUsersForMassUpdate.push(email);
+                    }
+                } else {
+                    selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
+                }
+
+                selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+
+                if (selectedUsersForMassUpdate.length > 0) {
+                    massUpdateControls.style.display = 'block';
+                } else {
+                    massUpdateControls.style.display = 'none';
+                }
+                massUpdateMessage.textContent = ''; 
+            }
+        });
 
 
         // --- فانكشن تعديل الرصيد الجماعي (مُحصنة) ---
@@ -587,11 +607,50 @@ document.addEventListener("DOMContentLoaded", () => {
         massUpdateAddBtn.addEventListener('click', () => { /* ... */ });
         massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
 
-        // --- كود فورم إضافة سؤال (مُصحح) ---
+        // 🛑 كود فورم إضافة سؤال (مُصحح) 🛑
         adminQuizForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
-            // ... (باقي الكود)
+            
+            const question = document.getElementById("quiz-question").value.trim();
+            const optionA = document.getElementById("quiz-opt-a").value.trim();
+            const optionB = document.getElementById("quiz-opt-b").value.trim();
+            const optionC = document.getElementById("quiz-opt-c").value.trim();
+            const answer = document.getElementById("quiz-correct-opt").value.trim();
+            const pointsInput = document.getElementById("quiz-points").value;
+            const points = parseInt(pointsInput);
+
+            if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || !pointsInput.trim()) {
+                adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
+                adminQuizMessage.style.color = "red";
+                return;
+            }
+
+            adminQuizMessage.textContent = "جاري إضافة السؤال...";
+            adminQuizMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-create-quiz`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question, optionA, optionB, optionC, answer, points }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    adminQuizMessage.textContent = `تم إضافة السؤال بنجاح!`;
+                    adminQuizMessage.style.color = "green";
+                    adminQuizForm.reset(); 
+                } else {
+                    adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                    adminQuizMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminQuizMessage.textContent = "خطأ في الاتصال بالـ API لإضافة الكويز.";
+                adminQuizMessage.style.color = "red";
+                console.error("Quiz Creation Error:", err);
+            }
         });
 
         // 🛑 كود فورم الإعلانات (مُصحح) 🛑
