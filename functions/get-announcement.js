@@ -3,12 +3,13 @@
  * (جديد - بتاع الإعلانات)
  * وظيفته: قراءة نص الإعلان من KV
  */
-export async function onRequestGet(context) {
+export async function onRequestPost(context) { // 🛑 استخدام POST لسهولة استدعائه من app.js
   try {
-    // 🛑 KIROPAY_KV هو الاسم اللي عملناه في الخطوة 1
-    const text = await context.env.KIROPAY_KV.get('announcement');
+    // 🛑 KIROPAY_KV هو الاسم الذي تم ربطه
+    const text = await context.env.KIROPAY_KV.get('current_announcement');
     
-    return new Response(JSON.stringify({ announcement: text || "" }), {
+    // 🛑 إرجاع النص في حقل "message" ليتطابق مع ما يتوقعه app.js
+    return new Response(JSON.stringify({ message: text || "" }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
