@@ -8,79 +8,37 @@
 
     <style>
         /* (أكواد الـ CSS القديمة زي ما هي...) */
-        /* ... */
-
-        /* 🛑🛑 أكواد CSS جديدة (بتاعة الكويز) 🛑🛑 */
-        .quiz-container {
-            display: none; /* مخفي وهيظهر لليوزر العادي بس */
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 2px solid #007bff;
-        }
-        .quiz-container h2 {
-            text-align: center;
-            color: #007bff;
-            margin-top: 0;
-        }
-        #quiz-question-text {
-            font-size: 1.3em;
+        
+        /* 🛑🛑 التعديل هنا 🛑🛑 */
+        .avatar-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); color: white; 
+            
+            /* ده بيخلي الكلمة في النص بالظبط */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            
             font-weight: bold;
-            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            
+            /* 🛑 شيلنا opacity: 0 من هنا 🛑 */
+            /* الـ JS هو اللي هيتحكم في الإظهار والإخفاء */
+            
+            transition: opacity 0.2s;
+            cursor: pointer; 
             text-align: center;
-        }
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        /* ستايل زراير الاختيارات */
-        .quiz-option-btn {
-            padding: 15px;
-            font-size: 1.1em;
-            background-color: #f0f2f5;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: right;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .quiz-option-btn:hover {
-            background-color: #e9ecef;
-            border-color: #007bff;
-        }
-        /* ستايل الزرار لما اليوزر يختاره */
-        .quiz-option-btn.selected {
-            background-color: #cce5ff; /* أزرق فاتح */
-            border-color: #007bff;
-            font-weight: bold;
+            
+            /* 🛑 تثبيت حجم الخط (عشان نلغي الـ 4rem) 🛑 */
+            font-size: 1rem; 
         }
         
-        #quiz-submit-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.2em;
-            width: 100%;
-            margin-top: 1.5rem;
-        }
-        #quiz-submit-btn:hover {
-            background-color: #218838;
-        }
-        #quiz-message {
-            text-align: center;
-            font-size: 1.1em;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-
-        /* (باقي أكواد الأدمن ولوحة الصدارة...) */
+        /* 🛑 شيلنا كود الـ hover من هنا 🛑 */
+        /* .avatar-wrapper:hover .avatar-overlay { opacity: 1; } */
+        
+        #avatar-upload-input { display: none; }
+        
+        /* (باقي أكواد الـ CSS زي ما هي) */
         /* ... */
 
     </style>
@@ -93,11 +51,13 @@
             <div class="card-container">
                 <div class="card">
                     
-                    <div class="avatar-wrapper" style="position: relative; width: 150px; height: 150px; margin: 0 auto 4rem;">
+                    <div class="avatar-wrapper" style="position: relative; width: 150px; height: 150px; margin: 0 auto 1rem;">
                         <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
-                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label" style="display: none;">
+                        
+                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">
                             تغيير الصورة
                         </label>
+                        
                         <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg">
                     </div>
                     
@@ -116,50 +76,12 @@
             <button id="logout-btn">تسجيل الخروج</button>
 
             <div class="form-container">
-                <form id="login-form">
-                    <h3>Login</h3>
-                    <input type="email" id="email" placeholder="Email" required>
-                    <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
-                </form>
-
-                <form id="signup-form">
-                    <h3>Sign Up</h3>
-                    <input type="text" id="name" placeholder="Name" required>
-                    
-                    <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
-                    <select id="family" required>
-                        <option value="" disabled selected>-- اختر الأسرة --</option>
-                        <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
-                        <option value="اسرة مارجرس">اسرة مارجرس</option>
-                        <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
-                    </select>
-                    
-                    <input type="email" id="signup-email" placeholder="Email" required>
-                    <input type="password" id="signup-password" placeholder="Password" required>
-
-                    <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
-                    <input type="file" id="signup-avatar-file" accept="image/png, image/jpeg">
-
-                    <button type="submit">Sign Up</button>
-                </form>
-            </div>
+                </div>
         </div> 
     </div> 
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
-    <div class="quiz-container" id="quiz-container">
-        <h2>سؤال اليوم 🎁</h2>
-        <p id="quiz-question-text">جاري تحميل السؤال...</p>
-        <div class="quiz-options">
-            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">الاختيار أ</button>
-            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">الاختيار ب</button>
-            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">الاختيار ج</button>
-        </div>
-        <button id="quiz-submit-btn">إرسال الإجابة</button>
-        <p id="quiz-message"></p>
-    </div>
     <div class="admin-panel-container">
         <div id="admin-panel" style="display: none;">
             </div>
