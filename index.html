@@ -47,8 +47,8 @@
 
         /* 🛑🛑 أكواد CSS جديدة (بتاعة لوحة الصدارة) 🛑🛑 */
         .leaderboard-container {
-            display: none; /* مخفية لحد ما اليوزر يعمل لوجن */
-            max-width: 900px;
+            display: none; 
+            max-width: 1200px; /* كبرنا العرض عشان يكفي 3 أعمدة */
             margin: 2rem auto;
             padding: 20px;
             background-color: #ffffff;
@@ -62,6 +62,44 @@
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 10px;
         }
+        
+        /* 🛑 قسم الأبطال (الجديد) 🛑 */
+        .champions-container {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .champion-card {
+            flex-basis: 200px; /* عرض الكارت */
+        }
+        .champion-card .rank {
+            font-size: 2.5em; /* حجم الأيقونة (الكأس) */
+        }
+        .champion-card .name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            display: block;
+        }
+        .champion-card .family-name {
+            font-size: 1em;
+            color: #777;
+            display: block;
+        }
+        .champion-card .balance {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #28a745;
+            display: block;
+        }
+        /* ألوان الكؤوس */
+        .champion-card.gold .rank { color: #ffd700; }
+        .champion-card.silver .rank { color: #c0c0c0; }
+        .champion-card.bronze .rank { color: #cd7f32; }
+
+
         .leaderboard-columns {
             display: flex;
             justify-content: space-between;
@@ -76,6 +114,8 @@
             color: #333;
             border-bottom: 1px solid #ccc;
             padding-bottom: 5px;
+            font-size: 1.2em; 
+            text-align: center; /* 🛑 خلي العناوين في النص */
         }
         .leaderboard-list {
             list-style: none;
@@ -88,7 +128,6 @@
             align-items: center;
             padding: 10px;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 1.1em;
         }
         .leaderboard-list li:last-child {
             border-bottom: none;
@@ -96,22 +135,16 @@
         .leaderboard-list .rank {
             font-weight: bold;
             color: #007bff;
-            margin-right: 10px;
+            margin-left: 10px; /* 🛑 خليناه شمال (عشان عربي) */
         }
         .leaderboard-list .name {
             font-weight: 500;
         }
-        .leaderboard-list .family-name {
-            font-size: 0.8em;
-            color: #777;
-            display: block; /* تنزل سطر لوحدها */
-        }
         .leaderboard-list .balance {
             font-weight: bold;
             color: #28a745;
+            white-space: nowrap; 
         }
-        /* 🛑 نهاية أكواد CSS الجديدة 🛑 */
-
 
     </style>
 </head>
@@ -186,18 +219,30 @@
     </div>
 
     <div class="leaderboard-container" id="leaderboard-container">
-        <h2>🏆 لوحة الصدارة</h2>
+        <h2>🏆 أبطال الأسر 🏆</h2>
+        <div class="champions-container" id="top-champions-list">
+            </div>
+        
+        <hr style="margin: 2rem 0;">
+
+        <h2>لوحة الصدارة التفصيلية (أعلى 10)</h2>
         <div class="leaderboard-columns">
             
             <div class="leaderboard-column">
-                <h3>ترتيب الأسر (حسب الرصيد الإجمالي)</h3>
-                <ul class="leaderboard-list" id="family-leaderboard-list">
+                <h3>اسرة الانبا موسي الاسود</h3>
+                <ul class="leaderboard-list" id="family-anba-moussa-list">
                     </ul>
             </div>
             
             <div class="leaderboard-column">
-                <h3>أعلى 10 مستخدمين</h3>
-                <ul class="leaderboard-list" id="user-leaderboard-list">
+                <h3>اسرة مارجرس</h3>
+                <ul class="leaderboard-list" id="family-margerges-list">
+                    </ul>
+            </div>
+
+            <div class="leaderboard-column">
+                <h3>اسرة الانبا كاراس</h3>
+                <ul class="leaderboard-list" id="family-anba-karas-list">
                     </ul>
             </div>
 
