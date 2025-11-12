@@ -3,44 +3,36 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    /* 🛑🛑 التعديل هنا 🛑🛑 */
+    /* تم مسح أكواد "hero1.jpg" */
+    /* ده اللون السادة اللي هيظهر في الخلفية */
+    background-color: #f4f4f4; 
     color: #333;
     line-height: 1.6;
     direction: rtl; /* For Right-to-Left languages */
     text-align: right; /* For Right-to-Left languages */
-
-    /* 🛑🛑 التعديل الأول: رجعنا hero1.jpg كخلفية للـ body 🛑🛑 */
-    background-image: url('/hero1.jpg'); 
-    background-size: cover; 
-    background-position: center center; 
-    background-attachment: fixed; 
-    background-repeat: no-repeat; 
 }
 
 .container {
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
-    /* * دي الخلفية البيضا الشفافة اللي بتخلي الكلام مقري
-     * 🛑 هنا لغينا الخلفية البيضا الشفافة دي 🛑
-     * عشان hero2.jpg هي اللي هتبقى تحت الكروت
-    */
-    background-color: transparent; /* خليناها شفافة عشان تبين خلفية الكارد كونتينر */
+    background-color: transparent; /* شفافة عشان تبين خلفية الكارد كونتينر */
     border-radius: 8px;
-    box-shadow: none; /* شلنا الشادو كمان */
+    box-shadow: none; 
 }
 
-/* 🛑🛑 التعديل الثاني: إضافة ستايل لـ card-container عشان ياخد خلفية hero2.jpg 🛑🛑 */
+/* 🛑 "hero2.jpg" لسه موجودة كخلفية للكروت 🛑 */
 .card-and-forms-wrapper {
     background-image: url('/hero2.jpg');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-    background-attachment: scroll; /* ممكن تخليها fixed لو عايزها ثابتة مع السكرول */
+    background-attachment: scroll; 
     border-radius: 8px;
-    padding: 20px; /* سبيس داخلي عشان الصورة تبقى باينة كويس */
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* شادو خفيف ليها */
-    margin-bottom: 20px; /* مسافة تحتها */
+    padding: 20px; 
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); 
+    margin-bottom: 20px; 
 }
 
 
@@ -51,7 +43,6 @@ body {
 }
 
 .card {
-    /* 🛑🛑 التعديل الثالث: الخلفية البيضا الشفافة هنا للكارت نفسه 🛑🛑 */
     background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -77,7 +68,6 @@ body {
 }
 
 .form-container form {
-    /* 🛑🛑 التعديل الرابع: الخلفية البيضا الشفافة هنا للفورم نفسه 🛑🛑 */
     background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
     padding: 20px;
     border-radius: 8px;
