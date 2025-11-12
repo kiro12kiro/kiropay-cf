@@ -170,7 +170,14 @@
             <form id="signup-form">
                 <h3>Sign Up</h3>
                 <input type="text" id="name" placeholder="Name" required>
-                <input type="text" id="family" placeholder="Family" required>
+                
+                <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
+                <select id="family" required style="padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; background-color: white; width: 100%;">
+                    <option value="" disabled selected>-- اختر الأسرة --</option>
+                    <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
+                    <option value="اسرة مارجرس">اسرة مارجرس</option>
+                    <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
+                </select>
                 <input type="email" id="signup-email" placeholder="Email" required>
                 <input type="password" id="signup-password" placeholder="Password" required>
 
@@ -198,42 +205,3 @@
             <h2>لوحة تحكم الأدمن</h2>
             
             <div class="admin-section">
-                <h4>البحث عن مستخدم (بالاسم)</h4>
-                <form id="admin-search-form">
-                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
-                    <button type="submit">بحث</button>
-                </form>
-                
-                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
-
-                <div id="admin-searched-user-card" style="display: none;">
-                    <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
-                    <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
-                    <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
-                    <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
-                    
-                    <hr style="margin: 1rem 0;">
-
-                    <h4>تعديل الرصيد</h4>
-                    <div id="admin-balance-controls">
-                        <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
-                        <button id="admin-add-balance-btn">إضافة (+)</button>
-                        <button id="admin-subtract-balance-btn">خصم (-)</button>
-                    </div>
-                    <p id="admin-balance-message" style="color: green;"></p>
-                    
-                    <hr style="margin: 1rem 0;">
-
-                    <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
-                    <button id="admin-delete-user-btn">
-                        حذف هذا المستخدم نهائياً
-                    </button>
-                    <p id="admin-delete-message" style="color: red;"></p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <script src="app.js"></script>
-</body>
-</html>
