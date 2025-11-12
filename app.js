@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- عناصر لوحة الأدمن ---
   const adminPanelDiv = document.getElementById("admin-panel");
-  // ( ... باقي عناصر الأدمن ... )
   const adminSearchForm = document.getElementById("admin-search-form");
   const adminSearchInput = document.getElementById("admin-search-name");
   const adminSearchMessage = document.getElementById("admin-search-message");
@@ -53,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentSearchedUserEmail = null;
   let currentSearchResults = []; 
 
-  // 🛑 عناصر لوحة الصدارة الجديدة 🛑
+  // --- عناصر لوحة الصدارة ---
   const leaderboardContainer = document.getElementById("leaderboard-container");
   const topChampionsList = document.getElementById("top-champions-list");
   const familyAnbaMoussaList = document.getElementById("family-anba-moussa-list");
@@ -66,11 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.textContent = "جاري تسجيل الدخول...";
     messageDiv.style.color = "blue";
     
-    // إخفاء كل حاجة
+    // إخفاء كل حاجة (زي ما هو)
     adminPanelDiv.style.display = "none";
     transactionList.innerHTML = ""; 
-    leaderboardContainer.style.display = "none"; // اخفي اللوحة
-
+    leaderboardContainer.style.display = "none"; 
     // ... (باقي كود إخفاء الأدمن)
 
     const email = document.getElementById("email").value;
@@ -103,15 +101,22 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarOverlayLabel.style.display = "flex"; 
         loggedInUserEmail = user.email; 
         
-        // (جلب البيانات)
+        // (جلب السجل - ده مشترك للكل)
         await loadTransactionHistory(user.email); 
-        await loadLeaderboards(); // 🛑 نادي الفانكشن الجديدة
-        leaderboardContainer.style.display = "block"; 
 
+        // 🛑🛑 التعديل الجديد هنا 🛑🛑
         if (user.role === 'admin') {
+          // --- لو هو أدمن ---
           messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
-          adminPanelDiv.style.display = "block";
+          adminPanelDiv.style.display = "block"; // اظهر لوحة الأدمن
+          leaderboardContainer.style.display = "none"; // اتأكد إن لوحة الصدارة مخفية
+        } else {
+          // --- لو هو يوزر عادي ---
+          await loadLeaderboards(); // جيب لوحة الصدارة
+          leaderboardContainer.style.display = "block"; // اظهر لوحة الصدارة
+          adminPanelDiv.style.display = "none"; // اتأكد إن لوحة الأدمن مخفية
         }
+        // 🛑🛑 نهاية التعديل 🛑🛑
         
       } else {
         messageDiv.textContent = `فشل: ${data.error}`;
@@ -126,24 +131,56 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- فانكشن سجل المعاملات (زي ما هي) ---
   async function loadTransactionHistory(email) {
     // ( ... الكود زي ما هو ... )
+    transactionList.innerHTML = ""; 
+    try {
+      const response = await fetch(`/get-transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error("فشل جلب السجل");
+      if (data.history && data.history.length > 0) {
+        data.history.forEach(item => {
+          const li = document.createElement("li");
+          const amountClass = item.amount > 0 ? "positive" : "negative";
+          const amountSign = item.amount > 0 ? "+" : "";
+          const date = new Date(item.timestamp).toLocaleString('ar-EG', { 
+              year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+          }); 
+          li.innerHTML = `
+            <span>
+                ${item.reason}
+                <small style="color: #777; display: block;">(${date})</small>
+            </span>
+            <span class="amount ${amountClass}">${amountSign}${item.amount} نقطة</span>
+          `;
+          transactionList.appendChild(li);
+        });
+      } else {
+        transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة</li>`;
+      }
+    } catch (err) {
+      transactionList.innerHTML = `<li class="no-history" style="color: red;">${err.message}</li>`;
+    }
   }
 
-  // 🛑🛑 فانكشن لوحة الصدارة (الجديدة بالكامل) 🛑🛑
+  // --- فانكشن لوحة الصدارة (زي ما هي) ---
   async function loadLeaderboards() {
-    // فضي اللستات
+    // ( ... الكود زي ما هو ... )
     topChampionsList.innerHTML = "<li>جاري التحميل...</li>";
     familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
     familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
     familyAnbaKarasList.innerHTML = "<li>جاري التحميل...</li>";
 
     try {
-      // --- 1. جيب أبطال الأسر (التوب 3) ---
+      // 1. جيب أبطال الأسر
       const championsResponse = await fetch(`/get-top-champions`, { method: "POST" });
       const championsData = await championsResponse.json();
       topChampionsList.innerHTML = ""; 
       
       if (championsData.champions && championsData.champions.length > 0) {
-        const rankIcons = ["🥇", "🥈", "🥉"]; // أشكال الكؤوس
+        const rankIcons = ["🥇", "🥈", "🥉"];
         championsData.champions.forEach((user, index) => {
           const rankClass = ["gold", "silver", "bronze"][index] || "bronze";
           const rankIcon = rankIcons[index] || "🏆";
@@ -162,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         topChampionsList.innerHTML = "<p>لا يوجد أبطال بعد</p>";
       }
 
-      // --- 2. جيب لستات الأسر (هنستخدم فانكشن مساعدة) ---
+      // 2. جيب لستات الأسر
       await populateFamilyList("اسرة الانبا موسي الاسود", familyAnbaMoussaList);
       await populateFamilyList("اسرة مارجرس", familyMargergesList);
       await populateFamilyList("اسرة الانبا كاراس", familyAnbaKarasList);
@@ -176,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🛑 فانكشن مساعدة (جديدة) عشان تملأ لستات الأسر 🛑
+  // --- فانكشن مساعدة (زي ما هي) ---
   async function populateFamilyList(familyName, listElement) {
     try {
       const response = await fetch(`/get-family-top-10`, {
@@ -185,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ family: familyName })
       });
       const data = await response.json();
-      listElement.innerHTML = ""; // فضي اللستة
+      listElement.innerHTML = ""; 
 
       if (data.users && data.users.length > 0) {
         data.users.forEach((user, index) => {
@@ -214,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- زرار تسجيل الخروج (مُعدل) ---
+  // --- زرار تسجيل الخروج (زي ما هو) ---
   logoutBtn.addEventListener("click", () => {
     // ( ... كود اللوج أوت زي ما هو ... )
     cardContainer.style.display = "none";
@@ -236,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loggedInUserEmail = null; 
     transactionList.innerHTML = ""; 
     
-    // 🛑 اخفي لوحة الصدارة
+    // اخفي لوحة الصدارة
     leaderboardContainer.style.display = "none";
   });
 
@@ -248,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // 
-  // --- 🛑 أكواد الأدمن (كلها زي ما هي) 🛑 ---
+  // --- أكواد الأدمن (كلها زي ما هي) ---
   // 
   (function setupAdminPanel() {
       // --- 1. فورم البحث بالاسم ---
@@ -290,6 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // ( ... الكود زي ما هو ... )
         });
       });
-  })(); // 🛑 نهاية أكواد الأدمن 🛑
+  })(); // نهاية أكواد الأدمن
 
 }); // نهاية "DOMContentLoaded"
