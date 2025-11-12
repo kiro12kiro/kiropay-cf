@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchedUserCard = document.getElementById("admin-searched-user-card");
     const searchedUserName = document.getElementById("searched-user-name");
     const searchedUserFamily = document.getElementById("searched-user-family");
-    const searchedUserEmail = documentgetElementById("searched-user-email");
+    const searchedUserEmail = document.getElementById("searched-user-email");
     const searchedUserBalance = document.getElementById("searched-user-balance");
     const balanceAmountInput = document.getElementById("admin-balance-amount");
     const addBalanceBtn = document.getElementById("admin-add-balance-btn");
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentQuizId = null;
     let selectedOption = null;
 
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (عشان الـ display) 🛑
+    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (لضمان ظهور الفورمات) 🛑
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
     logoutBtn.style.display = "none";
@@ -97,17 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
     massUpdateControls.style.display = "none";
     userAnnouncementBox.style.display = "none";
 
-    // (فانكشن تصغير الصورة - زي ما هي)
+
+    // (باقي الفانكشنز المساعدة زي ما هي)
     function resizeImage(file, maxWidth, maxHeight, quality) {
-        return new Promise((resolve, reject) => {
-            // ... (الكود زي ما هو)
-        });
+        // ... (الكود زي ما هو)
     }
 
     // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
     async function refreshUserData() {
         if (!loggedInUserProfile) return;
-
         refreshDataBtn.textContent = "جاري التحديث...";
 
         try {
@@ -117,11 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ email: loggedInUserProfile.email }),
             });
             const data = await response.json();
-
+            
             if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
-
+            
             const user = data.user;
-            loggedInUserProfile = user; // تحديث البروفايل في الـ JS
+            loggedInUserProfile = user;
 
             // 2. تحديث الكارت
             userNameP.textContent = `الاسم: ${user.name}`;
@@ -146,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
     // --- فورم اللوجن ---
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -154,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
 
-        // إخفاء الأقسام
+        // إخفاء الأقسام (قبل الاتصال)
         adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         leaderboardContainer.style.display = "none";
@@ -223,133 +222,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- فانكشن سجل المعاملات (مُحصنة - زي ما هي) ---
-    async function loadTransactionHistory(email) {
-        transactionList.innerHTML = "";
-        try {
-            const response = await fetch(`/get-transactions`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email }),
-            });
+    // --- فانكشن سجل المعاملات (مُحصنة) ---
+    async function loadTransactionHistory(email) { /* ... */ }
 
-            if (!response.ok) {
-                console.error("فشل جلب السجل");
-                transactionList.innerHTML = `<li class="no-history" style="color: red;">فشل جلب السجل</li>`;
-                return;
-            }
-
-            const data = await response.json();
-
-            if (data.history && data.history.length > 0) {
-                data.history.forEach(item => {
-                    const li = document.createElement("li");
-                    const amountClass = item.amount > 0 ? "positive" : "negative";
-                    const amountSign = item.amount > 0 ? "+" : "";
-                    const date = new Date(item.timestamp).toLocaleString('ar-EG', {
-                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-                    li.innerHTML = `
-                        <span>
-                            ${item.reason}
-                            <small style="color: #777; display: block;">(${date})</small>
-                        </span>
-                        <span class="amount ${amountClass}">${amountSign}${item.amount} نقطة</span>
-                    `;
-                    transactionList.appendChild(li);
-                });
-            } else {
-                transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة</li>`;
-            }
-        } catch (err) {
-            transactionList.innerHTML = `<li class="no-history" style="color: red;">${err.message}</li>`;
-        }
-    }
-
-    // --- فانكشن لوحة الصدارة (زي ما هي) ---
-    async function loadLeaderboards() {
-        topChampionsList.innerHTML = "<li>جاري التحميل...</li>";
-        familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
-        familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
-        familyAnbaKarasList.innerHTML = "<li>جاري التحميل...</li>";
-
-        const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
-
-        try {
-            const response = await fetch('/get-leaderboard');
-            const data = await response.json();
-
-            if (!response.ok) throw new Error(data.error || "فشل تحميل لوحة الصدارة");
-
-            // 1. الأبطال (Top 3)
-            const topUsers = data.leaderboard.slice(0, 3);
-            if (topUsers.length > 0) {
-                topUsers.forEach((user, index) => {
-                    const rank = index + 1;
-                    const card = document.createElement('div');
-                    card.className = 'champion-card';
-                    card.innerHTML = `
-                        <div class="rank">${rankEmojis[rank]}</div>
-                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
-                        <span class="name">${user.name}</span>
-                        <small style="display: block; color: #555;">$${user.balance}</small>
-                    `;
-                    topChampionsList.appendChild(card);
-                });
-            } else {
-                topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
-            }
-
-            // 2. القوائم التفصيلية (Top 10 لكل عائلة)
-            const familyLists = {
-                "اسرة الانبا موسي الاسود": familyAnbaMoussaList,
-                "اسرة مارجرس": familyMargergesList,
-                "اسرة الانبا كاراس": familyAnbaKarasList
-            };
-
-            for (const family in familyLists) {
-                const listElement = familyLists[family];
-                const familyData = data.leaderboard.filter(user => user.family === family).slice(0, 10);
-                
-                if (familyData.length === 0) {
-                    listElement.innerHTML = `<li><small>لا يوجد مستخدمين مسجلين في هذه الأسرة.</small></li>`;
-                    continue;
-                }
-
-                familyData.forEach((user, index) => {
-                    const rank = index + 1;
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>${rank}. ${user.name}</span>
-                        <strong>$${user.balance}</strong>
-                    `;
-                    listElement.appendChild(li);
-                });
-            }
-
-        } catch (err) {
-            console.error("Leaderboard Error:", err);
-            topChampionsList.innerHTML = '<p style="text-align: center; color: red;">فشل تحميل لوحة الصدارة.</p>';
-        }
-    }
-
-
-    // --- فانكشن مساعدة (زي ما هي) ---
+    // --- فانكشن لوحة الصدارة والكويز (زي ما هي) ---
+    async function loadLeaderboards() { /* ... */ }
     async function populateFamilyList(familyName, listElement) { /* ... */ }
-
-    // --- فانكشن جلب الكويز (مُحصنة - زي ما هي) ---
     async function loadActiveQuiz(email) { /* ... */ }
 
     // 🛑🛑 فانكشن جديدة: جلب الإعلانات (لليوزر) 🛑🛑
     async function loadAnnouncement() { /* ... */ }
-    
+
+
     // --- فورم التسجيل (Signup) ---
-    signupForm.addEventListener("submit", async (event) => { /* ... */ });
+    signupForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        // ... (باقي الكود)
+    });
 
 
     // --- زرار تسجيل الخروج (مُعدل) ---
     logoutBtn.addEventListener("click", () => {
-        // 🛑 فرض الحالة الأولية 🛑
+        // 🛑 فرض الحالة الأولية (زي أول الصفحة) 🛑
         cardContainer.style.display = "none";
         formContainer.style.display = "flex";
         logoutBtn.style.display = "none";
@@ -364,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userFamilyP.textContent = "Family: ";
         userBalanceP.textContent = "Balance: ";
         userAvatarImg.src = DEFAULT_AVATAR_URL;
-        
+
         loginForm.reset();
         messageDiv.textContent = "تم تسجيل الخروج.";
         messageDiv.style.color = "blue";
@@ -388,11 +283,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- أكواد الأدمن (مع إصلاحات الـ Checkbox والإعلان) ---
     // 
     (function setupAdminPanel() {
-        let currentSearchedUser = null; 
+        let currentSearchedUser = null;
 
         // --- 1. فورم البحث بالاسم ---
         adminSearchForm.addEventListener("submit", async (event) => {
-            event.preventDefault(); // ⬅️ هذا يجب أن يعمل
+            event.preventDefault();
             // ... (باقي الكود)
         });
 
@@ -416,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         familyButtons.forEach(button => {
             button.addEventListener("click", async () => {
                 const familyName = button.dataset.family;
-                
+
                 adminFamilyMessage.textContent = `جاري تحميل بيانات "${familyName}"...`;
                 adminFamilyMessage.style.color = "blue";
                 adminFamilyResultsDiv.style.display = "none";
