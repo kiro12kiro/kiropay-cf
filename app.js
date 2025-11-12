@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const userBalanceP = document.getElementById("user-balance");
   const userAvatarImg = document.getElementById("user-avatar");
   
-  // (المسار ده سليم زي ما هو)
-  const DEFAULT_AVATAR_URL = "default-avatar.png";
+  // 🛑🛑 التعديل الثاني هنا 🛑🛑
+  // تم إرجاع الـ "/" في أول المسار
+  const DEFAULT_AVATAR_URL = "/default-avatar.png";
 
   // --- عناصر لوحة الأدمن (الكاملة) ---
   const adminPanelDiv = document.getElementById("admin-panel");
@@ -80,9 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
         
-        // 🛑🛑 التعديل الوحيد هنا 🛑🛑
-        // الكود ده أقوى وبيعرف يتعامل مع الـ null
-        // معناه: "هل (؟) فيه قيمة لليوزر؟ لو آه، استخدمها. لو لأ (:)، استخدم الافتراضية"
+        // الكود ده سليم وهيفضل زي ما هو
         userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL; 
         
         cardContainer.style.display = "flex";
@@ -143,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- زرار تسجيل الخروج (زي ما هو) ---
+  // --- زرار تسجيل الخروج ---
   logoutBtn.addEventListener("click", () => {
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
@@ -153,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
+    // 🛑 رجع الصورة الافتراضية (بالمسار الصحيح اللي فيه "/")
     userAvatarImg.src = DEFAULT_AVATAR_URL;
     
     loginForm.reset();
@@ -346,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- كود زراير الأسر (زي ما هو) ---
+  // --- كود زراير الأسر ---
   familyButtons.forEach(button => {
     
     button.addEventListener("click", async () => {
