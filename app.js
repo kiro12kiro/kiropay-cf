@@ -12,41 +12,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const userFamilyP = document.getElementById("user-family");
   const userBalanceP = document.getElementById("user-balance");
   const userAvatarImg = document.getElementById("user-avatar");
-  
-  // 🛑🛑 التعديل الثاني هنا 🛑🛑
-  // تم إرجاع الـ "/" في أول المسار
   const DEFAULT_AVATAR_URL = "/default-avatar.png";
 
-  // --- عناصر لوحة الأدمن (الكاملة) ---
+  // 🛑🛑 المتغيرات الجديدة لتغيير الصورة 🛑🛑
+  const avatarUploadInput = document.getElementById("avatar-upload-input");
+  const avatarOverlayLabel = document.getElementById("avatar-overlay-label");
+  const signupAvatarFile = document.getElementById("signup-avatar-file"); // الزرار بتاع الـ Signup
+  let loggedInUserEmail = null; // هنخزن ايميل اليوزر اللي عامل لوجن هنا
+
+  /*
+   * 🛑🛑 بيانات Cloudinary بتاعتك 🛑🛑
+  */
+  const CLOUDINARY_CLOUD_NAME = "Dhbanzq4n"; 
+  const CLOUDINARY_UPLOAD_PRESET = "kiropay_upload"; 
+  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+
+  // (باقي عناصر الأدمن زي ما هي)
   const adminPanelDiv = document.getElementById("admin-panel");
   const adminSearchForm = document.getElementById("admin-search-form");
   const adminSearchInput = document.getElementById("admin-search-name");
   const adminSearchMessage = document.getElementById("admin-search-message");
-  
   const adminResultsListDiv = document.getElementById("admin-results-list");
   const adminSelectUser = document.getElementById("admin-select-user");
-  
   const searchedUserCard = document.getElementById("admin-searched-user-card");
   const searchedUserName = document.getElementById("searched-user-name");
   const searchedUserFamily = document.getElementById("searched-user-family");
   const searchedUserEmail = document.getElementById("searched-user-email");
   const searchedUserBalance = document.getElementById("searched-user-balance");
-
   const balanceAmountInput = document.getElementById("admin-balance-amount");
   const addBalanceBtn = document.getElementById("admin-add-balance-btn");
   const subtractBalanceBtn = document.getElementById("admin-subtract-balance-btn");
   const balanceMessage = document.getElementById("admin-balance-message");
-
   const deleteUserBtn = document.getElementById("admin-delete-user-btn");
   const deleteMessage = document.getElementById("admin-delete-message");
-  
   const familyButtons = document.querySelectorAll(".family-btn"); 
   const adminFamilyResultsDiv = document.getElementById("admin-family-results");
   const adminFamilyMessage = document.getElementById("admin-family-message");
-
   let currentSearchedUserEmail = null;
   let currentSearchResults = []; 
-
+  
   // --- فورم اللوجن ---
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
@@ -80,13 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
-        
-        // الكود ده سليم وهيفضل زي ما هو
         userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL; 
         
         cardContainer.style.display = "flex";
         formContainer.style.display = "none";
         logoutBtn.style.display = "block";
+
+        // 🛑 الإضافة: اظهر زرار تغيير الصورة وخزن الايميل
+        avatarOverlayLabel.style.display = "flex"; // اظهر الزرار
+        loggedInUserEmail = user.email; // خزن الايميل
         
         if (user.role === 'admin') {
           messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
@@ -103,44 +110,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فورم التسجيل (زي ما هو) ---
+  // --- فورم التسجيل (Signup) (النسخة الجديدة) ---
   signupForm.addEventListener("submit", async (event) => {
-    event.preventDefault(); 
-    messageDiv.textContent = "جاري إنشاء حساب...";
-    messageDiv.style.color = "blue";
+      event.preventDefault(); 
+      messageDiv.textContent = "جاري إنشاء حساب...";
+      messageDiv.style.color = "blue";
+      
+      const avatarFile = signupAvatarFile.files[0];
+      let finalAvatarUrl = DEFAULT_AVATAR_URL; // الصورة الافتراضية
 
-    const formData = new FormData();
-    formData.append('name', document.getElementById('name').value);
-    formData.append('family', document.getElementById('family').value); 
-    formData.append('email', document.getElementById('signup-email').value);
-    formData.append('password', document.getElementById('signup-password').value);
-    
-    const avatarFile = document.getElementById('avatar-file').files[0];
-    if (avatarFile) {
-      formData.append('avatar', avatarFile);
-    }
-    
-    try {
-      const response = await fetch(`/signup`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+          // 1. لو اليوزر رفع صورة، ارفعها الأول
+          if (avatarFile && avatarFile.size > 0) {
+              messageDiv.textContent = "جاري رفع الصورة...";
+              
+              const formData_signup = new FormData();
+              formData_signup.append('file', avatarFile);
+              formData_signup.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-      const data = await response.json();
+              const uploadResponse = await fetch(CLOUDINARY_URL, {
+                  method: 'POST',
+                  body: formData_signup
+              });
+              
+              const uploadData = await uploadResponse.json();
+              
+              if (!uploadResponse.ok) {
+                  throw new Error(uploadData.error.message || 'فشل رفع الصورة');
+              }
+              
+              finalAvatarUrl = uploadData.secure_url; // اللينك الجديد
+              messageDiv.textContent = "جاري إنشاء الحساب..."; // رجع الرسالة
+          }
 
-      if (response.ok) {
-        messageDiv.textContent = "تم إنشاء الحساب! تقدر تعمل لوجن دلوقتي.";
-        messageDiv.style.color = "green";
-        signupForm.reset();
-      } else {
-        messageDiv.textContent = `فشل: ${data.error}`;
-        messageDiv.style.color = "red";
+          // 2. حضر البيانات للباك إند
+          const dataToFunctions = new FormData();
+          dataToFunctions.append('name', document.getElementById('name').value);
+          dataToFunctions.append('family', document.getElementById('family').value); 
+          dataToFunctions.append('email', document.getElementById('signup-email').value);
+          dataToFunctions.append('password', document.getElementById('signup-password').value);
+          
+          // 🛑 ابعت اللينك (سواء الافتراضي أو الجديد)
+          dataToFunctions.append('profile_image_url', finalAvatarUrl);
+
+          // 3. كلم الباك إند بتاعنا (functions/signup)
+          const response = await fetch(`/signup`, {
+              method: "POST",
+              body: dataToFunctions, // ابعت الـ FormData
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+              messageDiv.textContent = "تم إنشاء الحساب! تقدر تعمل لوجن دلوقتي.";
+              messageDiv.style.color = "green";
+              signupForm.reset();
+          } else {
+              messageDiv.textContent = `فشل: ${data.error}`;
+              messageDiv.style.color = "red";
+          }
+      } catch (err) {
+          messageDiv.textContent = "حدث خطأ: " + err.message;
+          messageDiv.style.color = "red";
       }
-    } catch (err) {
-      messageDiv.textContent = "حدث خطأ في الاتصال بالـ API.";
-      messageDiv.style.color = "red";
-    }
   });
+
 
   // --- زرار تسجيل الخروج ---
   logoutBtn.addEventListener("click", () => {
@@ -152,16 +186,75 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
-    // 🛑 رجع الصورة الافتراضية (بالمسار الصحيح اللي فيه "/")
     userAvatarImg.src = DEFAULT_AVATAR_URL;
     
     loginForm.reset();
     messageDiv.textContent = "تم تسجيل الخروج.";
     messageDiv.style.color = "blue";
+
+    // 🛑 الإضافة: اخفي زرار تغيير الصورة
+    avatarOverlayLabel.style.display = "none";
+    loggedInUserEmail = null; // امسح الايميل
   });
 
+
+  // 🛑🛑 الكود الجديد بتاع "تغيير الصورة" 🛑🛑
+  avatarUploadInput.addEventListener("change", async () => {
+      const file = avatarUploadInput.files[0];
+      if (!file) return; // لو اليوزر داس "cancel"
+      
+      // 1. اعرض رسالة "جاري الرفع"
+      avatarOverlayLabel.textContent = "جاري الرفع...";
+      
+      try {
+          // 2. ارفع الصورة الجديدة لـ Cloudinary
+          const formData_upload = new FormData();
+          formData_upload.append('file', file);
+          formData_upload.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+          const uploadResponse = await fetch(CLOUDINARY_URL, {
+              method: 'POST',
+              body: formData_upload
+          });
+          
+          const uploadData = await uploadResponse.json();
+          
+          if (!uploadResponse.ok) {
+              throw new Error(uploadData.error.message || 'فشل رفع الصورة');
+          }
+          
+          const newUrl = uploadData.secure_url; // اللينك الجديد
+
+          // 3. كلم الـ API الجديد بتاعنا (functions/update-avatar)
+          const updateResponse = await fetch(`/update-avatar`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  email: loggedInUserEmail, // الايميل اللي خزنّاه
+                  newAvatarUrl: newUrl       // اللينك الجديد
+              }),
+          });
+          
+          const updateData = await updateResponse.json();
+          
+          if (!updateResponse.ok) {
+              throw new Error(updateData.error.message || 'فشل تحديث الداتا بيز');
+          }
+
+          // 4. حدث الصورة في الكارت
+          userAvatarImg.src = newUrl;
+          avatarOverlayLabel.textContent = "تغيير الصورة"; // رجع الكلمة زي ما كانت
+
+      } catch (err) {
+          alert("حدث خطأ: " + err.message); // اعرض "alert" لليوزر
+          avatarOverlayLabel.textContent = "تغيير الصورة";
+      }
+  });
+
+
   // 
-  // --- أكواد الأدمن (البحث والدروب ليست) (زي ما هي) ---
+  // --- أكواد الأدمن (البحث والدروب ليست) ---
+  // (كل أكواد الأدمن زي ما هي متتغيرش)
   // 
 
   // --- 1. فورم البحث بالاسم ---
