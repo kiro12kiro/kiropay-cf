@@ -143,6 +143,45 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        /* 🛑 ستايلات جديدة لزراير الأسر 🛑 */
+        .family-buttons-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            flex-wrap: wrap; /* عشان لو الشاشة صغرت */
+        }
+        .family-btn {
+            flex: 1; /* عشان ياخدوا مساحة متساوية */
+            padding: 10px 15px;
+            font-size: 0.9em;
+            background-color: #17a2b8; /* لون أزرق مختلف */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 150px; /* أقل عرض للزرار */
+        }
+        .family-btn:hover {
+            background-color: #138496;
+        }
+        #admin-family-results {
+            margin-top: 1rem;
+            background: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            max-height: 300px; /* ارتفاع معين عشان اللستة لو طويلة */
+            overflow-y: auto; /* يضيف سكرول لو اللستة طويلة */
+        }
+        #admin-family-results p {
+            border-bottom: 1px solid #eee;
+            padding: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        #admin-family-results p:last-child {
+            border-bottom: none;
+        }
+
     </style>
 </head>
 <body>
@@ -178,6 +217,7 @@
                     <option value="اسرة مارجرس">اسرة مارجرس</option>
                     <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
                 </select>
+                
                 <input type="email" id="signup-email" placeholder="Email" required>
                 <input type="password" id="signup-password" placeholder="Password" required>
 
@@ -216,8 +256,9 @@
                         تم العثور على عدة مستخدمين، اختر واحد:
                     </label>
                     <select id="admin-select-user" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white;">
-                        </select>
+                    </select>
                 </div>
+
                 <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
 
                 <div id="admin-searched-user-card" style="display: none;">
@@ -245,7 +286,26 @@
                     <p id="admin-delete-message" style="color: red;"></p>
                 </div>
             </div>
-        </div>
+            <div class="admin-section">
+                <h4>عرض المستخدمين حسب الأسرة</h4>
+                <div class="family-buttons-container">
+                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">
+                        اسرة الانبا موسي الاسود
+                    </button>
+                    <button class="family-btn" data-family="اسرة مارجرس">
+                        اسرة مارجرس
+                    </button>
+                    <button class="family-btn" data-family="اسرة الانبا كاراس">
+                        اسرة الانبا كاراس
+                    </button>
+                </div>
+                
+                <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
+                
+                <div id="admin-family-results" style="display: none;">
+                    </div>
+            </div>
+            </div>
 
     </div>
     <script src="app.js"></script>
