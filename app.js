@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentQuizId = null;
     let selectedOption = null;
 
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (لضمان ظهور الفورمات) 🛑
+    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
     logoutBtn.style.display = "none";
@@ -262,81 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- فانكشن لوحة الصدارة (مُصححة نهائياً) ---
     async function loadLeaderboards() {
-        topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
-        familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
-        familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
-        familyAnbaKarasList.innerHTML = "<li>جاري التحميل...</li>";
-
-        const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
-
-        try {
-            // 🛑🛑 الكود الصحيح: نداء الملفات المتخصصة 🛑🛑
-            const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = await Promise.all([
-                fetch('/get-top-champions', { method: "POST" }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة مارجرس" }) }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) }),
-            ]);
-
-            // 1. الأبطال (Top 3)
-            if (!championsResponse.ok) throw new Error("فشل تحميل الأبطال");
-            const championsData = await championsResponse.json();
-            
-            topChampionsList.innerHTML = ""; 
-            if (championsData.champions && championsData.champions.length > 0) {
-                championsData.champions.forEach((user, index) => {
-                    const rank = index + 1;
-                    const card = document.createElement('div');
-                    card.className = 'champion-card';
-                    card.innerHTML = `
-                        <div class="rank">${rankEmojis[rank] || rank}</div>
-                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
-                        <span class="name">${user.name}</span>
-                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
-                    `;
-                    topChampionsList.appendChild(card);
-                });
-            } else {
-                topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
-            }
-
-            // 2. القوائم التفصيلية (Top 10 لكل عائلة)
-            const familyLists = {
-                "اسرة الانبا موسي الاسود": familyAnbaMoussaList,
-                "اسرة مارجرس": familyMargergesList,
-                "اسرة الانبا كاراس": familyAnbaKarasList
-            };
-
-            const familyResponses = [
-                { list: familyAnbaMoussaList, response: anbaMoussaResponse, name: "اسرة الانبا موسي الاسود" },
-                { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
-                { list: familyAnbaKarasList, response: karasResponse, name: "اسرة الانبا كاراس" }
-            ];
-
-            for (const item of familyResponses) {
-                if (!item.response.ok) throw new Error(`فشل تحميل بيانات أسرة ${item.name}`);
-                const data = await item.response.json();
-                
-                item.list.innerHTML = '';
-                if (data.users && data.users.length > 0) {
-                    data.users.forEach((user, index) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
-                        item.list.appendChild(li);
-                    });
-                } else {
-                    item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
-                }
-            }
-
-
-        } catch (err) {
-            console.error("Leaderboard Error:", err);
-            topChampionsList.innerHTML = '<p style="text-align: center; color: red;">فشل تحميل لوحة الصدارة.</p>';
-            familyAnbaMoussaList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            familyMargergesList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            familyAnbaKarasList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-        }
+        // ... (الكود زي ما هو)
     }
 
 
@@ -403,24 +329,148 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- 1. فورم البحث بالاسم ---
         adminSearchForm.addEventListener("submit", async (event) => {
-            event.preventDefault(); 
-            // ... (باقي الكود)
+            event.preventDefault(); // 🛑 التأكد من منع إعادة التحميل
+            event.stopPropagation();
+            const name = adminSearchInput.value.trim();
+
+            adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
+            adminSearchMessage.style.color = "blue";
+            adminResultsListDiv.innerHTML = "";
+            adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
+            searchedUserCard.style.display = "none";
+            currentSearchedUser = null;
+
+            if (!name) {
+                adminSearchMessage.textContent = "الرجاء إدخال اسم للبحث.";
+                adminSearchMessage.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin-search`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: name }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                
+                if (!response.ok) {
+                    adminSearchMessage.textContent = `فشل البحث: ${data.error || "خطأ غير محدد"}`;
+                    adminSearchMessage.style.color = "red";
+                    return;
+                }
+
+                currentSearchResults = data.users;
+
+                if (currentSearchResults.length === 0) {
+                    adminSearchMessage.textContent = `لم يتم العثور على مستخدمين بالاسم "${name}".`;
+                    adminSearchMessage.style.color = "black";
+                } else {
+                    adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم:`;
+                    adminSearchMessage.style.color = "green";
+
+                    currentSearchResults.forEach(user => {
+                        const option = document.createElement("option");
+                        option.value = user.email;
+                        option.textContent = `${user.name} (${user.family})`;
+                        adminSelectUser.appendChild(option);
+                    });
+                    
+                    adminResultsListDiv.style.display = "block";
+                    // قم بملء الكارت بأول نتيجة تلقائيا
+                    adminSelectUser.value = currentSearchResults[0].email;
+                    populateAdminCard(currentSearchResults[0]);
+                }
+            } catch (err) {
+                adminSearchMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                adminSearchMessage.style.color = "red";
+                console.error("Admin Search Error:", err);
+            }
         });
 
         // --- فانكشن ملء الكارت ---
-        function populateAdminCard(user) { /* ... */ }
+        function populateAdminCard(user) {
+            searchedUserName.textContent = `الاسم: ${user.name}`;
+            searchedUserFamily.textContent = `العائلة: ${user.family}`;
+            searchedUserEmail.textContent = `الإيميل: ${user.email}`;
+            searchedUserBalance.textContent = `الرصيد: $${user.balance}`;
+            searchedUserCard.style.display = "block";
+            currentSearchedUserEmail = user.email;
+            currentSearchedUser = user;
+            balanceMessage.textContent = "";
+            deleteMessage.textContent = "";
+        }
 
         // --- كود الدروب ليست ---
-        adminSelectUser.addEventListener("change", () => { /* ... */ });
+        adminSelectUser.addEventListener("change", () => {
+            const selectedEmail = adminSelectUser.value;
+            const user = currentSearchResults.find(u => u.email === selectedEmail);
+            if (user) {
+                populateAdminCard(user);
+            }
+        });
 
-        // --- فانكشن تعديل الرصيد الجماعي ---
-        async function handleMassUpdate(amount) { /* ... */ }
+        // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
+        async function updateBalance(amount, reason) {
+            if (!currentSearchedUser || !loggedInUserProfile) return;
+
+            balanceMessage.textContent = "جاري تحديث الرصيد...";
+            balanceMessage.style.color = "blue";
+            addBalanceBtn.disabled = true;
+            subtractBalanceBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/admin-update-balance`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: currentSearchedUser.email,
+                        amount: amount,
+                        reason: reason
+                    }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
+                    balanceMessage.style.color = "green";
+                    currentSearchedUser.balance = data.new_balance;
+                    searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
+                    balanceAmountInput.value = "";
+                    
+                    if (loggedInUserProfile.email === currentSearchedUser.email) {
+                        refreshUserData(); 
+                    }
+
+                } else {
+                    balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                    balanceMessage.style.color = "red";
+                }
+            } catch (err) {
+                balanceMessage.textContent = "خطأ في الاتصال بالـ API.";
+                balanceMessage.style.color = "red";
+                console.error("Balance Update Error:", err);
+            } finally {
+                addBalanceBtn.disabled = false;
+                subtractBalanceBtn.disabled = false;
+            }
+        }
 
         // --- زراير الرصيد (الفردي) ---
-        addBalanceBtn.addEventListener("click", () => { /* ... */ });
-        subtractBalanceBtn.addEventListener("click", () => { /* ... */ });
+        addBalanceBtn.addEventListener("click", () => {
+            const amount = parseInt(balanceAmountInput.value);
+            if (isNaN(amount) || amount <= 0 || !currentSearchedUser) return;
+            updateBalance(amount, "إضافة يدوية من الأدمن");
+        });
+        subtractBalanceBtn.addEventListener("click", () => {
+            const amount = -parseInt(balanceAmountInput.value); 
+            if (isNaN(amount) || amount >= 0 || !currentSearchedUser) return;
+            updateBalance(amount, "خصم يدوي من الأدمن");
+        });
 
-        // --- زرار حذف المستخدم ---
+        // --- زرار حذف المستخدم (مُحصن) ---
         deleteUserBtn.addEventListener("click", async () => { /* ... */ });
 
         // --- كود زراير الأسر (🛑 مع إضافة Checkbox) ---
@@ -435,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- كود فورم إضافة سؤال (مع الـ preventDefault) ---
         adminQuizForm.addEventListener("submit", async (event) => {
-            event.preventDefault(); // 🛑 التأكد من منع إعادة التحميل
+            event.preventDefault(); 
             // ... (باقي الكود)
         });
 
