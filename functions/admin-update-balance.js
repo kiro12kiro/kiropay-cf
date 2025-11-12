@@ -1,41 +1,51 @@
 /*
  * API Endpoint: /admin-update-balance
- * بيضيف أو يخصم رصيد (لو الرقم بالسالب)
+ * (النسخة الجديدة - بتسجل في جدول transactions)
  */
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
     const data = await context.request.json();
-    const { email, amount } = data; // email المستخدم اللي هنعدله, amount الكمية
+    const { email, amount } = data; // amount can be positive or negative
 
     if (!email || !amount) {
-      return new Response(JSON.stringify({ error: "بيانات ناقصة" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "بيانات ناقصة" }), { status: 400 });
     }
 
-    // 🛑 السحر هنا: بنستخدم `balance = balance + ?`
-    // لو الـ amount موجب هيضيف، لو سالب هيخصم
-    const query = "UPDATE users SET balance = balance + ? WHERE email = ? RETURNING balance";
-    const result = await db.prepare(query).bind(amount, email).first();
+    // --- الخطوة 1: ابدأ "عملية" (Transaction) ---
+    // ده بيضمن إن الخطوتين (التحديث والإدخال) يحصلوا مع بعض
+    const batch = [
+      // 1. حضّر أمر التحديث (زي القديم)
+      db.prepare(
+        "UPDATE users SET balance = balance + ? WHERE email = ?"
+      ).bind(amount, email),
 
-    if (result) {
-      return new Response(JSON.stringify({ success: true, new_balance: result.balance }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } else {
-      return new Response(JSON.stringify({ error: "لم يتم العثور على المستخدم" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+      // 2. 🛑 حضّر أمر التسجيل في السجل الجديد
+      db.prepare(
+        "INSERT INTO transactions (user_email, amount, reason) VALUES (?, ?, ?)"
+      ).bind(email, amount, (amount > 0 ? "إضافة من الأدمن" : "خصم من الأدمن"))
+    ];
+
+    // --- الخطوة 2: نفذ العمليتين مع بعض ---
+    await db.batch(batch);
+
+    // --- الخطوة 3: هات الرصيد الجديد عشان نرجعه ---
+    const userPs = db.prepare("SELECT balance FROM users WHERE email = ?");
+    const user = await userPs.bind(email).first();
+
+    // 4. رجع رسالة النجاح
+    return new Response(JSON.stringify({
+      success: true,
+      message: "تم تحديث الرصيد وتسجيل الحركة",
+      new_balance: user.balance
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
+      status: 500
     });
   }
 }
