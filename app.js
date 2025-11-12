@@ -52,11 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminFamilyMessage = document.getElementById("admin-family-message");
   const adminQuizForm = document.getElementById("admin-quiz-form");
   const adminQuizMessage = document.getElementById("admin-quiz-message");
-  const userAnnouncementBox = document.getElementById("user-announcement-box"); // جديد
-  const userAnnouncementText = document.getElementById("user-announcement-text"); // جديد
-  const adminAnnouncementForm = document.getElementById("admin-announcement-form"); // جديد
-  const adminAnnouncementText = document.getElementById("admin-announcement-text"); // جديد
-  const adminAnnouncementMessage = document.getElementById("admin-announcement-message"); // جديد
+  const userAnnouncementBox = document.getElementById("user-announcement-box"); 
+  const userAnnouncementText = document.getElementById("user-announcement-text"); 
+  const adminAnnouncementForm = document.getElementById("admin-announcement-form"); 
+  const adminAnnouncementText = document.getElementById("admin-announcement-text"); 
+  const adminAnnouncementMessage = document.getElementById("admin-announcement-message"); 
   
   const massUpdateControls = document.getElementById("mass-update-controls");
   const selectedUsersCount = document.getElementById("selected-users-count");
@@ -64,14 +64,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const massUpdateAddBtn = document.getElementById("mass-update-add-btn"); 
   const massUpdateSubtractBtn = document.getElementById("mass-update-subtract-btn"); 
   const massUpdateMessage = document.getElementById("mass-update-message"); 
-  let selectedUsersForMassUpdate = []; // لستة اليوزرز
+  let selectedUsersForMassUpdate = []; 
   
-  // --- عناصر لوحة الصدارة والكويز ---
   const leaderboardContainer = document.getElementById("leaderboard-container");
   const topChampionsList = document.getElementById("top-champions-list");
   const familyAnbaMoussaList = document.getElementById("family-anba-moussa-list");
   const familyMargergesList = document.getElementById("family-margerges-list");
   const familyAnbaKarasList = document.getElementById("family-anba-karas-list");
+  
   const quizContainer = document.getElementById("quiz-container");
   const quizQuestionText = document.getElementById("quiz-question-text");
   const quizBtnA = document.getElementById("quiz-btn-a");
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   quizContainer.style.display = "none";
   avatarOverlayLabel.style.display = "none";
   massUpdateControls.style.display = "none";
-  userAnnouncementBox.style.display = "none"; // اخفاء الإعلان
+  userAnnouncementBox.style.display = "none";
   
   // (فانكشن تصغير الصورة - زي ما هي)
   function resizeImage(file, maxWidth, maxHeight, quality) {
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
           
           const user = data.user;
-          loggedInUserProfile = user; // تحديث البروفايل في الـ JS
+          loggedInUserProfile = user; 
 
           // 2. تحديث الكارت
           userNameP.textContent = `Name: ${user.name}`;
@@ -134,7 +134,10 @@ document.addEventListener("DOMContentLoaded", () => {
           if (user.role !== 'admin') {
               await loadLeaderboards();
               await loadActiveQuiz(user.email);
-              await loadAnnouncement(); // 🛑 جيب الإعلان
+              await loadAnnouncement(); 
+          } else {
+              // لو الأدمن عمل تحديث
+              await loadAnnouncement();
           }
 
           refreshDataBtn.textContent = "تحديث البيانات";
@@ -159,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     transactionList.innerHTML = ""; 
     leaderboardContainer.style.display = "none"; 
     quizContainer.style.display = "none"; 
+    userAnnouncementBox.style.display = "none";
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -207,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // --- لو هو يوزر عادي ---
           await loadLeaderboards(); 
           await loadActiveQuiz(user.email);
-          await loadAnnouncement(); // 🛑 جيب الإعلان
+          await loadAnnouncement(); 
           leaderboardContainer.style.display = "block"; 
           adminPanelDiv.style.display = "none"; 
         }
@@ -221,48 +225,51 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.style.color = "red";
     }
   });
-  
-  // 🛑 ربط زرار الريفرش 🛑
-  refreshDataBtn.addEventListener('click', refreshUserData);
-
 
   // --- فانكشن سجل المعاملات (مُحصنة - زي ما هي) ---
   async function loadTransactionHistory(email) { /* ... */ }
 
-  // --- فانكشن لوحة الصدارة (زي ما هي) ---
+  // --- فانكشن لوحة الصدارة والكويز (زي ما هي) ---
   async function loadLeaderboards() { /* ... */ }
   async function populateFamilyList(familyName, listElement) { /* ... */ }
   async function loadActiveQuiz(email) { /* ... */ }
-
-  // 🛑🛑 فانكشن جديدة: جلب الإعلانات 🛑🛑
-  async function loadAnnouncement() {
-    try {
-      const response = await fetch(`/get-announcement`, { method: "GET" }); 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.announcement && data.announcement.trim() !== "") {
-          userAnnouncementText.textContent = data.announcement;
-          userAnnouncementBox.style.display = "block";
-        } else {
-          userAnnouncementBox.style.display = "none";
-        }
-      }
-    } catch (err) {
-      console.error("فشل جلب الإعلان:", err);
-      userAnnouncementBox.style.display = "none";
-    }
-  }
+  
+  // 🛑🛑 فانكشن جديدة: جلب الإعلانات (لليوزر) 🛑🛑
+  async function loadAnnouncement() { /* ... */ }
 
 
-  // --- فورم التسجيل (Signup) (زي ما هي) ---
+  // --- فورم التسجيل (Signup) (زي ما هو) ---
   signupForm.addEventListener("submit", async (event) => { /* ... */ });
 
 
   // --- زرار تسجيل الخروج (مُعدل - زي ما هو) ---
-  logoutBtn.addEventListener("click", () => { /* ... */ });
+  logoutBtn.addEventListener("click", () => {
+    // 🛑 فرض الحالة الأولية (زي أول الصفحة) 🛑
+    cardContainer.style.display = "none";
+    formContainer.style.display = "flex";
+    logoutBtn.style.display = "none";
+    refreshDataBtn.style.display = "none";
+    adminPanelDiv.style.display = "none";
+    leaderboardContainer.style.display = "none";
+    quizContainer.style.display = "none";
+    avatarOverlayLabel.style.display = "none";
+    userAnnouncementBox.style.display = "none";
+    
+    userNameP.textContent = "Name: ";
+    userFamilyP.textContent = "Family: ";
+    userBalanceP.textContent = "Balance: ";
+    userAvatarImg.src = DEFAULT_AVATAR_URL;
+    
+    loginForm.reset();
+    messageDiv.textContent = "تم تسجيل الخروج.";
+    messageDiv.style.color = "blue";
+
+    loggedInUserProfile = null; 
+    transactionList.innerHTML = ""; 
+  });
 
 
-  // --- كود "تغيير الصورة" (مُعدل ليستخدم التصغير - زي ما هو) ---
+  // --- كود "تغيير الصورة" (زي ما هو) ---
   avatarUploadInput.addEventListener("change", async () => { /* ... */ });
 
   // --- أكواد الكويز (زي ما هي) ---
@@ -270,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
   quizSubmitBtn.addEventListener("click", async () => { /* ... */ });
   
   // 
-  // --- أكواد الأدمن (كلها رجعت تاني) ---
+  // --- أكواد الأدمن (مع إصلاحات الـ Checkbox والإعلان) ---
   // 
   (function setupAdminPanel() {
       // --- 1. فورم البحث بالاسم ---
@@ -295,42 +302,74 @@ document.addEventListener("DOMContentLoaded", () => {
       // --- كود زراير الأسر (🛑 مع إضافة Checkbox) ---
       familyButtons.forEach(button => {
         button.addEventListener("click", async () => {
-            // ... (الكود اللي بيجيب اللستة)
+            const familyName = button.dataset.family;
+            
+            adminFamilyMessage.textContent = `جاري تحميل بيانات "${familyName}"...`;
+            adminFamilyMessage.style.color = "blue";
+            adminFamilyResultsDiv.style.display = "none"; 
+            adminFamilyResultsDiv.innerHTML = ""; 
+            
             try {
-                // ... (fetch)
+                const response = await fetch(`/admin-get-family`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ family: familyName }),
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    adminFamilyMessage.textContent = `فشل: ${data.error}`;
+                    adminFamilyMessage.style.color = "red";
+                    return;
+                }
+                
                 const users = data.users;
                 
                 if (users.length === 0) {
-                    // ... (عرض رسالة لا يوجد مستخدمين)
+                    adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
+                    adminFamilyMessage.style.color = "black";
                 } else {
-                    // ... (عرض رسالة عدد المستخدمين)
+                    adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                    adminFamilyMessage.style.color = "green";
                     
                     users.forEach(user => {
                         const userItem = document.createElement("div");
                         userItem.className = "family-user-item";
                         
-                        // 🛑 إنشاء Checkbox (الإصلاح المطلوب)
                         const checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
                         checkbox.className = "mass-update-checkbox";
                         checkbox.dataset.email = user.email; 
                         
+                        if (selectedUsersForMassUpdate.includes(user.email)) {
+                            checkbox.checked = true;
+                        }
+
                         const userInfo = document.createElement("div");
                         userInfo.className = "user-info";
-                        // ... (ملء بيانات اليوزر)
+                        userInfo.innerHTML = `
+                            <span>${user.name} (${user.email})</span>
+                            <strong>الرصيد: ${user.balance}</strong>
+                        `;
                         
-                        userInfo.addEventListener('click', () => { /* ... */ });
+                        userInfo.addEventListener('click', () => {
+                            user.family = familyName;
+                            populateAdminCard(user);
+                            searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
 
                         userItem.appendChild(checkbox);
                         userItem.appendChild(userInfo);
                         adminFamilyResultsDiv.appendChild(userItem);
                     });
                     
-                    // ...
+                    adminFamilyResultsDiv.style.display = "block"; 
                 }
                 
             } catch (err) {
-                // ...
+                adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                adminFamilyMessage.style.color = "red";
             }
         });
       });
@@ -343,16 +382,10 @@ document.addEventListener("DOMContentLoaded", () => {
       massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
       
       // --- كود فورم إضافة سؤال (مع الـ preventDefault) ---
-      adminQuizForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // 🛑 التأكد من منع إعادة التحميل
-        // ... (باقي الكود)
-      });
+      adminQuizForm.addEventListener("submit", async (event) => { /* ... */ });
       
       // 🛑 كود فورم الإعلانات (مع الـ preventDefault) 🛑
-      adminAnnouncementForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // 🛑🛑 الإصلاح: منع تسجيل الخروج 🛑🛑
-        // ... (باقي الكود)
-      });
+      adminAnnouncementForm.addEventListener("submit", async (event) => { /* ... */ });
       
   })(); // 🛑 نهاية أكواد الأدمن 🛑
 
