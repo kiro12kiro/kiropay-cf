@@ -143,23 +143,23 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 🛑 ستايلات جديدة لزراير الأسر 🛑 */
+        /* ستايلات جديدة لزراير الأسر */
         .family-buttons-container {
             display: flex;
             justify-content: space-around;
             gap: 10px;
-            flex-wrap: wrap; /* عشان لو الشاشة صغرت */
+            flex-wrap: wrap; 
         }
         .family-btn {
-            flex: 1; /* عشان ياخدوا مساحة متساوية */
+            flex: 1; 
             padding: 10px 15px;
             font-size: 0.9em;
-            background-color: #17a2b8; /* لون أزرق مختلف */
+            background-color: #17a2b8; 
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            min-width: 150px; /* أقل عرض للزرار */
+            min-width: 150px; 
         }
         .family-btn:hover {
             background-color: #138496;
@@ -169,8 +169,8 @@
             background: #fff;
             padding: 0.5rem 1rem;
             border-radius: 4px;
-            max-height: 300px; /* ارتفاع معين عشان اللستة لو طويلة */
-            overflow-y: auto; /* يضيف سكرول لو اللستة طويلة */
+            max-height: 300px; 
+            overflow-y: auto; 
         }
         #admin-family-results p {
             border-bottom: 1px solid #eee;
@@ -189,7 +189,7 @@
     <div class="container">
         <div class="card-container">
             <div class="card">
-                <img src="https://via.placeholder.com/100" alt="Card Image" class="card-img" id="user-avatar">
+                <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
                 <p id="user-name">Name: </p>
                 <p id="user-family">Family: </p>
                 <p id="user-balance">Balance: </p>
@@ -303,7 +303,7 @@
                 <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
                 
                 <div id="admin-family-results" style="display: none;">
-                    </div>
+                </div>
             </div>
             </div>
 
