@@ -1,7 +1,6 @@
 /*
  * API Endpoint: /admin-get-family
- * (ملف جديد)
- * وظيفته: يجيب كل المستخدمين اللي تبع أسرة معينة
+ * (لتفعيل الـ Checkboxes ولوحة الأدمن)
  */
 export async function onRequestPost(context) {
   try {
@@ -16,13 +15,12 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑 هنجيب الاسم والايميل والرصيد (مش محتاجين الباسورد)
+    // 🛑 التعديل: جلب كل الحقول الضرورية (بما فيها EMAIL)
     const ps = db.prepare(
-      "SELECT name, email, balance FROM users WHERE family = ?"
+      "SELECT name, email, balance, family, profile_image_url FROM users WHERE family = ?"
     );
     const results = await ps.bind(familyName).all();
 
-    // لو الأسرة فاضية
     if (!results.results || results.results.length === 0) {
       return new Response(JSON.stringify({ users: [] }), { // رجع لستة فاضية
         status: 200, 
@@ -37,7 +35,8 @@ export async function onRequestPost(context) {
     });
 
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
+    // 🛑 تحصين ضد خطأ 500 
+    return new Response(JSON.stringify({ error: `فشل داخلي في جلب بيانات الأسرة للأدمن: ${e.message}` }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
