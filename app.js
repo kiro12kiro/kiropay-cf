@@ -290,7 +290,17 @@ document.addEventListener("DOMContentLoaded", () => {
             
             topChampionsList.innerHTML = ""; 
             if (championsData.champions && championsData.champions.length > 0) {
-                // ... (ملء الأبطال)
+                championsData.champions.forEach((user, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'champion-card';
+                    card.innerHTML = `
+                        <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
+                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
+                        <span class="name">${user.name}</span>
+                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                    `;
+                    topChampionsList.appendChild(card);
+                });
             } else {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
@@ -312,7 +322,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 item.list.innerHTML = '';
                 if (data.users && data.users.length > 0) {
-                    // ... (ملء القائمة)
+                    data.users.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        item.list.appendChild(li);
+                    });
                 } else {
                     item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
@@ -439,9 +453,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     populateAdminCard(currentSearchResults[0]);
                     adminResultsListDiv.style.display = "none";
                 } else {
-                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
+                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة (مُصحح) 🛑
                     adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
                     adminSearchMessage.style.color = "orange";
+                    
+                    // تأكد من مسح القائمة قبل الملء
+                    adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
 
                     currentSearchResults.forEach(user => {
                         const option = document.createElement("option");
@@ -451,6 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                     
                     adminResultsListDiv.style.display = "block";
+                    // لضمان تحديد العنصر الأول وعرضه في الكارد
                     adminSelectUser.value = currentSearchResults[0].email;
                     populateAdminCard(currentSearchResults[0]);
                 }
@@ -473,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteMessage.textContent = "";
         }
 
-        // --- كود الدروب ليست ---
+        // --- كود الدروب ليست (مُصحح) ---
         adminSelectUser.addEventListener("change", () => {
             const selectedEmail = adminSelectUser.value;
             const user = currentSearchResults.find(u => u.email === selectedEmail);
@@ -607,20 +625,23 @@ document.addEventListener("DOMContentLoaded", () => {
         massUpdateAddBtn.addEventListener('click', () => { /* ... */ });
         massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
 
-        // 🛑 كود فورم إضافة سؤال (مُصحح) 🛑
+        // 🛑 كود فورم إضافة سؤال (مُصحح بناءً على ID الـ HTML) 🛑
         adminQuizForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
             
+            // 🛑 تم التأكد من الـ IDs هنا 🛑
             const question = document.getElementById("quiz-question").value.trim();
             const optionA = document.getElementById("quiz-opt-a").value.trim();
             const optionB = document.getElementById("quiz-opt-b").value.trim();
             const optionC = document.getElementById("quiz-opt-c").value.trim();
+            // الـ ID الصحيح للـ select (الإجابة) هو quiz-correct-opt
             const answer = document.getElementById("quiz-correct-opt").value.trim();
             const pointsInput = document.getElementById("quiz-points").value;
             const points = parseInt(pointsInput);
 
-            if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || !pointsInput.trim()) {
+            // منطق التحقق
+            if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || pointsInput.trim() === '') {
                 adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
                 adminQuizMessage.style.color = "red";
                 return;
