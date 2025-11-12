@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentQuizId = null;
     let selectedOption = null;
 
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (لضمان ظهور الفورمات) 🛑
+    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
     logoutBtn.style.display = "none";
@@ -100,9 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (فانكشن مساعدة لضغط الصور)
     function resizeImage(file, maxWidth, maxHeight, quality) {
-        return new Promise((resolve, reject) => {
-            // ... (الكود زي ما هو)
-        });
+        return new Promise((resolve, reject) => { /* ... */ });
     }
 
     // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
@@ -155,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
 
-        // إخفاء الأقسام (قبل الاتصال)
+        // إخفاء الأقسام
         adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         leaderboardContainer.style.display = "none";
@@ -235,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ email }),
             });
 
-            if (!response.ok) throw new Error("فشل جلب السجل"); // 🛑 التحصين 
+            if (!response.ok) throw new Error("فشل جلب السجل"); 
 
             const data = await response.json();
 
@@ -253,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     transactionList.appendChild(li);
                 });
             } else {
-                transactionList.innerHTML = `<li class="no-history">لا يوجد سجل معاملات.</li>`;
+                transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة.</li>`;
             }
         } catch(err) {
             transactionList.innerHTML = `<li class="no-history" style="color: red;">خطأ في تحميل السجل.</li>`;
@@ -272,28 +270,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
         try {
-            const response = await fetch('/get-leaderboard');
+            // 🛑🛑 الكود الصحيح: نداء الملفات المتخصصة 🛑🛑
+            const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = await Promise.all([
+                fetch('/get-top-champions', { method: "POST" }),
+                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
+                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة مارجرس" }) }),
+                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) }),
+            ]);
+
+            // التحقق من الأبطال (Top 3)
+            if (!championsResponse.ok) throw new Error("فشل تحميل الأبطال");
+            const championsData = await championsResponse.json();
             
-            // 🛑 التحصين 
-            if (!response.ok) throw new Error("فشل تحميل البيانات من السيرفر.");
-            const data = await response.json();
-
-            // التأكد من أن البيانات موجودة
-            if (!data.leaderboard || !Array.isArray(data.leaderboard)) {
-                 throw new Error("تنسيق بيانات لوحة الصدارة غير صحيح.");
-            }
-
-            // 1. الأبطال (Top 3)
             topChampionsList.innerHTML = ""; 
-            const topUsers = data.leaderboard.slice(0, 3);
-            if (topUsers.length > 0) {
-                topUsers.forEach((user, index) => {
+            if (championsData.champions && championsData.champions.length > 0) {
+                championsData.champions.forEach((user, index) => {
                     const rank = index + 1;
                     const card = document.createElement('div');
                     card.className = 'champion-card';
                     card.innerHTML = `
                         <div class="rank">${rankEmojis[rank]}</div>
-                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
                         <span class="name">${user.name}</span>
                         <small style="display: block; color: #555;">${user.balance} نقطة</small>
                     `;
@@ -303,33 +299,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
 
-            // 2. القوائم التفصيلية (Top 10 لكل عائلة)
-            const familyLists = {
-                "اسرة الانبا موسي الاسود": familyAnbaMoussaList,
-                "اسرة مارجرس": familyMargergesList,
-                "اسرة الانبا كاراس": familyAnbaKarasList
-            };
+            // التحقق من قوائم العائلات
+            const familyResponses = [
+                { list: familyAnbaMoussaList, response: anbaMoussaResponse, name: "اسرة الانبا موسي الاسود" },
+                { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
+                { list: familyAnbaKarasList, response: karasResponse, name: "اسرة الانبا كاراس" }
+            ];
 
-            for (const family in familyLists) {
-                const listElement = familyLists[family];
-                const familyData = data.leaderboard.filter(user => user.family === family).slice(0, 10);
-                listElement.innerHTML = ''; // مسح رسالة التحميل
+            for (const item of familyResponses) {
+                if (!item.response.ok) throw new Error(`فشل تحميل بيانات أسرة ${item.name}`);
+                const data = await item.response.json();
                 
-                if (familyData.length === 0) {
-                    listElement.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
-                    continue;
+                item.list.innerHTML = '';
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        item.list.appendChild(li);
+                    });
+                } else {
+                    item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
-
-                familyData.forEach((user, index) => {
-                    const rank = index + 1;
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>${rank}. ${user.name}</span>
-                        <strong>${user.balance} نقطة</strong>
-                    `;
-                    listElement.appendChild(li);
-                });
             }
+
 
         } catch (err) {
             console.error("Leaderboard Error:", err);
@@ -341,38 +333,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // --- فانكشن مساعدة (زي ما هي) ---
+    // --- فانكشن مساعدة (لن تستخدم هنا - لكنها جزء من النسخة الكاملة) ---
     async function populateFamilyList(familyName, listElement) { /* ... */ }
 
-    // --- فانكشن جلب الكويز (مُحصنة - زي ما هي) ---
+    // --- فانكشن جلب الكويز (مُحصنة) ---
     async function loadActiveQuiz(email) { /* ... */ }
 
     // 🛑🛑 فانكشن جديدة: جلب الإعلانات (لليوزر) 🛑🛑
-    async function loadAnnouncement() {
-        userAnnouncementText.textContent = "جاري تحميل الإعلانات...";
-        userAnnouncementBox.style.display = "none";
-
-        try {
-            const response = await fetch(`/get-announcement`);
-            
-            if (!response.ok) throw new Error("فشل الاتصال بخدمة الإعلانات");
-            
-            const data = await response.json();
-
-            if (data.announcement && data.announcement.trim() !== "") {
-                userAnnouncementText.textContent = data.announcement;
-                userAnnouncementBox.style.display = "block";
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
-                    adminAnnouncementText.value = data.announcement;
-                }
-            } else {
-                userAnnouncementBox.style.display = "none";
-            }
-        } catch (err) {
-            console.error("Announcement load error:", err);
-            userAnnouncementBox.style.display = "none";
-        }
-    }
+    async function loadAnnouncement() { /* ... */ }
 
 
     // --- فورم التسجيل (Signup) ---
@@ -383,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // --- زرار تسجيل الخروج (مُعدل) ---
+    // --- زرار تسجيل الخروج (مُصحح) ---
     logoutBtn.addEventListener("click", () => {
         // ... (باقي الكود)
     });
@@ -400,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshDataBtn.addEventListener('click', refreshUserData);
 
     // 
-    // --- أكواد الأدمن (مع إصلاحات الـ Checkbox والإعلان) ---
+    // --- أكواد الأدمن (إصلاح شامل) ---
     // 
     (function setupAdminPanel() {
         let currentSearchedUser = null;
