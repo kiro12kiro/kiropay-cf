@@ -1,15 +1,15 @@
 /*
  * API Endpoint: /admin-set-announcement
- * (جديد - بتاع الإعلانات)
- * وظيفته: حفظ نص الإعلان في KV
+ * (لحفظ الإعلان في KV)
  */
 export async function onRequestPost(context) {
   try {
     const data = await context.request.json();
-    const newText = data.text || ""; // لو بعت فاضي، امسحه
+    // 🛑 التحقق من وجود الحقل الصحيح الذي يرسله app.js
+    const newText = data.message || ""; 
     
-    // 🛑 KIROPAY_KV هو الاسم اللي عملناه في الخطوة 1
-    await context.env.KIROPAY_KV.put('announcement', newText);
+    // 🛑 KIROPAY_KV هو الاسم الذي تم ربطه. نستخدم نفس الـ Key للجلب.
+    await context.env.KIROPAY_KV.put('current_announcement', newText);
     
     return new Response(JSON.stringify({ success: true, message: "تم نشر الإعلان!" }), {
       status: 200,
