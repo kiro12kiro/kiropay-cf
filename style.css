@@ -9,28 +9,40 @@ body {
     direction: rtl; /* For Right-to-Left languages */
     text-align: right; /* For Right-to-Left languages */
 
-    /* 🛑🛑 أكواد الباكجراند هنا 🛑🛑 */
-    background-image: url('/hero1.jpg'); /* ⬅️ غير الاسم ده باسم صورتك */
-    
-    /* * 🛑🛑 التعديل الأول: تصغير الخلفية 🛑🛑 
-     * تم تغيير "cover" إلى "80%" بناءً على طلبك
-     */
-    background-size: 80%;
-    
-    background-position: center center; /* عشان الصورة تكون متوسّطة */
-    background-attachment: fixed; /* عشان الصورة تفضل ثابتة لما تعمل سكرول */
-    background-repeat: no-repeat; /* عشان الصورة متتكررش */
-    /* 🛑🛑 نهاية أكواد الباكجراند 🛑🛑 */
+    /* 🛑🛑 التعديل الأول: رجعنا hero1.jpg كخلفية للـ body 🛑🛑 */
+    background-image: url('/hero1.jpg'); 
+    background-size: cover; 
+    background-position: center center; 
+    background-attachment: fixed; 
+    background-repeat: no-repeat; 
 }
 
 .container {
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9); /* خلفية بيضاء شفافة عشان الكلام يبان */
+    /* * دي الخلفية البيضا الشفافة اللي بتخلي الكلام مقري
+     * 🛑 هنا لغينا الخلفية البيضا الشفافة دي 🛑
+     * عشان hero2.jpg هي اللي هتبقى تحت الكروت
+    */
+    background-color: transparent; /* خليناها شفافة عشان تبين خلفية الكارد كونتينر */
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: none; /* شلنا الشادو كمان */
 }
+
+/* 🛑🛑 التعديل الثاني: إضافة ستايل لـ card-container عشان ياخد خلفية hero2.jpg 🛑🛑 */
+.card-and-forms-wrapper {
+    background-image: url('/hero2.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: scroll; /* ممكن تخليها fixed لو عايزها ثابتة مع السكرول */
+    border-radius: 8px;
+    padding: 20px; /* سبيس داخلي عشان الصورة تبقى باينة كويس */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* شادو خفيف ليها */
+    margin-bottom: 20px; /* مسافة تحتها */
+}
+
 
 .card-container {
     display: flex;
@@ -39,12 +51,13 @@ body {
 }
 
 .card {
-    background-color: #fff;
+    /* 🛑🛑 التعديل الثالث: الخلفية البيضا الشفافة هنا للكارت نفسه 🛑🛑 */
+    background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
-    width: 200px;
+    width: 200px; 
 }
 
 .card-img {
@@ -64,7 +77,8 @@ body {
 }
 
 .form-container form {
-    background-color: #fff;
+    /* 🛑🛑 التعديل الرابع: الخلفية البيضا الشفافة هنا للفورم نفسه 🛑🛑 */
+    background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -84,12 +98,14 @@ body {
 .form-container input[type="email"],
 .form-container input[type="password"],
 .form-container input[type="text"],
-.form-container input[type="file"] {
+.form-container input[type="file"],
+.form-container select { 
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box; /* Include padding in width */
+    box-sizing: border-box; 
+    background-color: white; 
 }
 
 .form-container button {
@@ -113,20 +129,166 @@ body {
     text-align: center;
 }
 
-/* * 🛑🛑 التعديل الثاني: تكبير الكارت والصورة 🛑🛑 
- * هذا الكود يستهدف الكارت الرئيسي فقط (داخل .container)
- * ولن يؤثر على كارت الأدمن
-*/
 .container .card {
-    /* يمكنك تغيير الرقم 450px ليناسبك */
     max-width: 450px; 
-    width: 90%; /* عشان يكون متجاوب أفضل من width: 200px */
-    margin: 1rem auto; /* توسيط الكارت */
-    padding: 1.5rem; /* زيادة الهوامش الداخلية */
+    width: 90%; 
+    margin: 1rem auto; 
+    padding: 1.5rem; 
 }
 
 .container .card .card-img {
-    /* تكبير الصورة من 100px إلى 150px */
     width: 150px;
     height: 150px;
+}
+
+/* ستايلات لوحة الأدمن (بدون تغيير) */
+.admin-panel-container {
+    padding: 20px;
+    max-width: 900px;
+    margin: 2rem auto;
+}
+#admin-panel {
+    background-color: #f0f0f0;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 2px dashed #007bff;
+}
+#admin-panel h2 {
+    text-align: center;
+    color: #333;
+}
+.admin-section {
+    margin-top: 1.5rem;
+    background: #fafafa;
+    padding: 1rem;
+    border-radius: 4px;
+}
+.admin-section h4 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+#admin-search-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+}
+#admin-search-form input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#admin-search-form button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    background-color: #007bff;
+}
+
+/* ستايلات لزراير الإضافة والخصم */
+#admin-balance-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+}
+#admin-balance-controls input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#admin-add-balance-btn, #admin-subtract-balance-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+}
+#admin-add-balance-btn {
+    background-color: #28a745; /* أخضر */
+}
+#admin-subtract-balance-btn {
+    background-color: #ffc107; /* أصفر */
+    color: #333;
+}
+
+/* ستايل زرار الحذف */
+#admin-delete-user-btn {
+    background-color: #dc3545; /* أحمر */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* ستايل زرار تسجيل الخروج */
+#logout-btn {
+    display: none;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 1rem auto;
+    width: 90%;
+    max-width: 400px;
+}
+
+#admin-searched-user-card {
+    display: none; 
+    background: #fff; 
+    padding: 1rem; 
+    margin-top: 1rem; 
+    border-radius: 4px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+#admin-searched-user-card p {
+    margin: 0.5rem 0;
+}
+
+/* ستايلات جديدة لزراير الأسر */
+.family-buttons-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    flex-wrap: wrap; 
+}
+.family-btn {
+    flex: 1; 
+    padding: 10px 15px;
+    font-size: 0.9em;
+    background-color: #17a2b8; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 150px; 
+}
+.family-btn:hover {
+    background-color: #138496;
+}
+#admin-family-results {
+    margin-top: 1rem;
+    background: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    max-height: 300px; 
+    overflow-y: auto; 
+}
+#admin-family-results p {
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+}
+#admin-family-results p:last-child {
+    border-bottom: none;
 }
