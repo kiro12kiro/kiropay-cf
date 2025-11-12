@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentQuizId = null;
     let selectedOption = null;
 
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
+    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (لضمان ظهور الفورمات) 🛑
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
     logoutBtn.style.display = "none";
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) }),
             ]);
 
-            // التحقق من الأبطال (Top 3)
+            // 1. الأبطال (Top 3)
             if (!championsResponse.ok) throw new Error("فشل تحميل الأبطال");
             const championsData = await championsResponse.json();
             
@@ -289,7 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const card = document.createElement('div');
                     card.className = 'champion-card';
                     card.innerHTML = `
-                        <div class="rank">${rankEmojis[rank]}</div>
+                        <div class="rank">${rankEmojis[rank] || rank}</div>
+                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
                         <span class="name">${user.name}</span>
                         <small style="display: block; color: #555;">${user.balance} نقطة</small>
                     `;
@@ -299,7 +300,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
 
-            // التحقق من قوائم العائلات
+            // 2. القوائم التفصيلية (Top 10 لكل عائلة)
+            const familyLists = {
+                "اسرة الانبا موسي الاسود": familyAnbaMoussaList,
+                "اسرة مارجرس": familyMargergesList,
+                "اسرة الانبا كاراس": familyAnbaKarasList
+            };
+
             const familyResponses = [
                 { list: familyAnbaMoussaList, response: anbaMoussaResponse, name: "اسرة الانبا موسي الاسود" },
                 { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
@@ -353,7 +360,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- زرار تسجيل الخروج (مُصحح) ---
     logoutBtn.addEventListener("click", () => {
-        // ... (باقي الكود)
+        // 🛑 فرض الحالة الأولية 🛑
+        cardContainer.style.display = "none";
+        formContainer.style.display = "flex";
+        logoutBtn.style.display = "none";
+        refreshDataBtn.style.display = "none";
+        adminPanelDiv.style.display = "none";
+        leaderboardContainer.style.display = "none";
+        quizContainer.style.display = "none";
+        avatarOverlayLabel.style.display = "none";
+        userAnnouncementBox.style.display = "none";
+
+        userNameP.textContent = "Name: ";
+        userFamilyP.textContent = "Family: ";
+        userBalanceP.textContent = "Balance: ";
+        userAvatarImg.src = DEFAULT_AVATAR_URL;
+        
+        loginForm.reset();
+        messageDiv.textContent = "تم تسجيل الخروج.";
+        messageDiv.style.color = "blue";
+
+        loggedInUserProfile = null;
+        transactionList.innerHTML = "";
     });
 
 
@@ -407,13 +435,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- كود فورم إضافة سؤال (مع الـ preventDefault) ---
         adminQuizForm.addEventListener("submit", async (event) => {
-            event.preventDefault(); 
+            event.preventDefault(); // 🛑 التأكد من منع إعادة التحميل
             // ... (باقي الكود)
         });
 
         // 🛑 كود فورم الإعلانات (مع الـ preventDefault) 🛑
         adminAnnouncementForm.addEventListener("submit", async (event) => {
-            event.preventDefault(); 
+            event.preventDefault(); // 🛑🛑 الإصلاح: منع تسجيل الخروج 🛑🛑
             // ... (باقي الكود)
         });
 
