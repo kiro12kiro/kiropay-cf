@@ -15,27 +15,29 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑 التعديل: جلب كل الحقول الضرورية (بما فيها EMAIL)
+    // جلب كل الحقول الضرورية
     const ps = db.prepare(
       "SELECT name, email, balance, family, profile_image_url FROM users WHERE family = ?"
     );
-    const results = await ps.bind(familyName).all();
+    
+    // 🛑 التعديل الأكثر أهمية: التأكد من التعامل مع الـ results بشكل سليم
+    const { results } = await ps.bind(familyName).all();
 
-    if (!results.results || results.results.length === 0) {
-      return new Response(JSON.stringify({ users: [] }), { // رجع لستة فاضية
+    if (!results || results.length === 0) {
+      return new Response(JSON.stringify({ users: [] }), { 
         status: 200, 
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // 🛑 رجع "لستة" المستخدمين
-    return new Response(JSON.stringify({ users: results.results }), {
+    // إرجاع قائمة المستخدمين
+    return new Response(JSON.stringify({ users: results }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
-    // 🛑 تحصين ضد خطأ 500 
+    // تحصين ضد خطأ 500
     return new Response(JSON.stringify({ error: `فشل داخلي في جلب بيانات الأسرة للأدمن: ${e.message}` }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
