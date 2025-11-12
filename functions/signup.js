@@ -1,12 +1,12 @@
 /*
  * API Endpoint: /signup
- * (النسخة الجديدة - بتقرأ FormData وبتحط الصورة الافتراضية)
+ * (النسخة الجديدة - بتستقبل لينك الصورة جاهز)
  */
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
 
-    // 1. اقرأ البيانات كـ FormData (عشان ملف الصورة)
+    // 1. اقرأ البيانات كـ FormData
     const formData = await context.request.formData();
 
     // 2. اسحب البيانات
@@ -14,10 +14,9 @@ export async function onRequestPost(context) {
     const family = formData.get("family");
     const email = formData.get("email");
     const password = formData.get("password");
-    // "avatar" هو الاسم اللي باعتينه من app.js
-    const avatarFile = formData.get("avatar"); 
+    // 🛑 بقينا بنستقبل لينك جاهز
+    const profileImageUrl = formData.get("profile_image_url");
 
-    // 3. اتأكد إن البيانات كاملة
     if (!name || !email || !password || !family) {
       return new Response(JSON.stringify({ error: "الرجاء ملء جميع الحقول" }), { 
         status: 400, 
@@ -25,31 +24,19 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 4. 🛑🛑 اللوجيك الجديد بتاع الصورة 🛑🛑
-    let imageUrlToSave = null; // القيمة اللي هتتسجل في الداتا بيز
-
-    if (avatarFile && avatarFile.size > 0) {
-      // لو اليوزر رفع صورة
-      // (هنا المفروض نرفع الصورة على R2 وناخد اللينك)
-      // (بما إننا معملناش R2، هنسيبها null)
-      imageUrlToSave = null; 
-      console.log("User uploaded an avatar, but R2 is not configured.");
-    } else {
-      // لو اليوزر *معملش* رفع صورة
-      // 🛑 هنسجل المسار بتاع الصورة الافتراضية
-      imageUrlToSave = "/default-avatar.png";
-    }
+    // 3. 🛑 اللوجيك الجديد: اتأكد إن اللينك موجود (لو لأ، حط الافتراضي)
+    // لو app.js بعت "null" أو "undefined", استخدم الافتراضي
+    const imageUrlToSave = profileImageUrl || "/default-avatar.png";
     
-    // 5. حضّر أمر الإدخال للداتا بيز
+    // 4. حضّر أمر الإدخال للداتا بيز
     const ps = db.prepare(
-      // 🛑 اتأكد إننا بنضيف "profile_image_url"
       "INSERT INTO users (name, family, email, password, profile_image_url) VALUES (?, ?, ?, ?, ?)"
     );
     
-    // 6. نفذ الأمر بالبيانات الجديدة
+    // 5. نفذ الأمر بالبيانات الجديدة
     await ps.bind(name, family, email, password, imageUrlToSave).run();
 
-    // 7. رجّع رسالة نجاح
+    // 6. رجّع رسالة نجاح
     return new Response(JSON.stringify({ success: true, message: "User created!" }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
