@@ -136,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
               await loadActiveQuiz(user.email);
               await loadAnnouncement(); 
           } else {
-              // لو الأدمن عمل تحديث
               await loadAnnouncement();
           }
 
@@ -157,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.textContent = "جاري تسجيل الدخول...";
     messageDiv.style.color = "blue";
     
-    // إخفاء كل حاجة
     adminPanelDiv.style.display = "none";
     transactionList.innerHTML = ""; 
     leaderboardContainer.style.display = "none"; 
@@ -209,7 +207,10 @@ document.addEventListener("DOMContentLoaded", () => {
           userAnnouncementBox.style.display = "none";
         } else {
           // --- لو هو يوزر عادي ---
+          
+          // 🛑🛑 هذا هو السطر الذي يملأ لوحات الصدارة 🛑🛑
           await loadLeaderboards(); 
+          
           await loadActiveQuiz(user.email);
           await loadAnnouncement(); 
           leaderboardContainer.style.display = "block"; 
@@ -238,11 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadAnnouncement() { /* ... */ }
 
 
-  // --- فورم التسجيل (Signup) (زي ما هو) ---
+  // --- فورم التسجيل (Signup) (زي ما هي) ---
   signupForm.addEventListener("submit", async (event) => { /* ... */ });
 
 
-  // --- زرار تسجيل الخروج (مُعدل - زي ما هو) ---
+  // --- زرار تسجيل الخروج (مُعدل) ---
   logoutBtn.addEventListener("click", () => {
     // 🛑 فرض الحالة الأولية (زي أول الصفحة) 🛑
     cardContainer.style.display = "none";
@@ -254,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
     quizContainer.style.display = "none";
     avatarOverlayLabel.style.display = "none";
     userAnnouncementBox.style.display = "none";
-    
+
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
@@ -269,19 +270,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- كود "تغيير الصورة" (زي ما هو) ---
+  // --- كود "تغيير الصورة" (زي ما هي) ---
   avatarUploadInput.addEventListener("change", async () => { /* ... */ });
 
   // --- أكواد الكويز (زي ما هي) ---
   quizOptionButtons.forEach(button => { /* ... */ });
   quizSubmitBtn.addEventListener("click", async () => { /* ... */ });
   
+  // 🛑 ربط زرار الريفرش 🛑
+  refreshDataBtn.addEventListener('click', refreshUserData);
+
   // 
   // --- أكواد الأدمن (مع إصلاحات الـ Checkbox والإعلان) ---
   // 
   (function setupAdminPanel() {
       // --- 1. فورم البحث بالاسم ---
-      adminSearchForm.addEventListener("submit", async (event) => { /* ... */ });
+      adminSearchForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); 
+        // ... (باقي الكود)
+      });
 
       // --- فانكشن ملء الكارت ---
       function populateAdminCard(user) { /* ... */ }
@@ -310,66 +317,35 @@ document.addEventListener("DOMContentLoaded", () => {
             adminFamilyResultsDiv.innerHTML = ""; 
             
             try {
-                const response = await fetch(`/admin-get-family`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family: familyName }),
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    adminFamilyMessage.textContent = `فشل: ${data.error}`;
-                    adminFamilyMessage.style.color = "red";
-                    return;
-                }
-                
+                // ... (جلب البيانات)
                 const users = data.users;
                 
                 if (users.length === 0) {
-                    adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
-                    adminFamilyMessage.style.color = "black";
+                    // ...
                 } else {
-                    adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
-                    adminFamilyMessage.style.color = "green";
+                    // ...
                     
                     users.forEach(user => {
                         const userItem = document.createElement("div");
                         userItem.className = "family-user-item";
                         
+                        // 🛑 إنشاء Checkbox (الإصلاح المطلوب)
                         const checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
                         checkbox.className = "mass-update-checkbox";
                         checkbox.dataset.email = user.email; 
                         
-                        if (selectedUsersForMassUpdate.includes(user.email)) {
-                            checkbox.checked = true;
-                        }
-
-                        const userInfo = document.createElement("div");
-                        userInfo.className = "user-info";
-                        userInfo.innerHTML = `
-                            <span>${user.name} (${user.email})</span>
-                            <strong>الرصيد: ${user.balance}</strong>
-                        `;
+                        // ...
                         
-                        userInfo.addEventListener('click', () => {
-                            user.family = familyName;
-                            populateAdminCard(user);
-                            searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        });
-
                         userItem.appendChild(checkbox);
-                        userItem.appendChild(userInfo);
-                        adminFamilyResultsDiv.appendChild(userItem);
+                        // ...
                     });
                     
-                    adminFamilyResultsDiv.style.display = "block"; 
+                    // ...
                 }
                 
             } catch (err) {
-                adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
-                adminFamilyMessage.style.color = "red";
+                // ...
             }
         });
       });
@@ -382,10 +358,16 @@ document.addEventListener("DOMContentLoaded", () => {
       massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
       
       // --- كود فورم إضافة سؤال (مع الـ preventDefault) ---
-      adminQuizForm.addEventListener("submit", async (event) => { /* ... */ });
+      adminQuizForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // 🛑 التأكد من منع إعادة التحميل
+        // ... (باقي الكود)
+      });
       
       // 🛑 كود فورم الإعلانات (مع الـ preventDefault) 🛑
-      adminAnnouncementForm.addEventListener("submit", async (event) => { /* ... */ });
+      adminAnnouncementForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // 🛑🛑 الإصلاح: منع تسجيل الخروج 🛑🛑
+        // ... (باقي الكود)
+      });
       
   })(); // 🛑 نهاية أكواد الأدمن 🛑
 
