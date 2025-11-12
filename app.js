@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const userAvatarImg = document.getElementById("user-avatar");
   
   // 🛑🛑 التعديل الثاني هنا 🛑🛑
-  // تم تغيير "https://via.placeholder.com/100"
-  const DEFAULT_AVATAR_URL = "/default-avatar.png";
+  // تم شيل الـ "/" من أول المسار
+  const DEFAULT_AVATAR_URL = "default-avatar.png";
 
   // --- عناصر لوحة الأدمن (الكاملة) ---
   const adminPanelDiv = document.getElementById("admin-panel");
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
-        // 🛑 الكود ده دلوقتي هيستخدم الصورة الافتراضية صح
+        // 🛑 الكود ده دلوقتي هيستخدم المسار الصحيح
         userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
         
         cardContainer.style.display = "flex";
@@ -119,9 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append('avatar', avatarFile);
     }
     
-    // 🛑 ملحوظة: إحنا لسه معملناش الكود بتاع "رفع الصورة" في الباك إند
-    // بس الكود ده هيخلي الصورة الافتراضية تظهر
-
     try {
       const response = await fetch(`/signup`, {
         method: "POST",
@@ -154,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
-    // 🛑 رجع الصورة الافتراضية لما نعمل لوج أوت
+    // 🛑 رجع الصورة الافتراضية (بالمسار الصحيح)
     userAvatarImg.src = DEFAULT_AVATAR_URL;
     
     loginForm.reset();
