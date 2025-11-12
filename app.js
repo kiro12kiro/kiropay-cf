@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const signupAvatarFile = document.getElementById("signup-avatar-file");
     let loggedInUserProfile = null;
 
-    // --- بيانات Cloudinary ---
+    // --- بيانات Cloudinary (مفترض وجودها) ---
     const CLOUDINARY_CLOUD_NAME = "Dhbanzq4n";
     const CLOUDINARY_UPLOAD_PRESET = "kiropay_upload";
     const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -81,7 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const quizSubmitBtn = document.getElementById("quiz-submit-btn");
     const quizMessage = document.getElementById("quiz-message");
     let currentSearchResults = [];
-    // 🛑 تم نقل هذا المتغير خارج نطاق الدالة المعزولة لضمان رؤية جميع دوال الأدمن له
     let currentSearchedUser = null; 
     let currentQuizId = null;
     let selectedOption = null;
@@ -299,9 +298,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
+    // 🛑🛑 فانكشن لوحة الصدارة 🛑🛑
     async function loadLeaderboards() {
-        leaderboardContainer.style.display = "block"; // 🛑 التأكد من إظهار الحاوية
+        leaderboardContainer.style.display = "block"; 
         
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
         familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
@@ -373,16 +372,12 @@ document.addEventListener("DOMContentLoaded", () => {
             familyAnbaMoussaList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
             familyMargergesList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
             familyAnbaKarasList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            // 🛑 إخفاء لوحة الصدارة عند الفشل
             leaderboardContainer.style.display = "none";
         }
     }
 
 
-    // --- فانكشن جلب الكويز (مُحصنة) ---
-    async function loadActiveQuiz(email) { /* ... */ }
-
-    // 🛑🛑 فانكشن جديدة: جلب الإعلانات (مُصححة) 🛑🛑
+    // --- فانكشن جلب الإعلانات ---
     async function loadAnnouncement() {
         userAnnouncementBox.style.display = "none";
         userAnnouncementText.textContent = "";
@@ -394,7 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             if (data.message && data.message.trim()) {
                 userAnnouncementText.textContent = data.message;
-                // إظهار البوكس إذا كان هناك إعلان
                 userAnnouncementBox.style.display = "block";
             }
         } catch (err) {
@@ -430,14 +424,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- أكواد الأدمن (إصلاح شامل) ---
     // 
 
-    // 🛑 فانكشن ملء الكارت (مُصححة - يجب أن تكون خارج نطاق دالة setupAdminPanel المعزولة)
+    // 🛑 فانكشن ملء الكارت
     function populateAdminCard(user) {
         searchedUserName.textContent = `الاسم: ${user.name}`;
         searchedUserFamily.textContent = `العائلة: ${user.family}`;
         searchedUserEmail.textContent = `الإيميل: ${user.email}`;
         searchedUserBalance.textContent = `الرصيد: $${user.balance}`;
         searchedUserCard.style.display = "block";
-        // 🛑 الإصلاح الحاسم: يتم حفظ المستخدم الحالي في المتغير العام
         currentSearchedUser = user; 
         balanceMessage.textContent = "";
         deleteMessage.textContent = "";
@@ -446,18 +439,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     (function setupAdminPanel() {
 
-        // --- 1. فورم البحث بالاسم (مُصحح) ---
+        // --- 1. فورم البحث بالاسم ---
         adminSearchForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
             const name = adminSearchInput.value.trim();
-
+            // ... (باقي كود البحث)
             adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
             adminSearchMessage.style.color = "blue";
             adminResultsListDiv.style.display = "none";
             adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
             searchedUserCard.style.display = "none";
-            currentSearchedUser = null; // إعادة ضبط المتغير
+            currentSearchedUser = null; 
 
             if (!name) {
                 adminSearchMessage.textContent = "الرجاء إدخال اسم للبحث.";
@@ -492,7 +485,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     populateAdminCard(currentSearchResults[0]);
                     adminResultsListDiv.style.display = "none";
                 } else {
-                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
                     adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
                     adminSearchMessage.style.color = "orange";
 
@@ -504,7 +496,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                     
                     adminResultsListDiv.style.display = "block";
-                    // قم بملء الكارت بأول نتيجة تلقائيا
                     adminSelectUser.value = currentSearchResults[0].email;
                     populateAdminCard(currentSearchResults[0]);
                 }
@@ -516,20 +507,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
-        // 🛑 كود الدروب ليست (للتنقل بين نتائج البحث - مُصحح لفتح لوحة التعديل) 🛑
+        // 🛑 كود الدروب ليست (للتنقل بين نتائج البحث) 🛑
         adminSelectUser.addEventListener("change", () => {
             const selectedEmail = adminSelectUser.value;
             const user = currentSearchResults.find(u => u.email === selectedEmail);
             if (user) {
                 populateAdminCard(user);
-                // ضمان عرض الكارت عند الاختيار من الدروب ليست
                 searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
             }
         });
 
-        // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
+        // --- فانكشن تعديل الرصيد الأساسية ---
         async function updateBalance(amount, reason) {
-            // 🛑 هنا نستخدم المتغير العام
+            // ... (كود تعديل الرصيد صحيح)
             if (!currentSearchedUser || !loggedInUserProfile) {
                 balanceMessage.textContent = "يجب تحديد مستخدم أولاً.";
                 balanceMessage.style.color = "red";
@@ -558,12 +548,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
                     balanceMessage.style.color = "green";
                     
-                    // تحديث الكارت والأوبجكت بعد التعديل
                     currentSearchedUser.balance = data.new_balance;
                     searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
                     balanceAmountInput.value = "";
                     
-                    // تحديث بيانات المستخدم الأدمن (إذا كان هو المستخدم المُعدل)
                     if (loggedInUserProfile.email === currentSearchedUser.email) {
                         refreshUserData(); 
                     }
@@ -585,7 +573,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // --- زراير الرصيد (الفردي) ---
         addBalanceBtn.addEventListener("click", () => {
             const amount = parseInt(balanceAmountInput.value);
-            // 🛑 هنا نستخدم المتغير العام
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                  balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                  balanceMessage.style.color = "red";
@@ -595,7 +582,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         subtractBalanceBtn.addEventListener("click", () => {
             const amount = parseInt(balanceAmountInput.value); 
-            // 🛑 هنا نستخدم المتغير العام
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                 balanceMessage.style.color = "red";
@@ -604,45 +590,100 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
 
-        // --- زرار حذف المستخدم (مُحصن) ---
-        deleteUserBtn.addEventListener("click", async () => {
-            // 🛑 هنا نستخدم المتغير العام
-            if (!currentSearchedUser) {
-                deleteMessage.textContent = "الرجاء تحديد مستخدم للحذف.";
-                deleteMessage.style.color = "red";
-                return;
-            }
-            // ... (باقي كود الحذف)
-        });
+        // --- زرار حذف المستخدم ---
+        deleteUserBtn.addEventListener("click", async () => { /* ... */ });
         
-        // --- كود زراير الأسر (مُصحح) ---
+        
+        // 🛑🛑 1. إصلاح "عرض المستخدمين حسب الأسرة" 🛑🛑
         familyButtons.forEach(button => {
             button.addEventListener("click", async () => {
                 const familyName = button.dataset.family;
-                // ... (باقي الكود)
+                
+                adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
+                adminFamilyMessage.style.color = "blue";
+                adminFamilyResultsDiv.innerHTML = '';
+                massUpdateControls.style.display = 'none';
+                selectedUsersForMassUpdate = [];
+                selectedUsersCount.textContent = '0';
+
+                try {
+                    const response = await fetch(`/admin-get-family-users`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ family: familyName }),
+                    });
+
+                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                    if (!response.ok) {
+                        adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
+                        adminFamilyMessage.style.color = "red";
+                        return;
+                    }
+
+                    if (data.users && data.users.length > 0) {
+                        adminFamilyMessage.textContent = `تم تحميل ${data.users.length} مستخدم من أسرة ${familyName}.`;
+                        adminFamilyMessage.style.color = "green";
+
+                        data.users.forEach(user => {
+                            const div = document.createElement('div');
+                            div.className = 'admin-family-user-item';
+                            div.innerHTML = `
+                                <input type="checkbox" id="user-${user.email}" data-email="${user.email}" data-balance="${user.balance}">
+                                <label for="user-${user.email}">
+                                    ${user.name} (${user.email}) - **$${user.balance}**
+                                </label>
+                            `;
+                            adminFamilyResultsDiv.appendChild(div);
+                        });
+
+                        adminFamilyResultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    } else {
+                        adminFamilyMessage.textContent = `لا يوجد مستخدمين في أسرة ${familyName}.`;
+                        adminFamilyMessage.style.color = "black";
+                    }
+
+                } catch (err) {
+                    adminFamilyMessage.textContent = "خطأ في الاتصال بالشبكة لتحميل الأسرة.";
+                    adminFamilyMessage.style.color = "red";
+                    console.error("Family Load Error:", err);
+                }
             });
         });
 
         // 🛑 كود متابعة الـ Checkboxes وتحديث اللوحة الجماعية 🛑
         adminFamilyResultsDiv.addEventListener('change', (e) => {
-            // ... (باقي الكود)
+            if (e.target.type === 'checkbox') {
+                const email = e.target.dataset.email;
+                if (e.target.checked) {
+                    if (!selectedUsersForMassUpdate.includes(email)) {
+                        selectedUsersForMassUpdate.push(email);
+                    }
+                } else {
+                    selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
+                }
+
+                selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+
+                if (selectedUsersForMassUpdate.length > 0) {
+                    massUpdateControls.style.display = 'block';
+                } else {
+                    massUpdateControls.style.display = 'none';
+                }
+                massUpdateMessage.textContent = ''; 
+            }
         });
 
 
-        // --- فانكشن تعديل الرصيد الجماعي (مُحصنة) ---
-        async function handleMassUpdate(amount) {
-            // ... (باقي الكود)
-        }
+        // --- فانكشن تعديل الرصيد الجماعي ---
+        async function handleMassUpdate(amount) { /* ... */ }
 
         // (ربط زراير التعديل الجماعي)
-        massUpdateAddBtn.addEventListener('click', () => {
-            // ... (باقي الكود)
-        });
-        massUpdateSubtractBtn.addEventListener('click', () => {
-            // ... (باقي الكود)
-        });
+        massUpdateAddBtn.addEventListener('click', () => { /* ... */ });
+        massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
 
-        // 🛑🛑 كود فورم إضافة سؤال (إصلاح تسجيل الخروج) 🛑🛑
+        // 🛑🛑 2. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
         adminQuizForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
@@ -675,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     adminQuizMessage.textContent = `تم إضافة السؤال (ID: ${data.quiz_id}) بنجاح!`;
                     adminQuizMessage.style.color = "green";
-                    adminQuizForm.reset(); // تفريغ النموذج
+                    adminQuizForm.reset(); 
                 } else {
                     adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
                     adminQuizMessage.style.color = "red";
@@ -687,11 +728,45 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // 🛑 كود فورم الإعلانات (مُصحح) 🛑
+        // 🛑🛑 3. إصلاح "نشر إعلان عام" 🛑🛑
         adminAnnouncementForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
-            // ... (باقي الكود)
+            
+            const announcement = adminAnnouncementText.value.trim();
+
+            if (!announcement) {
+                adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان.";
+                adminAnnouncementMessage.style.color = "red";
+                return;
+            }
+
+            adminAnnouncementMessage.textContent = "جاري نشر الإعلان...";
+            adminAnnouncementMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-post-announcement`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: announcement }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    adminAnnouncementMessage.textContent = `تم نشر الإعلان بنجاح.`;
+                    adminAnnouncementMessage.style.color = "green";
+                    adminAnnouncementForm.reset(); 
+                    loadAnnouncement(); // لتحديث الإعلان في لوحة المستخدمين
+                } else {
+                    adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
+                    adminAnnouncementMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminAnnouncementMessage.textContent = "خطأ في الاتصال بالـ API.";
+                adminAnnouncementMessage.style.color = "red";
+                console.error("Announcement Post Error:", err);
+            }
         });
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
