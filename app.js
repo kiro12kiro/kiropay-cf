@@ -13,8 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const userBalanceP = document.getElementById("user-balance");
   const userAvatarImg = document.getElementById("user-avatar");
   
-  // 🛑🛑 التعديل الثاني هنا 🛑🛑
-  // تم شيل الـ "/" من أول المسار
+  // (المسار ده سليم زي ما هو)
   const DEFAULT_AVATAR_URL = "default-avatar.png";
 
   // --- عناصر لوحة الأدمن (الكاملة) ---
@@ -80,8 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
         userNameP.textContent = `Name: ${user.name}`;
         userFamilyP.textContent = `Family: ${user.family}`;
         userBalanceP.textContent = `Balance: $${user.balance}`;
-        // 🛑 الكود ده دلوقتي هيستخدم المسار الصحيح
-        userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL; 
+        
+        // 🛑🛑 التعديل الوحيد هنا 🛑🛑
+        // الكود ده أقوى وبيعرف يتعامل مع الـ null
+        // معناه: "هل (؟) فيه قيمة لليوزر؟ لو آه، استخدمها. لو لأ (:)، استخدم الافتراضية"
+        userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL; 
         
         cardContainer.style.display = "flex";
         formContainer.style.display = "none";
@@ -102,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- فورم التسجيل ---
+  // --- فورم التسجيل (زي ما هو) ---
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault(); 
     messageDiv.textContent = "جاري إنشاء حساب...";
@@ -141,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- زرار تسجيل الخروج ---
+  // --- زرار تسجيل الخروج (زي ما هو) ---
   logoutBtn.addEventListener("click", () => {
     cardContainer.style.display = "none";
     formContainer.style.display = "flex";
@@ -151,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameP.textContent = "Name: ";
     userFamilyP.textContent = "Family: ";
     userBalanceP.textContent = "Balance: ";
-    // 🛑 رجع الصورة الافتراضية (بالمسار الصحيح)
     userAvatarImg.src = DEFAULT_AVATAR_URL;
     
     loginForm.reset();
@@ -160,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 
-  // --- أكواد الأدمن (البحث والدروب ليست) ---
+  // --- أكواد الأدمن (البحث والدروب ليست) (زي ما هي) ---
   // 
 
   // --- 1. فورم البحث بالاسم ---
@@ -345,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // --- كود زراير الأسر ---
+  // --- كود زراير الأسر (زي ما هو) ---
   familyButtons.forEach(button => {
     
     button.addEventListener("click", async () => {
