@@ -7,236 +7,59 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* ستايلات لوحة الأدمن */
-        .admin-panel-container {
-            padding: 20px;
-            max-width: 900px;
-            margin: 2rem auto;
-        }
-        #admin-panel {
-            background-color: #f0f0f0;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            border: 2px dashed #007bff;
-        }
-        #admin-panel h2 {
-            text-align: center;
-            color: #333;
-        }
-        .admin-section {
-            margin-top: 1.5rem;
-            background: #fafafa;
-            padding: 1rem;
-            border-radius: 4px;
-        }
-        .admin-section h4 {
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
-        }
-        #admin-search-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 0.5rem;
-        }
-        #admin-search-form input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        #admin-search-form button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            background-color: #007bff;
-        }
-
-        /* ستايلات لزراير الإضافة والخصم */
-        #admin-balance-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 0.5rem;
-        }
-        #admin-balance-controls input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        #admin-add-balance-btn, #admin-subtract-balance-btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-        }
-        #admin-add-balance-btn {
-            background-color: #28a745; /* أخضر */
-        }
-        #admin-subtract-balance-btn {
-            background-color: #ffc107; /* أصفر */
-            color: #333;
-        }
-        
-        /* ستايل زرار الحذف */
-        #admin-delete-user-btn {
-            background-color: #dc3545; /* أحمر */
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        /* ستايل زرار تسجيل الخروج */
-        #logout-btn {
-            display: none;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 1rem auto;
-            width: 90%;
-            max-width: 400px;
-        }
-        
-        #admin-searched-user-card {
-            display: none; 
-            background: #fff; 
-            padding: 1rem; 
-            margin-top: 1rem; 
-            border-radius: 4px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        #admin-searched-user-card p {
-            margin: 0.5rem 0;
-        }
-
-        /* ستايلات صور الواجهة (عشان تكون فوق بعض) */
-        .hero-images-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 2rem auto;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .hero-image {
-            width: 90%;
-            max-width: 800px;
-            height: auto;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* ستايلات جديدة لزراير الأسر */
-        .family-buttons-container {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            flex-wrap: wrap; 
-        }
-        .family-btn {
-            flex: 1; 
-            padding: 10px 15px;
-            font-size: 0.9em;
-            background-color: #17a2b8; 
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            min-width: 150px; 
-        }
-        .family-btn:hover {
-            background-color: #138496;
-        }
-        #admin-family-results {
-            margin-top: 1rem;
-            background: #fff;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            max-height: 300px; 
-            overflow-y: auto; 
-        }
-        #admin-family-results p {
-            border-bottom: 1px solid #eee;
-            padding: 0.5rem 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        #admin-family-results p:last-child {
-            border-bottom: none;
-        }
-
+        /* * كل الأكواد اللي كانت هنا اتشالت
+         * واتحطت في ملف style.css 
+         * عشان التنظيم
+        */
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="card-container">
-            <div class="card">
-                <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
-                <p id="user-name">Name: </p>
-                <p id="user-family">Family: </p>
-                <p id="user-balance">Balance: </p>
+        <div class="card-and-forms-wrapper">
+            <div class="card-container">
+                <div class="card">
+                    <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
+                    <p id="user-name">Name: </p>
+                    <p id="user-family">Family: </p>
+                    <p id="user-balance">Balance: </p>
+                </div>
             </div>
-        </div>
-        
-        <button id="logout-btn">تسجيل الخروج</button>
+            
+            <button id="logout-btn">تسجيل الخروج</button>
 
-        <div class="form-container">
-            <form id="login-form">
-                <h3>Login</h3>
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
+            <div class="form-container">
+                <form id="login-form">
+                    <h3>Login</h3>
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
 
-            <form id="signup-form">
-                <h3>Sign Up</h3>
-                <input type="text" id="name" placeholder="Name" required>
-                
-                <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
-                <select id="family" required style="padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; background-color: white; width: 100%;">
-                    <option value="" disabled selected>-- اختر الأسرة --</option>
-                    <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
-                    <option value="اسرة مارجرس">اسرة مارجرس</option>
-                    <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
-                </select>
-                
-                <input type="email" id="signup-email" placeholder="Email" required>
-                <input type="password" id="signup-password" placeholder="Password" required>
+                <form id="signup-form">
+                    <h3>Sign Up</h3>
+                    <input type="text" id="name" placeholder="Name" required>
+                    
+                    <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
+                    <select id="family" required>
+                        <option value="" disabled selected>-- اختر الأسرة --</option>
+                        <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
+                        <option value="اسرة مارجرس">اسرة مارجرس</option>
+                        <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
+                    </select>
+                    
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Password" required>
 
-                <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
-                <input type="file" id="avatar-file" accept="image/png, image/jpeg">
+                    <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
+                    <input type="file" id="avatar-file" accept="image/png, image/jpeg">
 
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
+                    <button type="submit">Sign Up</button>
+                </form>
+            </div>
+        </div> </div> <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
 
     
-    <div class="hero-images-container">
-        <img src="/hero2.jpg" alt="صورة توضيحية 2" class="hero-image">
-    </div>
-
-
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
