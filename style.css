@@ -318,7 +318,7 @@ body {
     background-color: #c82333;
 }
 
-/* 🛑🛑 تنسيقات زر العودة للمتجر 🛑🛑 */
+/* 🛑🛑 تنسيقات زر العودة للقائمة الرئيسية 🛑🛑 */
 #back-to-store-btn {
     background-color: #007bff; /* Primary Blue */
     color: white;
@@ -332,6 +332,7 @@ body {
     width: fit-content;
     margin-right: auto; 
     transition: background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 #back-to-store-btn:hover {
     background-color: #0056b3;
@@ -341,11 +342,592 @@ body {
 form#admin-add-item-form button[type="submit"] {
     background-color: #28a745; /* Success Green */
     color: white;
-    padding: 10px 15px;
+    padding: 12px 18px; /* تم تكبيره قليلاً */
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 1.1em; /* تم تكبير الخط قليلاً */
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+form#admin-add-item-form button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+
+/* تنسيقات فورم الكويز */
+#admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
+#admin-quiz-form input[type="text"],
+#admin-quiz-form input[type="number"],
+#admin-quiz-form select {
+    padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;
+}
+#admin-quiz-form button {
+    background-color: #17a2b8; color: white; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em;
+}
+#admin-quiz-form button:hover { background-color: #138496; }
+
+/* تنسيقات فورم الإعلان */
+#admin-announcement-form textarea {
+    width: 100%; min-height: 80px; padding: 10px;
+    border: 1px solid #ccc; border-radius: 4px;
+    font-size: 1em; box-sizing: border-box; 
+}
+#admin-announcement-form button {
+    background-color: #ffc107; color: #212529; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.1em; width: 100%; margin-top: 10px;
+}
+
+/* ستايلات الكويز (لليوزر) */
+.quiz-container {
+    display: none; 
+    max-width: 900px; margin: 2rem auto; padding: 20px;
+    background-color: #fff; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #007bff;
+}
+.quiz-container h2 { text-align: center; color: #007bff; margin-top: 0; }
+#quiz-question-text {
+    font-size: 1.3em; font-weight: bold;
+    margin-bottom: 1.5rem; text-align: center;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option-btn {
+    padding: 15px; font-size: 1.1em; background-color: #f0f2f5;
+    border: 2px solid #ddd; border-radius: 8px; cursor: pointer;
+    text-align: right; transition: background-color 0.2s, border-color 0.2s;
+}
+.quiz-option-btn:hover { background-color: #e9ecef; border-color: #007bff; }
+.quiz-option-btn.selected {
+    background-color: #cce5ff; border-color: #007bff; font-weight: bold;
+}
+#quiz-submit-btn {
+    background-color: #28a745; color: white; padding: 12px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.2em; width: 100%; margin-top: 1.5rem;
+}
+#quiz-submit-btn:hover { background-color: #218838; }
+#quiz-message {
+    text-align: center; font-size: 1.1em;
+    margin-top: 1rem; font-weight: bold;
+}
+
+/* ستايلات لوحة الصدارة */
+.leaderboard-container {
+    display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
+    background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.leaderboard-container h2 {
+    text-align: center; color: #007bff; margin-top: 0;
+    border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+}
+.champions-container {
+    display: flex; justify-content: space-around; text-align: center;
+    margin: 2rem 0; flex-wrap: wrap;
+}
+.champion-card { flex-basis: 200px; }
+.champion-card .rank { font-size: 2.5em; }
+.champion-card .name {
+    font-size: 1.2em; font-weight: bold; color: #333; display: block;
+}
+.champion-card small {
+    display: block; color: #555;
+}
+.leaderboard-columns {
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; 
+}
+.leaderboard-column { flex: 1; min-width: 300px; }
+.leaderboard-column h3 {
+    color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+    font-size: 1.2em; text-align: center; 
+}
+.leaderboard-list { list-style: none; padding: 0; margin: 0; }
+.leaderboard-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px; border-bottom: 1px solid #f0f0f0;
+}
+.leaderboard-list li:last-child { border-bottom: none; }
+
+/* ستايلات المتجر الجديدة (لليوزر) */
+.store-container {
+    display: none; 
+    max-width: 900px; margin: 2rem auto; padding: 20px;
+    background-color: #fff; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #28a745;
+}
+.store-container h2 { text-align: center; color: #28a745; margin-top: 0; }
+.store-items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+.store-item-card {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    width: 180px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.store-item-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+.store-item-card h5 {
+    margin: 5px 0;
+    color: #333;
+    font-size: 1.1em;
+}
+.store-item-card p.price {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+.store-item-card button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    width: 100%;
+}
+.store-item-card button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* ستايلات إدارة المتجر للأدمن (الكارت الكبير الجديد والمحسن) */
+#admin-store-items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-item-card {
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    border-right: 5px solid #007bff; /* شريط جانبي أزرق */
+    border-radius: 8px;
+    padding: 15px 20px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease; 
+    font-size: 1.1em;
+}
+
+.admin-item-card:hover {
+    background-color: #f0f8ff; /* لون أزرق فاتح جداً عند التحويم */
+    transform: translateY(-2px); /* تأثير رفع خفيف */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-item-info {
+    flex-grow: 1;
+    text-align: right;
+    margin-left: 20px;
+}
+
+.admin-item-info strong {
+    display: block;
+    font-size: 1.4em; 
+    color: #333; 
+    margin-bottom: 5px;
+}
+
+.admin-item-info small {
+    display: block;
+    color: #6c757d;
+    font-size: 1em; 
+    line-height: 1.5;
+}
+
+.admin-item-card .delete-store-item-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 18px; 
+    border-radius: 50px; /* جعل الزر دائرياً أكثر */
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 100px; 
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.admin-item-card .delete-store-item-btn:hover {
+    background-color: #c82333; /* أحمر أغمق عند التحويم */
+    transform: scale(1.05);
+}
+
+
+/* ستايلات التعديل الجماعي */
+.mass-update-controls {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.mass-update-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+.mass-update-buttons button {
+    padding: 12px 20px; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    flex-grow: 1; 
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+}
+#mass-update-add-btn {
+    background-color: #28a745; 
+}
+#mass-update-add-btn:hover {
+    background-color: #218838;
+}
+#mass-update-subtract-btn {
+    background-color: #dc3545; 
+}
+#mass-update-subtract-btn:hover {
+    background-color: #c82333;
+}
+
+/* 🛑🛑 تنسيقات زر العودة للقائمة الرئيسية 🛑🛑 */
+#back-to-store-btn {
+    background-color: #007bff; /* Primary Blue */
+    color: white;
+    padding: 12px 25px; /* تكبير الزر */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: block; 
+    width: fit-content;
+    margin-right: auto; 
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+#back-to-store-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 🛑🛑 تنسيقات زر إضافة عنصر (للأدمن) 🛑🛑 */
+form#admin-add-item-form button[type="submit"] {
+    background-color: #28a745; /* Success Green */
+    color: white;
+    padding: 12px 18px; /* تم تكبيره قليلاً */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em; /* تم تكبير الخط قليلاً */
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+form#admin-add-item-form button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+
+/* تنسيقات فورم الكويز */
+#admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
+#admin-quiz-form input[type="text"],
+#admin-quiz-form input[type="number"],
+#admin-quiz-form select {
+    padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;
+}
+#admin-quiz-form button {
+    background-color: #17a2b8; color: white; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em;
+}
+#admin-quiz-form button:hover { background-color: #138496; }
+
+/* تنسيقات فورم الإعلان */
+#admin-announcement-form textarea {
+    width: 100%; min-height: 80px; padding: 10px;
+    border: 1px solid #ccc; border-radius: 4px;
+    font-size: 1em; box-sizing: border-box; 
+}
+#admin-announcement-form button {
+    background-color: #ffc107; color: #212529; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.1em; width: 100%; margin-top: 10px;
+}
+
+/* ستايلات الكويز (لليوزر) */
+.quiz-container {
+    display: none; 
+    max-width: 900px; margin: 2rem auto; padding: 20px;
+    background-color: #fff; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #007bff;
+}
+.quiz-container h2 { text-align: center; color: #007bff; margin-top: 0; }
+#quiz-question-text {
+    font-size: 1.3em; font-weight: bold;
+    margin-bottom: 1.5rem; text-align: center;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option-btn {
+    padding: 15px; font-size: 1.1em; background-color: #f0f2f5;
+    border: 2px solid #ddd; border-radius: 8px; cursor: pointer;
+    text-align: right; transition: background-color 0.2s, border-color 0.2s;
+}
+.quiz-option-btn:hover { background-color: #e9ecef; border-color: #007bff; }
+.quiz-option-btn.selected {
+    background-color: #cce5ff; border-color: #007bff; font-weight: bold;
+}
+#quiz-submit-btn {
+    background-color: #28a745; color: white; padding: 12px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.2em; width: 100%; margin-top: 1.5rem;
+}
+#quiz-submit-btn:hover { background-color: #218838; }
+#quiz-message {
+    text-align: center; font-size: 1.1em;
+    margin-top: 1rem; font-weight: bold;
+}
+
+/* ستايلات لوحة الصدارة */
+.leaderboard-container {
+    display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
+    background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.leaderboard-container h2 {
+    text-align: center; color: #007bff; margin-top: 0;
+    border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+}
+.champions-container {
+    display: flex; justify-content: space-around; text-align: center;
+    margin: 2rem 0; flex-wrap: wrap;
+}
+.champion-card { flex-basis: 200px; }
+.champion-card .rank { font-size: 2.5em; }
+.champion-card .name {
+    font-size: 1.2em; font-weight: bold; color: #333; display: block;
+}
+.champion-card small {
+    display: block; color: #555;
+}
+.leaderboard-columns {
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; 
+}
+.leaderboard-column { flex: 1; min-width: 300px; }
+.leaderboard-column h3 {
+    color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+    font-size: 1.2em; text-align: center; 
+}
+.leaderboard-list { list-style: none; padding: 0; margin: 0; }
+.leaderboard-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px; border-bottom: 1px solid #f0f0f0;
+}
+.leaderboard-list li:last-child { border-bottom: none; }
+
+/* ستايلات المتجر الجديدة (لليوزر) */
+.store-container {
+    display: none; 
+    max-width: 900px; margin: 2rem auto; padding: 20px;
+    background-color: #fff; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #28a745;
+}
+.store-container h2 { text-align: center; color: #28a745; margin-top: 0; }
+.store-items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+.store-item-card {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    width: 180px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.store-item-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+.store-item-card h5 {
+    margin: 5px 0;
+    color: #333;
+    font-size: 1.1em;
+}
+.store-item-card p.price {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+.store-item-card button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    width: 100%;
+}
+.store-item-card button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* 🛑🛑 ستايلات إدارة المتجر للأدمن (الكارت الكبير الجديد والمحسن) 🛑🛑 */
+#admin-store-items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-item-card {
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    border-right: 5px solid #007bff; /* شريط جانبي أزرق */
+    border-radius: 8px;
+    padding: 15px 20px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease; 
+    font-size: 1.1em;
+}
+
+.admin-item-card:hover {
+    background-color: #f0f8ff; /* لون أزرق فاتح جداً عند التحويم */
+    transform: translateY(-2px); /* تأثير رفع خفيف */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-item-info {
+    flex-grow: 1;
+    text-align: right;
+    margin-left: 20px;
+}
+
+.admin-item-info strong {
+    display: block;
+    font-size: 1.4em; 
+    color: #333; 
+    margin-bottom: 5px;
+}
+
+.admin-item-info small {
+    display: block;
+    color: #6c757d;
+    font-size: 1em; 
+    line-height: 1.5;
+}
+
+.admin-item-card .delete-store-item-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 18px; 
+    border-radius: 50px; /* جعل الزر دائرياً أكثر */
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 100px; 
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.admin-item-card .delete-store-item-btn:hover {
+    background-color: #c82333; /* أحمر أغمق عند التحويم */
+    transform: scale(1.05);
+}
+
+
+/* ستايلات التعديل الجماعي */
+.mass-update-controls {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.mass-update-buttons button {
+    padding: 12px 20px; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    flex-grow: 1; 
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+}
+#mass-update-add-btn {
+    background-color: #28a745; 
+}
+#mass-update-add-btn:hover {
+    background-color: #218838;
+}
+#mass-update-subtract-btn {
+    background-color: #dc3545; 
+}
+#mass-update-subtract-btn:hover {
+    background-color: #c82333;
+}
+
+/* 🛑🛑 تنسيقات زر العودة للقائمة الرئيسية 🛑🛑 */
+#back-to-store-btn {
+    background-color: #007bff; /* Primary Blue */
+    color: white;
+    padding: 12px 25px; /* تكبير الزر */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: block; 
+    width: fit-content;
+    margin-right: auto; 
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+#back-to-store-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 🛑🛑 تنسيقات زر إضافة عنصر (للأدمن) 🛑🛑 */
+form#admin-add-item-form button[type="submit"] {
+    background-color: #28a745; /* Success Green */
+    color: white;
+    padding: 12px 18px; /* تم تكبيره قليلاً */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em; /* تم تكبير الخط قليلاً */
     font-weight: bold;
     width: 100%;
     margin-top: 10px;
