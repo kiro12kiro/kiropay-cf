@@ -255,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
     async function loadLeaderboards() {
-        // ... (الكود زي ما هو)
         leaderboardContainer.style.display = "block"; 
         
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
@@ -280,7 +279,17 @@ document.addEventListener("DOMContentLoaded", () => {
             
             topChampionsList.innerHTML = ""; 
             if (championsData.champions && championsData.champions.length > 0) {
-                // ... (ملء الأبطال)
+                championsData.champions.forEach((user, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'champion-card';
+                    card.innerHTML = `
+                        <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
+                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
+                        <span class="name">${user.name}</span>
+                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                    `;
+                    topChampionsList.appendChild(card);
+                });
             } else {
                 topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
             }
@@ -302,7 +311,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 item.list.innerHTML = '';
                 if (data.users && data.users.length > 0) {
-                    // ... (ملء القائمة)
+                    data.users.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        item.list.appendChild(li);
+                    });
                 } else {
                     item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
@@ -497,17 +510,17 @@ document.addEventListener("DOMContentLoaded", () => {
         massUpdateAddBtn.addEventListener('click', () => { /* ... */ });
         massUpdateSubtractBtn.addEventListener('click', () => { /* ... */ });
 
-        // 🛑 كود فورم إضافة سؤال (مُصحح) 🛑
+        // 🛑 كود فورم إضافة سؤال (مُصحح نهائي) 🛑
         adminQuizForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
             
+            // 🛑 التأكد من أن IDs الحقول صحيحة ومطابقة لـ index.html
             const question = document.getElementById("quiz-question").value.trim();
             const optionA = document.getElementById("quiz-opt-a").value.trim();
             const optionB = document.getElementById("quiz-opt-b").value.trim();
             const optionC = document.getElementById("quiz-opt-c").value.trim();
-            // 🛑 هنا نستخدم ID حقل الإجابة الصحيحة
-            const answer = document.getElementById("quiz-correct-opt").value.trim();
+            const answer = document.getElementById("quiz-correct-opt").value.trim(); // ID الصحيح
             const pointsInput = document.getElementById("quiz-points").value;
             const points = parseInt(pointsInput);
 
