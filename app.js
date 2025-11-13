@@ -178,12 +178,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         hideUserSections(); // إخفاء الكل قبل العرض
         
-        // Call all initial load functions to bring back the default view
-        await Promise.all([
-            loadLeaderboards(), // سيظهر لوحة الصدارة
-            loadActiveQuiz(loggedInUserProfile.email), // سيظهر الكويز
-            loadStoreItems() // سيظهر المتجر
-        ]);
+        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
+        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
+        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
+        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
         
         // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
@@ -743,7 +741,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: formData
                 });
 
-                    if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
                 
                 const cloudinaryData = await cloudinaryResponse.json();
                     profile_image_url = cloudinaryData.secure_url;
