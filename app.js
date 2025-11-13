@@ -519,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
 
         hideUserSections(); // إخفاء الكل قبل العرض
         storeContainer.style.display = "block";
@@ -1010,12 +1010,19 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
 
-        // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑 ⬅️ تم إضافة الكود المفقود هنا
+        // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑 ⬅️ تم إضافة الكود المفقود والمصحح هنا
         deleteUserBtn.addEventListener("click", async () => {
             if (!currentSearchedUser) {
                 deleteMessage.textContent = "الرجاء البحث واختيار مستخدم أولاً.";
                 deleteMessage.style.color = "red";
                 return;
+            }
+            
+            // 🛑🛑 التحقق الإضافي: التأكد من إيميل الأدمن 🛑🛑
+            if (!loggedInUserProfile || !loggedInUserProfile.email) {
+                 deleteMessage.textContent = "خطأ: لم يتم التعرف على إيميل الأدمن الحالي. (يرجى إعادة تسجيل الدخول)";
+                 deleteMessage.style.color = "red";
+                 return;
             }
             
             if (currentSearchedUser.email === loggedInUserProfile.email) {
