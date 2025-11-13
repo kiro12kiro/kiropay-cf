@@ -519,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
         hideUserSections(); // إخفاء الكل قبل العرض
         storeContainer.style.display = "block";
@@ -1010,8 +1010,65 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
 
-        // --- زرار حذف المستخدم (مُحصن) ---
-        deleteUserBtn.addEventListener("click", async () => { /* ... */ });
+        // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑 ⬅️ تم إضافة الكود المفقود هنا
+        deleteUserBtn.addEventListener("click", async () => {
+            if (!currentSearchedUser) {
+                deleteMessage.textContent = "الرجاء البحث واختيار مستخدم أولاً.";
+                deleteMessage.style.color = "red";
+                return;
+            }
+            
+            if (currentSearchedUser.email === loggedInUserProfile.email) {
+                 deleteMessage.textContent = "لا يمكن حذف حساب الأدمن الحالي.";
+                 deleteMessage.style.color = "red";
+                 return;
+            }
+
+            if (!confirm(`تحذير: أنت على وشك حذف ${currentSearchedUser.name} نهائياً. هل أنت متأكد؟ (سيتم حذف كل سجلاته)`)) {
+                return;
+            }
+
+            deleteMessage.textContent = "جاري حذف المستخدم وكافة سجلاته...";
+            deleteMessage.style.color = "blue";
+            deleteUserBtn.disabled = true;
+
+            try {
+                // 🛑 هذا الطلب سيتصل بدالة admin-delete-user.js في الخلفية
+                const response = await fetch(`/admin-delete-user`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    // نرسل الإيميل لحذفه وإيميل الأدمن للتحقق من الصلاحيات
+                    body: JSON.stringify({ 
+                        emailToDelete: currentSearchedUser.email,
+                        adminEmail: loggedInUserProfile.email 
+                    }),
+                });
+                
+                // التأكد من قراءة الرد سواء كان ناجحاً أو فاشلاً
+                const data = await response.json().catch(() => ({ success: false, error: 'رد سيرفر غير صالح' }));
+
+                if (response.ok && data.success) {
+                    deleteMessage.textContent = data.message;
+                    deleteMessage.style.color = "green";
+                    searchedUserCard.style.display = "none";
+                    currentSearchedUser = null;
+                    document.getElementById("admin-search-form").reset();
+                } else {
+                    deleteMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير معروف"}`;
+                    deleteMessage.style.color = "red";
+                    // تنبيه: هذا يحدث إذا كان هناك خطأ Foreign Key
+                    if (data.error && data.error.includes("FOREIGN KEY")) {
+                        deleteMessage.textContent = "فشل الحذف: المستخدم لديه سجلات مرتبطة (معاملات/مشتريات). يجب استخدام دالة الحذف المتسلسل الآمنة في الخلفية.";
+                    }
+                }
+            } catch (err) {
+                deleteMessage.textContent = "خطأ في الاتصال بالشبكة.";
+                deleteMessage.style.color = "red";
+                console.error("Delete User Error:", err);
+            } finally {
+                deleteUserBtn.disabled = false;
+            }
+        });
         
         // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
         document.querySelectorAll(".family-btn").forEach(button => {
