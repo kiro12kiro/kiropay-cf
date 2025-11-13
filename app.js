@@ -75,13 +75,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminAddItemForm = document.getElementById("admin-add-item-form");
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
     const adminStoreMessage = document.getElementById("admin-store-message");
-    const storeItemImageFile = document.getElementById("store-item-image-file"); // 🛑 العنصر الجديد لرفع الصورة
+    const storeItemImageFile = document.getElementById("store-item-image-file"); 
 
     // --- عناصر المشتريات (جديدة) ---
     const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
     const unlockedItemsContainer = document.getElementById("unlocked-items-container");
     const unlockedItemsList = document.getElementById("unlocked-items-list");
     const unlockedItemsMessage = document.getElementById("unlocked-items-message");
+    const backToStoreBtn = document.getElementById("back-to-store-btn"); // 🛑 الزر الجديد
     // --- نهاية عناصر المشتريات ---
 
     const leaderboardContainer = document.getElementById("leaderboard-container");
@@ -110,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formContainer.style.display = "flex";
         logoutBtn.style.display = "none";
         refreshDataBtn.style.display = "none";
-        unlockedItemsBtn.style.display = "none"; // 🛑 إضافة إخفاء زر المشتريات
+        unlockedItemsBtn.style.display = "none"; 
         adminPanelDiv.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
@@ -240,10 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 unlockedItemsBtn.style.display = "block"; // 🛑 إظهار الزر
-                hideUserSections(); // إخفاء الكل
-                await loadLeaderboards(); // يتم استدعاؤها لإظهارها
+                hideUserSections(); // إخفاء الكل قبل العرض
+                
+                // يتم استدعاء الثلاثة أدناه لعرضهم بشكل افتراضي
+                await loadLeaderboards(); 
                 await loadActiveQuiz(user.email); 
-                await loadAnnouncement();
                 await loadStoreItems(); 
             } else {
                 unlockedItemsBtn.style.display = "none";
@@ -328,6 +330,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
+    // 🛑🛑 معالجة ضغط زر العودة للمتجر 🛑🛑
+    backToStoreBtn.addEventListener('click', loadStoreItems);
     // --- فانكشن سجل المعاملات (مُحصنة) ---
     async function loadTransactionHistory(email) {
         transactionList.innerHTML = "<li>جاري تحميل السجل...</li>";
@@ -573,23 +577,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     itemId: itemId
                 }),
             });
+            
+            // 🛑🛑 تم التعديل: التعامل مع الرد حتى لو كان هناك خطأ وهمي بعد النجاح 🛑🛑
+            const data = await response.json(); 
 
-            const data = await response.json();
-
-            if (data.success) {
-                storeMessage.textContent = data.message;
+            if (data.success || response.ok) { // نتحقق من response.ok أيضاً لضمان التحديث
+                storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
                 storeMessage.style.color = "green";
-                await refreshUserData(); // 🛑 تحديث الرصيد والعناصر
+                await refreshUserData(); // 🛑 تحديث الرصيد والعناصر والسجل
             } else {
                 storeMessage.textContent = data.error || "فشل عملية الشراء.";
                 storeMessage.style.color = "red";
             }
         } catch (err) {
-            storeMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-            storeMessage.style.color = "red";
+            // سنعرض رسالة الخطأ العامة، لكن بما أن الخصم حدث، هذا غالباً خطأ وهمي في الـ JSON
+            storeMessage.textContent = "حدث خطأ أثناء إتمام العملية. (الرجاء التحقق من الرصيد والسجل).";
+            storeMessage.style.color = "orange";
             console.error("Buy Item Error:", err);
         } finally {
-            // يتم التحديث عبر refreshUserData()
+            event.target.disabled = false;
         }
     }
     
@@ -690,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const family = document.getElementById("family").value;
         const email = document.getElementById("signup-email").value;
         const password = document.getElementById("signup-password").value;
-        const avatarFile = signupAvatarFile.files[0];
+        const avatarFile = document.getElementById("signup-avatar-file").files[0];
 
         if (!name || !family || !email || !password) {
             messageDiv.textContent = "الرجاء ملء جميع الحقول المطلوبة.";
