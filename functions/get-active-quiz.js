@@ -1,5 +1,6 @@
 /*
  * API Endpoint: /get-active-quiz
+ * (الكود المُصحح والنهائي)
  */
 export async function onRequestPost(context) {
   try {
@@ -30,17 +31,18 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑🛑🛑 التعديل تم هنا 🛑🛑🛑
-    // تم تغيير الأسماء لتطابق ما يتوقعه app.js
+    // 🛑🛑🛑 هذا هو التعديل الأهم 🛑🛑🛑
+    // app.js يتوقع هذه الأسماء (question_text, option_a, ...)
     const formattedQuiz = {
         id: quiz.id,
-        question_text: quiz.question_text, // <-- (التصحيح)
-        option_a: quiz.option_a,         // <-- (التصحيح)
-        option_b: quiz.option_b,         // <-- (التصحيح)
-        option_c: quiz.option_c,         // <-- (التصحيح)
+        question_text: quiz.question_text, // <-- كان خطأ (question)
+        option_a: quiz.option_a,         // <-- كان خطأ (optionA)
+        option_b: quiz.option_b,         // <-- كان خطأ (optionB)
+        option_c: quiz.option_c,         // <-- كان خطأ (optionC)
         points: quiz.points
     };
 
+    // هذا السطر يرسل { quiz: {...} } وهو ما يتوقعه app.js
     return new Response(JSON.stringify({ quiz: formattedQuiz }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
