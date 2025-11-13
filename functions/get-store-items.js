@@ -1,22 +1,18 @@
 // File Name: get-store-items.js
-// 🛑 تم التعديل إلى استخدام 'name' (حسب طلبك)
-export default {
-    async fetch(request, env) {
-        if (request.method !== 'GET') {
-            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة. يجب استخدام GET.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-        }
+// 🛑 تم التحويل إلى صيغة Cloudflare Pages Function (onRequestGet)
+export async function onRequestGet(context) {
+    try {
+        const db = context.env.DB; // الوصول لـ DB عن طريق context.env
 
-        try {
-            // 🛑 تم التعديل: اختيار name
-            const { results: items } = await env.DB.prepare(
-                'SELECT id, name, price, image_url FROM store_items'
-            ).all();
+        // 🛑 تم التعديل: اختيار name (حسب آخر تأكيد)
+        const { results: items } = await db.prepare(
+            'SELECT id, name, price, image_url FROM store_items'
+        ).all();
 
-            return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
-        } catch (error) {
-            console.error('Error fetching store items:', error);
-            return new Response(JSON.stringify({ error: `فشل في جلب عناصر المتجر. (DB Error)` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
+    } catch (error) {
+        console.error('Error fetching store items:', error);
+        return new Response(JSON.stringify({ error: `فشل في جلب عناصر المتجر: ${error.message}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
-};
+}
