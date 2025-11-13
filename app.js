@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+Document.addEventListener("DOMContentLoaded", () => {
     // --- مسك العناصر الأساسية ---
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
@@ -66,6 +66,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const massUpdateMessage = document.getElementById("mass-update-message");
     let selectedUsersForMassUpdate = [];
 
+    // --- عناصر المتجر (جديدة) ---
+    const storeContainer = document.getElementById("store-container");
+    const storeItemsList = document.getElementById("store-items-list");
+    const storeMessage = document.getElementById("store-message");
+    const storeLoadingMessage = document.getElementById("store-loading-message");
+    // --- عناصر إدارة المتجر (جديدة) ---
+    const adminAddItemForm = document.getElementById("admin-add-item-form");
+    const adminStoreItemsList = document.getElementById("admin-store-items-list");
+    const adminStoreMessage = document.getElementById("admin-store-message");
+
     const leaderboardContainer = document.getElementById("leaderboard-container");
     const topChampionsList = document.getElementById("top-champions-list");
     const familyAnbaMoussaList = document.getElementById("family-anba-moussa-list");
@@ -95,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         adminPanelDiv.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
+        storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
         avatarOverlayLabel.style.display = "none";
         massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
@@ -167,8 +178,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 await loadLeaderboards();
                 await loadActiveQuiz(user.email); 
                 await loadAnnouncement();
+                await loadStoreItems(); // 🛑 إضافة المتجر هنا
             } else {
                 await loadAnnouncement();
+                await loadAdminStoreItems(); // 🛑 إضافة تحميل عناصر الأدمن هنا
             }
             refreshDataBtn.textContent = "تحديث البيانات";
         } catch(err) {
@@ -188,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         transactionList.innerHTML = "";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
+        storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
         userAnnouncementBox.style.display = "none";
 
         const email = document.getElementById("email").value;
@@ -225,11 +239,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     adminPanelDiv.style.display = "block";
                     leaderboardContainer.style.display = "none";
                     userAnnouncementBox.style.display = "none";
+                    storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
                     await loadAnnouncement();
+                    await loadAdminStoreItems(); // 🛑 إضافة تحميل عناصر الأدمن
                 } else {
                     await loadLeaderboards();
                     await loadActiveQuiz(user.email); 
                     await loadAnnouncement();
+                    await loadStoreItems(); // 🛑 إضافة تحميل المتجر للمستخدم
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
@@ -409,6 +426,163 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (err) {
             console.error("Load Announcement Error:", err);
+        }
+    }
+
+    // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
+    async function loadStoreItems() {
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
+
+        storeLoadingMessage.style.display = 'block';
+        storeItemsList.innerHTML = '';
+        storeContainer.style.display = "block";
+        storeMessage.textContent = "";
+
+        try {
+            const response = await fetch(`/get-store-items`, { method: "POST" });
+            if (!response.ok) throw new Error("فشل جلب عناصر المتجر"); 
+            const data = await response.json();
+            
+            storeLoadingMessage.style.display = 'none';
+            storeItemsList.innerHTML = ''; // تفريغ القائمة قبل الملء
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'store-item-card';
+                    
+                    const canAfford = loggedInUserProfile.balance >= item.price;
+                    const buttonText = canAfford ? `شراء (${item.price} نقطة)` : `النقاط غير كافية`;
+                    
+                    card.innerHTML = `
+                        <img src="${item.image_url || '/default-item.png'}" alt="${item.name}">
+                        <h5>${item.name}</h5>
+                        <p class="price">$${item.price}</p>
+                        <button class="buy-item-btn" data-item-id="${item.id}" ${canAfford ? '' : 'disabled'}>
+                            ${buttonText}
+                        </button>
+                    `;
+                    storeItemsList.appendChild(card);
+                });
+                
+                // إضافة مُستمعي الأحداث لأزرار الشراء
+                document.querySelectorAll('.buy-item-btn').forEach(btn => {
+                    btn.addEventListener('click', handleBuyItem);
+                });
+
+            } else {
+                storeItemsList.innerHTML = `<p style="text-align: center; color: #888;">لا توجد عناصر متاحة حالياً في المتجر.</p>`;
+            }
+        } catch(err) {
+            storeLoadingMessage.style.display = 'none';
+            storeItemsList.innerHTML = `<p style="text-align: center; color: red;">خطأ في تحميل المتجر.</p>`;
+            console.error("Store Load Error:", err);
+        }
+    }
+
+    // 🛑🛑 فانكشن شراء عنصر 🛑🛑
+    async function handleBuyItem(event) {
+        const itemId = event.target.dataset.itemId;
+        event.target.disabled = true;
+        storeMessage.textContent = "جاري إتمام عملية الشراء...";
+        storeMessage.style.color = "blue";
+
+        try {
+            const response = await fetch(`/buy-store-item`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: loggedInUserProfile.email,
+                    itemId: itemId
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                storeMessage.textContent = data.message;
+                storeMessage.style.color = "green";
+                await refreshUserData(); // 🛑 تحديث الرصيد والعناصر
+            } else {
+                storeMessage.textContent = data.error || "فشل عملية الشراء.";
+                storeMessage.style.color = "red";
+            }
+        } catch (err) {
+            storeMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
+            storeMessage.style.color = "red";
+            console.error("Buy Item Error:", err);
+        } finally {
+            // يتم التحديث عبر refreshUserData()
+        }
+    }
+    
+    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن ---
+    async function loadAdminStoreItems() {
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
+
+        adminStoreItemsList.innerHTML = '<li>جاري تحميل العناصر...</li>';
+        adminStoreMessage.textContent = "";
+
+        try {
+            const response = await fetch(`/admin-get-items`, { method: "POST" });
+            if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
+            const data = await response.json();
+            
+            adminStoreItemsList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${item.name} (${item.price} نقطة) - ID: ${item.id}</span>
+                        <button class="delete-store-item-btn" data-item-id="${item.id}">حذف</button>
+                    `;
+                    adminStoreItemsList.appendChild(li);
+                });
+
+                // إضافة مُستمعي الأحداث لأزرار الحذف
+                document.querySelectorAll('.delete-store-item-btn').forEach(btn => {
+                    btn.addEventListener('click', handleDeleteItem);
+                });
+            } else {
+                adminStoreItemsList.innerHTML = `<li>لا توجد عناصر مضافة حالياً.</li>`;
+            }
+        } catch(err) {
+            adminStoreItemsList.innerHTML = `<li style="color: red;">خطأ في تحميل العناصر.</li>`;
+            console.error("Admin Store Load Error:", err);
+        }
+    }
+
+    // --- فانكشن حذف عنصر ---
+    async function handleDeleteItem(event) {
+        const itemId = event.target.dataset.itemId;
+        if (!confirm(`هل أنت متأكد من حذف العنصر ذو ID: ${itemId} نهائياً؟`)) return;
+
+        adminStoreMessage.textContent = "جاري حذف العنصر...";
+        adminStoreMessage.style.color = "blue";
+
+        try {
+            const response = await fetch(`/admin-delete-item`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemId }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                adminStoreMessage.textContent = `تم حذف العنصر بنجاح.`;
+                adminStoreMessage.style.color = "green";
+                await loadAdminStoreItems(); // تحديث القائمة بعد الحذف
+                await refreshUserData(); // لتحديث واجهة المستخدمين إذا كان مفتوحاً
+            } else {
+                adminStoreMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير محدد"}`;
+                adminStoreMessage.style.color = "red";
+            }
+        } catch (err) {
+            adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لحذف العنصر.";
+            adminStoreMessage.style.color = "red";
+            console.error("Delete Item Error:", err);
         }
     }
 
@@ -860,8 +1034,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     selectedUsersCount.textContent = "0";
                     massUpdateAmount.value = "";
                     
-                    // 🛑🛑 تم حذف الأسطر التي تخفي العناصر 🛑🛑
-                    
                     // قم بإلغاء تحديد كل الـ checkboxes يدوياً
                     const checkboxes = adminFamilyResultsDiv.querySelectorAll('.mass-update-checkbox');
                     checkboxes.forEach(cb => cb.checked = false);
@@ -996,6 +1168,50 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Set Announcement Error:", err);
             }
         });
+        
+        // --- فورم إضافة عنصر جديد ---
+        adminAddItemForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); 
+            const name = document.getElementById("store-item-name").value.trim();
+            const price = parseInt(document.getElementById("store-item-price").value);
+            const imageUrl = document.getElementById("store-item-image-url").value.trim();
+
+            if (!name || isNaN(price) || price <= 0 || !imageUrl) {
+                adminStoreMessage.textContent = "الرجاء ملء جميع حقول إضافة العنصر بشكل صحيح.";
+                adminStoreMessage.style.color = "red";
+                return;
+            }
+
+            adminStoreMessage.textContent = "جاري إضافة العنصر...";
+            adminStoreMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-add-item`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, price, image_url: imageUrl }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    adminStoreMessage.textContent = `تم إضافة العنصر: ${name} بنجاح!`;
+                    adminStoreMessage.style.color = "green";
+                    adminAddItemForm.reset(); 
+                    await loadAdminStoreItems(); // تحديث القائمة بعد الإضافة
+                } else {
+                    adminStoreMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                    adminStoreMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لإضافة العنصر.";
+                adminStoreMessage.style.color = "red";
+                console.error("Add Item Error:", err);
+            }
+        });
+        
+        // 🛑 استدعاء وظائف الأدمن عند اللوجن 🛑
+        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
 
