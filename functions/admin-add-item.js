@@ -1,37 +1,29 @@
-export async function onRequestPost(context) {
-  try {
-    const db = context.env.DB;
-    const data = await context.request.json();
-    const { name, price, image_url } = data;
+// File Name: admin-add-item.js
+// الوصف: إضافة عنصر جديد إلى المتجر بواسطة الأدمن.
 
-    if (!name || !price) {
-      return new Response(JSON.stringify({ error: "الاسم والسعر مطلوبان" }), { status: 400 });
+export default {
+    async fetch(request, env) {
+        if (request.method !== 'POST') {
+            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
+
+        const { name, price, image_url } = await request.json();
+
+        if (!name || !price || !image_url || isNaN(price) || price <= 0) {
+            return new Response(JSON.stringify({ error: 'بيانات العنصر غير كاملة أو غير صالحة.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        try {
+            // 🛑 يجب استبدال هذا بمنطق إضافة عنصر جديد إلى قاعدة البيانات
+            const newItemId = await env.DB.addNewItem({ name, price: parseInt(price), image_url });
+
+            return new Response(JSON.stringify({ success: true, message: `تم إضافة العنصر بنجاح.`, itemId: newItemId }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+        } catch (error) {
+            console.error('Admin error adding item:', error);
+            return new Response(JSON.stringify({ error: 'فشل إداري في إضافة العنصر.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
     }
-    
-    const itemPrice = parseInt(price);
-    if (isNaN(itemPrice) || itemPrice <= 0) {
-        return new Response(JSON.stringify({ error: "السعر يجب أن يكون رقماً صحيحاً أكبر من صفر" }), { status: 400 });
-    }
-
-    // Upsert Logic: إدخال جديد أو تحديث القديم إذا كان الاسم موجوداً
-    const ps = db.prepare(`
-      INSERT INTO store_items (name, price, image_url) VALUES (?, ?, ?)
-      ON CONFLICT(name) DO UPDATE SET
-      price = excluded.price,
-      image_url = excluded.image_url
-    `);
-    
-    await ps.bind(name, itemPrice, image_url || null).run();
-
-    // جلب العقار بعد التعديل
-    const item = await db.prepare("SELECT * FROM store_items WHERE name = ?").bind(name).first();
-
-    return new Response(JSON.stringify({ success: true, item: item }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-  }
-}
+};
