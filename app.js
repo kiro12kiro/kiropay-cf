@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const quizBtnC = document.getElementById("quiz-btn-c");
     const quizOptionButtons = document.querySelectorAll(".quiz-option-btn");
     const quizSubmitBtn = document.getElementById("quiz-submit-btn");
-    const quizMessage = document.getElementById("quiz-message"); // تم التعريف هنا
+    const quizMessage = document.getElementById("quiz-message"); 
 
     let currentSearchResults = [];
     let currentSearchedUser = null; 
