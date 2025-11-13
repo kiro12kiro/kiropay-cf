@@ -1,4 +1,4 @@
-Document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     // --- مسك العناصر الأساسية ---
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
