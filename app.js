@@ -675,4 +675,322 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
-                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'})
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                if (response.ok) {
+                    balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
+                    balanceMessage.style.color = "green";
+                    currentSearchedUser.balance = data.new_balance;
+                    searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
+                    balanceAmountInput.value = "";
+                    if (loggedInUserProfile.email === currentSearchedUser.email) {
+                        refreshUserData(); 
+                    }
+                } else {
+                    balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                    balanceMessage.style.color = "red";
+                }
+            } catch (err) {
+                balanceMessage.textContent = "خطأ في الاتصال بالـ API.";
+                balanceMessage.style.color = "red";
+                console.error("Balance Update Error:", err);
+            } finally {
+                addBalanceBtn.disabled = false;
+                subtractBalanceBtn.disabled = false;
+            }
+        }
+
+        // --- زراير الرصيد (الفردي) ---
+        addBalanceBtn.addEventListener("click", () => {
+            const amount = parseInt(balanceAmountInput.value);
+            if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                 balanceMessage.style.color = "red";
+                 return;
+            }
+            updateBalance(amount, "إضافة يدوية من الأدمن");
+        });
+        subtractBalanceBtn.addEventListener("click", () => {
+            const amount = parseInt(balanceAmountInput.value); 
+            if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                balanceMessage.style.color = "red";
+                return;
+            }
+            updateBalance(-amount, "خصم يدوي من الأدمن");
+        });
+
+        // --- زرار حذف المستخدم (مُحصن) ---
+        deleteUserBtn.addEventListener("click", async () => { /* ... */ });
+        
+        // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
+        familyButtons.forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const familyName = button.dataset.family;
+                
+                adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
+                adminFamilyMessage.style.color = "blue";
+                adminFamilyResultsDiv.innerHTML = '';
+                massUpdateControls.style.display = 'none';
+                selectedUsersForMassUpdate = [];
+                selectedUsersCount.textContent = '0';
+
+                try {
+                    const response = await fetch(`/admin-get-family`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ family: familyName }),
+                    });
+                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                    if (!response.ok) {
+                        adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
+                        adminFamilyMessage.style.color = "red";
+                        massUpdateControls.style.display = "none";
+                        return;
+                    }
+                    const users = data.users;
+
+                    if (!users || users.length === 0) {
+                        adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
+                        adminFamilyMessage.style.color = "black";
+                        massUpdateControls.style.display = "none";
+                    } else {
+                        adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                        adminFamilyMessage.style.color = "green";
+                        massUpdateControls.style.display = "block";
+                        users.forEach(user => {
+                            const userItem = document.createElement("div");
+                            userItem.className = "family-user-item";
+                            const checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.className = "mass-update-checkbox";
+                            checkbox.dataset.email = user.email;
+                            if (selectedUsersForMassUpdate.includes(user.email)) {
+                                checkbox.checked = true;
+                            }
+                            const userInfo = document.createElement("div");
+                            userInfo.className = "user-info";
+                            userInfo.innerHTML = `
+                                <span>${user.name} (${user.email})</span>
+                                <strong>الرصيد: $${user.balance}</strong>
+                            `;
+                            userInfo.addEventListener('click', () => {
+                                user.family = familyName;
+                                populateAdminCard(user);
+                                searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            });
+                            userItem.appendChild(checkbox);
+                            userItem.appendChild(userInfo);
+                            adminFamilyResultsDiv.appendChild(userItem);
+                        });
+                        adminFamilyResultsDiv.style.display = "block";
+                        selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                    }
+                } catch (err) {
+                    adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                    adminFamilyMessage.style.color = "red";
+                    massUpdateControls.style.display = "none";
+                }
+            });
+        });
+
+        // 🛑 كود متابعة الـ Checkboxes وتحديث اللوحة الجماعية 🛑
+        adminFamilyResultsDiv.addEventListener('change', (e) => {
+            if (e.target.classList.contains('mass-update-checkbox')) {
+                const email = e.target.dataset.email;
+                if (e.target.checked) {
+                    if (!selectedUsersForMassUpdate.includes(email)) {
+                        selectedUsersForMassUpdate.push(email);
+                    }
+                } else {
+                    selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
+                }
+                selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                if (selectedUsersForMassUpdate.length > 0) {
+                    massUpdateControls.style.display = 'block';
+                } else {
+                    massUpdateControls.style.display = 'none';
+                }
+                massUpdateMessage.textContent = ''; 
+            }
+        });
+
+
+        // --- فانكشن تعديل الرصيد الجماعي (مُحصنة) ---
+        async function handleMassUpdate(amount) {
+            if (selectedUsersForMassUpdate.length === 0) {
+                massUpdateMessage.textContent = "الرجاء اختيار مستخدم واحد على الأقل.";
+                massUpdateMessage.style.color = "red";
+                return;
+            }
+            if (isNaN(amount) || amount === 0) {
+                massUpdateMessage.textContent = "الرجاء إدخال كمية صحيحة.";
+                massUpdateMessage.style.color = "red";
+                return;
+            }
+            const isAdd = amount > 0;
+            const absoluteAmount = Math.abs(amount);
+            const action = isAdd ? "إضافة" : "خصم";
+            const reason = isAdd ? "إضافة جماعية من الأدمن" : "خصم جماعي من الأدمن";
+
+            if (!confirm(`هل أنت متأكد من ${action} ${absoluteAmount} نقطة لـ ${selectedUsersForMassUpdate.length} مستخدم؟`)) {
+                return;
+            }
+            massUpdateMessage.textContent = `جاري ${action} الرصيد لـ ${selectedUsersForMassUpdate.length} مستخدم...`;
+            massUpdateMessage.style.color = "blue";
+            massUpdateAddBtn.disabled = true;
+            massUpdateSubtractBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/admin-mass-update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        emails: selectedUsersForMassUpdate,
+                        amount: amount,
+                        reason: reason
+                    }),
+                });
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                
+                if (response.ok) {
+                    massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
+                    massUpdateMessage.style.color = "green";
+                    selectedUsersForMassUpdate = [];
+                    selectedUsersCount.textContent = "0";
+                    massUpdateAmount.value = "";
+                    adminFamilyResultsDiv.innerHTML = ""; 
+                    massUpdateControls.style.display = 'none';
+                    refreshUserData();
+                } else {
+                    massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
+                    massUpdateMessage.style.color = "red";
+                }
+            } catch (err) {
+                massUpdateMessage.textContent = "خطأ في الاتصال بالـ API.";
+                massUpdateMessage.style.color = "red";
+                console.error("Mass Update Error:", err);
+            } finally {
+                massUpdateAddBtn.disabled = false;
+                massUpdateSubtractBtn.disabled = false;
+            }
+        }
+
+        // (ربط زراير التعديل الجماعي)
+        massUpdateAddBtn.addEventListener('click', () => {
+            const amount = parseInt(massUpdateAmount.value);
+            if (!isNaN(amount) && amount > 0) {
+                handleMassUpdate(amount);
+            } else {
+                massUpdateMessage.textContent = "الرجاء إدخال قيمة صحيحة وموجبة.";
+                massUpdateMessage.style.color = "red";
+            }
+        });
+        massUpdateSubtractBtn.addEventListener('click', () => {
+            const amount = parseInt(massUpdateAmount.value);
+            if (!isNaN(amount) && amount > 0) {
+                handleMassUpdate(-amount); // إرسال قيمة سالبة للخصم
+            } else {
+                massUpdateMessage.textContent = "الرجاء إدخال قيمة صحيحة وموجبة.";
+                massUpdateMessage.style.color = "red";
+            }
+        });
+
+        // 🛑🛑 3. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
+        adminQuizForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); 
+            event.stopPropagation();
+            
+            // 🛑 التأكد من أن IDs الحقول صحيحة ومطابقة لـ index.html
+            const question = document.getElementById("quiz-question").value.trim();
+            const optionA = document.getElementById("quiz-opt-a").value.trim();
+            const optionB = document.getElementById("quiz-opt-b").value.trim();
+            const optionC = document.getElementById("quiz-opt-c").value.trim();
+            const answer = document.getElementById("quiz-correct-opt").value.trim(); // ID الصحيح
+            const pointsInput = document.getElementById("quiz-points").value;
+            const points = parseInt(pointsInput);
+
+            // منطق التحقق
+            if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || pointsInput.trim() === '') {
+                adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
+                adminQuizMessage.style.color = "red";
+                return;
+            }
+
+            adminQuizMessage.textContent = "جاري إضافة السؤال...";
+            adminQuizMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-create-quiz`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        question: question, 
+                        opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
+                        opt_b: optionB, 
+                        opt_c: optionC, 
+                        correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
+                        points: points 
+                    }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    adminQuizMessage.textContent = `تم إضافة السؤال بنجاح!`;
+                    adminQuizMessage.style.color = "green";
+                    adminQuizForm.reset(); 
+                } else {
+                    adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                    adminQuizMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminQuizMessage.textContent = "خطأ في الاتصال بالـ API لإضافة الكويز.";
+                adminQuizMessage.style.color = "red";
+                console.error("Quiz Creation Error:", err);
+            }
+        });
+
+        // 🛑 كود فورم الإعلانات (مُصحح) 🛑
+        adminAnnouncementForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); 
+            event.stopPropagation();
+            
+            const announcementTextValue = adminAnnouncementText.value.trim();
+
+            if (!announcementTextValue) {
+                adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان أولاً.";
+                adminAnnouncementMessage.style.color = "red";
+                return;
+            }
+
+            adminAnnouncementMessage.textContent = "جاري نشر الإعلان...";
+            adminAnnouncementMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch(`/admin-set-announcement`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: announcementTextValue }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    adminAnnouncementMessage.textContent = "تم نشر الإعلان بنجاح!";
+                    adminAnnouncementMessage.style.color = "green";
+                    adminAnnouncementText.value = ""; // تفريغ الحقل
+                    loadAnnouncement(); // 🛑 تحديث الإعلان لليوزر
+                } else {
+                    adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
+                    adminAnnouncementMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminAnnouncementMessage.textContent = "خطأ في الاتصال بالـ API لنشر الإعلان.";
+                adminAnnouncementMessage.style.color = "red";
+                console.error("Set Announcement Error:", err);
+            }
+        });
+
+    })(); // 🛑 نهاية أكواد الأدمن 🛑
+
+}); // نهاية "DOMContentLoaded"
