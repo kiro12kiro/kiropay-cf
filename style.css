@@ -479,3 +479,53 @@ body {
 #admin-add-item-form input {
     margin-bottom: 8px;
 }
+/* New styles for the Admin Store Items Card */
+#admin-store-items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Spacing between cards */
+}
+.admin-item-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between; /* Space content and button */
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s;
+    font-size: 1.1em; /* 🛑 تكبير حجم الكارت */
+}
+.admin-item-card:hover {
+    background-color: #f9f9f9;
+}
+.admin-item-info {
+    flex-grow: 1;
+    text-align: right;
+    margin-left: 20px;
+}
+.admin-item-info strong {
+    display: block;
+    font-size: 1.3em; /* تكبير اسم المنتج */
+    color: #007bff;
+    margin-bottom: 5px;
+}
+.admin-item-info small {
+    display: block;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+.admin-item-card .delete-store-item-btn {
+    background-color: #dc3545; 
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 80px;
+}
