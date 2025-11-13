@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const familyMargergesList = document.getElementById("family-margerges-list");
     const familyAnbaKarasList = document.getElementById("family-anba-karas-list");
 
+    // 🛑 عناصر الكويز (تم التأكد منها) 🛑
     const quizContainer = document.getElementById("quiz-container");
     const quizQuestionText = document.getElementById("quiz-question-text");
     const quizBtnA = document.getElementById("quiz-btn-a");
@@ -274,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة) 🛑🛑
+    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
     async function loadLeaderboards() {
         leaderboardContainer.style.display = "block"; 
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
@@ -284,6 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
         try {
+            // نداء الملفات المتخصصة بشكل متوازٍ
             const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = await Promise.all([
                 fetch('/get-top-champions', { method: "POST" }),
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
@@ -317,7 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
                 { list: familyAnbaKarasList, response: karasResponse, name: "اسرة الانبا كاراس" }
             ];
-
             for (const item of familyResponses) {
                 if (!item.response.ok) {
                     console.error(`فشل تحميل بيانات أسرة ${item.name}`, await item.response.text());
@@ -347,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها) 🛑🛑
+    // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها بالكامل) 🛑🛑
     async function loadActiveQuiz(email) {
         try {
             const response = await fetch(`/get-active-quiz`, {
@@ -391,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 🛑🛑 فانكشن جلب الإعلانات (مُصححة) 🛑🛑
+    // 🛑🛑 فانكشن جلب الإعلانات (لليوزر - تم إكمالها) 🛑🛑
     async function loadAnnouncement() {
         userAnnouncementBox.style.display = "none";
         userAnnouncementText.textContent = "";
@@ -434,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- كود "تغيير الصورة" (زي ما هي) ---
     avatarUploadInput.addEventListener("change", async () => { /* ... */ });
 
-    // --- أكواد الكويز (لليوزر) ---
+    // 🛑🛑 أكواد الكويز (تمت استعادتها بالكامل) 🛑🛑
     quizOptionButtons.forEach(button => {
         button.addEventListener("click", () => {
             quizOptionButtons.forEach(btn => btn.classList.remove('selected'));
@@ -470,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.success) {
                 quizMessage.textContent = data.message;
                 quizMessage.style.color = "green";
-                await refreshUserData();
+                await refreshUserData(); // 🛑 تحديث الرصيد والسجل
             } else {
                 quizMessage.textContent = data.message;
                 quizMessage.style.color = "red";
@@ -504,7 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
             adminSearchMessage.style.color = "blue";
-            adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
+            adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>'; // 🛑 الإصلاح: تفريغ الدروب ليست
             adminResultsListDiv.style.display = "none";
             searchedUserCard.style.display = "none";
             currentSearchedUser = null;
@@ -542,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     populateAdminCard(currentSearchResults[0]);
                     adminResultsListDiv.style.display = "none";
                 } else {
-                    // اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة
+                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
                     adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
                     adminSearchMessage.style.color = "orange";
 
@@ -553,7 +554,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         adminSelectUser.appendChild(option);
                     });
                     
-                    adminResultsListDiv.style.display = "block";
+                    adminResultsListDiv.style.display = "block"; // 🛑 الإصلاح: إظهار الدروب ليست
                     adminSelectUser.value = currentSearchResults[0].email;
                     populateAdminCard(currentSearchResults[0]);
                 }
@@ -588,11 +589,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
         async function updateBalance(amount, reason) {
-            if (!currentSearchedUser) {
+             if (!currentSearchedUser) {
                  balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                  balanceMessage.style.color = "red";
                  return;
             }
+
             balanceMessage.textContent = "جاري تحديث الرصيد...";
             balanceMessage.style.color = "blue";
             addBalanceBtn.disabled = true;
@@ -608,16 +610,21 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
+
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
                 if (response.ok) {
                     balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
                     balanceMessage.style.color = "green";
+                    
                     currentSearchedUser.balance = data.new_balance;
                     searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
                     balanceAmountInput.value = "";
+                    
                     if (loggedInUserProfile.email === currentSearchedUser.email) {
                         refreshUserData(); 
                     }
+
                 } else {
                     balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
                     balanceMessage.style.color = "red";
@@ -764,7 +771,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 massUpdateMessage.style.color = "red";
                 return;
             }
-
             const isAdd = amount > 0;
             const absoluteAmount = Math.abs(amount);
             const action = isAdd ? "إضافة" : "خصم";
@@ -773,7 +779,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!confirm(`هل أنت متأكد من ${action} ${absoluteAmount} نقطة لـ ${selectedUsersForMassUpdate.length} مستخدم؟`)) {
                 return;
             }
-
             massUpdateMessage.textContent = `جاري ${action} الرصيد لـ ${selectedUsersForMassUpdate.length} مستخدم...`;
             massUpdateMessage.style.color = "blue";
             massUpdateAddBtn.disabled = true;
@@ -800,7 +805,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     massUpdateAmount.value = "";
                     adminFamilyResultsDiv.innerHTML = ""; 
                     massUpdateControls.style.display = 'none';
-                    
                     refreshUserData();
                 } else {
                     massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
@@ -866,7 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         question: question, 
-                        opt_a: optionA, 
+                        opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
                         opt_b: optionB, 
                         opt_c: optionC, 
                         correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
