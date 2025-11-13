@@ -179,17 +179,14 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
+        // نستخدم Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
         await Promise.all([
             loadLeaderboards(),
             loadActiveQuiz(loggedInUserProfile.email),
             loadStoreItems()
         ]);
         
-        // 🛑🛑 فرض الإظهار بعد الانتهاء من التحميل 🛑🛑
-        // هذا يحل مشكلة الـ "اختفاء" ويزيل التداخلات
-        leaderboardContainer.style.display = "block"; 
-        quizContainer.style.display = "block"; 
-        storeContainer.style.display = "block"; 
+        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
 
 
@@ -523,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
 
         // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا
         storeContainer.style.display = "block";
@@ -1009,7 +1006,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                 balanceMessage.style.color = "red";
-                return;
+                 return;
             }
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
