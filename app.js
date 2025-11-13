@@ -178,10 +178,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         hideUserSections(); // إخفاء الكل قبل العرض
         
-        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
-        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
-        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
-        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
+        // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
+        // استخدام Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
+        await Promise.all([
+            loadLeaderboards(),
+            loadActiveQuiz(loggedInUserProfile.email),
+            loadStoreItems()
+        ]);
         
         // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
@@ -1112,7 +1115,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         massUpdateControls.style.display = "none";
                     } else {
                         adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
-                        massUpdateMessage.style.color = "green";
                         massUpdateControls.style.display = "block";
                         users.forEach(user => {
                             const userItem = document.createElement("div");
@@ -1230,7 +1232,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (err) {
                 massUpdateMessage.textContent = "خطأ في الاتصال بالـ API.";
-                    massUpdateMessage.style.color = "red";
+                massUpdateMessage.style.color = "red";
                 console.error("Mass Update Error:", err);
             } finally {
                 massUpdateAddBtn.disabled = false;
