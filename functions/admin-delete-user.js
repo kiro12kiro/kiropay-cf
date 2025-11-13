@@ -1,4 +1,5 @@
-// File Name: admin-delete-user.js (النسخة النهائية)
+// File Name: admin-delete-user.js
+// 🛑 تم التعديل: قراءة البيانات بشكل دفاعي من حمولة JSON
 import { getAuthUser, unauthorizedResponse } from './security-utils'; 
 
 export async function onRequestPost(context) {
@@ -7,12 +8,14 @@ export async function onRequestPost(context) {
         const request = context.request;
         
         const data = await request.json();
-        const emailToDelete = data.emailToDelete;
-        const adminEmail = data.adminEmail; // يتم استخدامه للتحقق من الصلاحية
+        
+        // 🛑🛑 التعديل: قراءة الخانات بشكل دفاعي ومباشر 🛑🛑
+        const emailToDelete = data && data.emailToDelete; 
+        const adminEmail = data && data.adminEmail; 
 
         // 1. التحقق الأساسي من وجود الإيميلات
         if (!emailToDelete || !adminEmail) {
-            return new Response(JSON.stringify({ success: false, error: "لم يتم إرسال الإيميل." }), { status: 400, headers: { "Content-Type": "application/json" } });
+            return new Response(JSON.stringify({ success: false, error: "لم يتم إرسال الإيميل (400)." }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
         
         // 2. التحقق من الصلاحيات
