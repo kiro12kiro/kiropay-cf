@@ -522,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
-        hideUserSections(); // إخفاء الكل قبل العرض
+        // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا (loadMainDashboard هو المسؤول)
         storeContainer.style.display = "block";
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
