@@ -105,35 +105,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (فانكشن مساعدة لضغط الصور)
     function resizeImage(file, maxWidth, maxHeight, quality) {
-        return new Promise((resolve, reject) => { /* ... */ });
+        return new Promise((resolve, reject) => { 
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
     }
 
     // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
     async function refreshUserData() {
         if (!loggedInUserProfile) return;
-
         refreshDataBtn.textContent = "جاري التحديث...";
-
         try {
             const response = await fetch(`/get-user-profile`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: loggedInUserProfile.email }),
             });
-            
             if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
             const data = await response.json();
-
             const user = data.user;
             loggedInUserProfile = user;
 
-            // 2. تحديث الكارت
             userNameP.textContent = `الاسم: ${user.name}`;
             userFamilyP.textContent = `العائلة: ${user.family}`;
             userBalanceP.textContent = `الرصيد: $${user.balance}`;
             userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-
-            // 3. تحديث باقي الأقسام
+            
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 await loadLeaderboards();
@@ -142,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 await loadAnnouncement();
             }
-
             refreshDataBtn.textContent = "تحديث البيانات";
         } catch(err) {
             refreshDataBtn.textContent = "فشل التحديث";
@@ -154,11 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         event.stopPropagation();
-
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
-
-        // إعادة ضبط اللوحة قبل اللوجن
+        
         adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         leaderboardContainer.style.display = "none";
@@ -174,24 +197,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
-
             const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
             if (response.ok) {
                 messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
                 messageDiv.style.color = "green";
-
                 const user = data.user;
-
                 loggedInUserProfile = user;
 
-                // (ملء الكارت)
                 userNameP.textContent = `الاسم: ${user.name}`;
                 userFamilyP.textContent = `العائلة: ${user.family}`;
                 userBalanceP.textContent = `الرصيد: $${user.balance}`;
                 userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-
-                // (إظهار الكارت)
+                
                 cardContainer.style.display = "flex";
                 formContainer.style.display = "none";
                 logoutBtn.style.display = "block";
@@ -201,21 +219,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 await loadTransactionHistory(user.email);
 
                 if (user.role === 'admin') {
-                    // --- لو هو أدمن ---
                     messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
                     adminPanelDiv.style.display = "block";
                     leaderboardContainer.style.display = "none";
                     userAnnouncementBox.style.display = "none";
                     await loadAnnouncement();
                 } else {
-                    // --- لو هو يوزر عادي ---
                     await loadLeaderboards();
                     // await loadActiveQuiz(user.email); 
-                    await loadAnnouncement();
+                    await loadAnnouncement(); 
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
-
             } else {
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
@@ -235,14 +250,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
             });
-
             if (!response.ok) throw new Error("فشل جلب السجل"); 
-
             const data = await response.json();
 
             transactionList.innerHTML = "";
             if (data.transactions && data.transactions.length > 0) {
-                // ... (ملء السجل)
+                data.transactions.forEach(t => {
+                    const li = document.createElement("li");
+                    const amountClass = t.amount > 0 ? "positive" : "negative";
+                    const sign = t.amount > 0 ? "+" : "";
+                    li.innerHTML = `
+                        <span>${t.reason}</span>
+                        <span class="amount ${amountClass}">${sign}${t.amount} نقطة</span>
+                    `;
+                    transactionList.appendChild(li);
+                });
             } else {
                 transactionList.innerHTML = `<li class="no-history">لا يوجد معاملات سابقة.</li>`;
             }
@@ -320,8 +342,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
                 }
             }
-
-
         } catch (err) {
             console.error("Leaderboard Error:", err);
             topChampionsList.innerHTML = '<p style="text-align: center; color: red;">فشل تحميل لوحة الصدارة.</p>';
@@ -348,14 +368,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             if (data.message && data.message.trim()) {
                 userAnnouncementText.textContent = data.message;
-                // إظهار البوكس إذا كان هناك إعلان
                 userAnnouncementBox.style.display = "block";
-                // 🛑 تحديث الإعلان في لوحة الأدمن (إذا كان مفتوحًا)
                 if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
                     adminAnnouncementText.value = data.message;
                 }
-            } else {
-                userAnnouncementBox.style.display = "none";
             }
         } catch (err) {
             console.error("Load Announcement Error:", err);
@@ -371,7 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // 🛑🛑 زرار تسجيل الخروج (مُصحح نهائياً) 🛑🛑
+    // 🛑🛑 زرار تسجيل الخروج (مُصحح) 🛑🛑
     logoutBtn.addEventListener("click", () => {
         resetUI();
         loginForm.reset();
@@ -442,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     populateAdminCard(currentSearchResults[0]);
                     adminResultsListDiv.style.display = "none";
                 } else {
-                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
+                    // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة (مُصحح) 🛑
                     adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
                     adminSearchMessage.style.color = "orange";
 
@@ -476,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteMessage.textContent = "";
         }
 
-        // --- كود الدروب ليست ---
+        // --- كود الدروب ليست (مُصحح) ---
         adminSelectUser.addEventListener("change", () => {
             const selectedEmail = adminSelectUser.value;
             const user = currentSearchResults.find(u => u.email === selectedEmail);
@@ -487,20 +503,185 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
-        async function updateBalance(amount, reason) { /* ... */ }
+        async function updateBalance(amount, reason) {
+            if (!currentSearchedUser) {
+                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                 balanceMessage.style.color = "red";
+                 return;
+            }
+
+            balanceMessage.textContent = "جاري تحديث الرصيد...";
+            balanceMessage.style.color = "blue";
+            addBalanceBtn.disabled = true;
+            subtractBalanceBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/admin-update-balance`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: currentSearchedUser.email,
+                        amount: amount,
+                        reason: reason
+                    }),
+                });
+
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
+                    balanceMessage.style.color = "green";
+                    
+                    currentSearchedUser.balance = data.new_balance;
+                    searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
+                    balanceAmountInput.value = "";
+                    
+                    if (loggedInUserProfile.email === currentSearchedUser.email) {
+                        refreshUserData(); 
+                    }
+
+                } else {
+                    balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                    balanceMessage.style.color = "red";
+                }
+            } catch (err) {
+                balanceMessage.textContent = "خطأ في الاتصال بالـ API.";
+                balanceMessage.style.color = "red";
+                console.error("Balance Update Error:", err);
+            } finally {
+                addBalanceBtn.disabled = false;
+                subtractBalanceBtn.disabled = false;
+            }
+        }
 
         // --- زراير الرصيد (الفردي) ---
-        addBalanceBtn.addEventListener("click", () => { /* ... */ });
-        subtractBalanceBtn.addEventListener("click", () => { /* ... */ });
+        addBalanceBtn.addEventListener("click", () => {
+            const amount = parseInt(balanceAmountInput.value);
+            if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                 balanceMessage.style.color = "red";
+                 return;
+            }
+            updateBalance(amount, "إضافة يدوية من الأدمن");
+        });
+        subtractBalanceBtn.addEventListener("click", () => {
+            const amount = parseInt(balanceAmountInput.value); 
+            if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                balanceMessage.style.color = "red";
+                return;
+            }
+            updateBalance(-amount, "خصم يدوي من الأدمن");
+        });
 
         // --- زرار حذف المستخدم (مُحصن) ---
         deleteUserBtn.addEventListener("click", async () => { /* ... */ });
         
         // --- كود زراير الأسر (مُصحح) ---
-        familyButtons.forEach(button => { /* ... */ });
+        familyButtons.forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const familyName = button.dataset.family;
+                
+                adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
+                adminFamilyMessage.style.color = "blue";
+                adminFamilyResultsDiv.innerHTML = '';
+                massUpdateControls.style.display = 'none';
+                selectedUsersForMassUpdate = [];
+                selectedUsersCount.textContent = '0';
+
+                try {
+                    const response = await fetch(`/admin-get-family`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ family: familyName }),
+                    });
+
+                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                    if (!response.ok) {
+                        adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
+                        adminFamilyMessage.style.color = "red";
+                        massUpdateControls.style.display = "none";
+                        return;
+                    }
+
+                    const users = data.users;
+
+                    if (users.length === 0) {
+                        adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
+                        adminFamilyMessage.style.color = "black";
+                        massUpdateControls.style.display = "none";
+                    } else {
+                        adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                        adminFamilyMessage.style.color = "green";
+                        massUpdateControls.style.display = "block";
+
+                        users.forEach(user => {
+                            const userItem = document.createElement("div");
+                            userItem.className = "family-user-item";
+
+                            const checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.className = "mass-update-checkbox";
+                            checkbox.dataset.email = user.email;
+
+                            // حفظ حالة الـ Checkbox في حالة لو كان مختار من قبل
+                            if (selectedUsersForMassUpdate.includes(user.email)) {
+                                checkbox.checked = true;
+                            }
+
+                            const userInfo = document.createElement("div");
+                            userInfo.className = "user-info";
+                            userInfo.innerHTML = `
+                                <span>${user.name} (${user.email})</span>
+                                <strong>الرصيد: $${user.balance}</strong>
+                            `;
+
+                            userInfo.addEventListener('click', () => {
+                                user.family = familyName;
+                                populateAdminCard(user);
+                                searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            });
+
+                            userItem.appendChild(checkbox);
+                            userItem.appendChild(userInfo);
+                            adminFamilyResultsDiv.appendChild(userItem);
+                        });
+
+                        adminFamilyResultsDiv.style.display = "block";
+                        selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                    }
+
+                } catch (err) {
+                    adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                    adminFamilyMessage.style.color = "red";
+                    massUpdateControls.style.display = "none";
+                }
+            });
+        });
 
         // 🛑 كود متابعة الـ Checkboxes وتحديث اللوحة الجماعية 🛑
-        adminFamilyResultsDiv.addEventListener('change', (e) => { /* ... */ });
+        adminFamilyResultsDiv.addEventListener('change', (e) => {
+            if (e.target.classList.contains('mass-update-checkbox')) {
+                const email = e.target.dataset.email;
+                if (e.target.checked) {
+                    if (!selectedUsersForMassUpdate.includes(email)) {
+                        selectedUsersForMassUpdate.push(email);
+                    }
+                } else {
+                    selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
+                }
+
+                selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+
+                if (selectedUsersForMassUpdate.length > 0) {
+                    massUpdateControls.style.display = 'block';
+                } else {
+                    massUpdateControls.style.display = 'none';
+                }
+                massUpdateMessage.textContent = ''; 
+            }
+        });
 
 
         // --- فانكشن تعديل الرصيد الجماعي (مُحصنة) ---
@@ -524,6 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const pointsInput = document.getElementById("quiz-points").value;
             const points = parseInt(pointsInput);
 
+            // منطق التحقق
             if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || pointsInput.trim() === '') {
                 adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
                 adminQuizMessage.style.color = "red";
