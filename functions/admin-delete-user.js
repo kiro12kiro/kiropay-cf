@@ -1,7 +1,4 @@
-// File Name: admin-delete-user.js
-// 🛑 الكود النهائي لحذف المستخدم المتسلسل والآمن 🛑
-
-// يجب استيراد هذه الدوال من ملف security-utils.js
+// File Name: admin-delete-user.js (النهائي)
 import { getAuthUser, unauthorizedResponse } from './security-utils'; 
 
 export async function onRequestPost(context) {
@@ -9,28 +6,22 @@ export async function onRequestPost(context) {
         const db = context.env.DB;
         const request = context.request;
         
-        // Front-end sends: { emailToDelete: targetEmail, adminEmail: loggedInUserProfile.email }
         const data = await request.json();
         const emailToDelete = data.emailToDelete;
         const adminEmail = data.adminEmail;
 
-        // 1. التحقق الأساسي من وجود الإيميلات
+        // 1. التحقق الأساسي (وهذا الذي ترفضه الوظيفة)
         if (!emailToDelete || !adminEmail) {
-            return new Response(JSON.stringify({ success: false, error: "بيانات الإيميل غير كاملة." }), { status: 400, headers: { "Content-Type": "application/json" } });
+            return new Response(JSON.stringify({ success: false, error: "لم يتم إرسال الإيميل." }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
         
-        // 2. التحقق من الصلاحيات (Authorization)
+        // 2. التحقق من الصلاحيات
         const adminUser = await getAuthUser(adminEmail, db);
         if (!adminUser || adminUser.role !== 'admin') {
             return unauthorizedResponse();
         }
         
-        // 3. فحص الأمان: لا يمكن حذف حساب الأدمن الذي يقوم بالعملية
-        if (emailToDelete === adminEmail) {
-            return new Response(JSON.stringify({ success: false, error: "لا يمكن حذف حساب الأدمن الخاص بك." }), { status: 403, headers: { "Content-Type": "application/json" } });
-        }
-
-        // 4. فحص المستخدم الهدف
+        // 3. فحص المستخدم الهدف
         const { results: targetUserResults } = await db.prepare('SELECT role FROM users WHERE email = ?').bind(emailToDelete).all();
         const targetUser = targetUserResults[0];
 
@@ -41,20 +32,16 @@ export async function onRequestPost(context) {
              return new Response(JSON.stringify({ success: false, error: "لا يمكن حذف مستخدم أدمن آخر." }), { status: 403, headers: { "Content-Type": "application/json" } });
         }
 
-
-        // 5. تنفيذ الحذف المتسلسل (Cascading Deletion)
+        // 4. تنفيذ الحذف المتسلسل (D1 Batch)
         const batch = [
-            // حذف سجلات المعاملات (transactions)
             db.prepare('DELETE FROM transactions WHERE user_email = ?').bind(emailToDelete),
-            // حذف سجلات المشتريات (user_unlocked_items)
             db.prepare('DELETE FROM user_unlocked_items WHERE user_email = ?').bind(emailToDelete),
-            // حذف المستخدم نفسه (users)
             db.prepare('DELETE FROM users WHERE email = ?').bind(emailToDelete),
         ];
 
         const results = await db.batch(batch);
         
-        if (results[2].changes === 0) { // التحقق من نتيجة حذف المستخدم
+        if (results[2].changes === 0) { 
              return new Response(JSON.stringify({ success: false, error: 'المستخدم غير موجود بعد التحقق.' }), { status: 404, headers: { "Content-Type": "application/json" } });
         }
 
