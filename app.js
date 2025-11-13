@@ -516,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن ---
+    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (تم تغيير method إلى GET) ---
     async function loadAdminStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
 
@@ -524,7 +524,10 @@ document.addEventListener("DOMContentLoaded", () => {
         adminStoreMessage.textContent = "";
 
         try {
-            const response = await fetch(`/admin-get-items`, { method: "POST" });
+            // 🛑🛑 التعديل لحل مشكلة 405 (Method Not Allowed) 🛑🛑
+            // حذف { method: "POST" } لاستخدام GET التلقائية
+            const response = await fetch(`/admin-get-items`); 
+            
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
             const data = await response.json();
             
