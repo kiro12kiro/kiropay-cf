@@ -3,8 +3,9 @@
 
 export default {
     async fetch(request, env) {
-        if (request.method !== 'POST') {
-            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        // 🛑🛑 تم التعديل لحل مشكلة 405: التوقع الآن هو GET وليس POST 🛑🛑
+        if (request.method !== 'GET') {
+            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة. يجب استخدام GET.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
         }
 
         // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
