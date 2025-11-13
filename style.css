@@ -318,6 +318,44 @@ body {
     background-color: #c82333;
 }
 
+/* 🛑🛑 تنسيقات زر العودة للمتجر 🛑🛑 */
+#back-to-store-btn {
+    background-color: #007bff; /* Primary Blue */
+    color: white;
+    padding: 12px 25px; /* تكبير الزر */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: block; 
+    width: fit-content;
+    margin-right: auto; 
+    transition: background-color 0.2s;
+}
+#back-to-store-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 🛑🛑 تنسيقات زر إضافة عنصر (للأدمن) 🛑🛑 */
+form#admin-add-item-form button[type="submit"] {
+    background-color: #28a745; /* Success Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+form#admin-add-item-form button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+
 /* تنسيقات فورم الكويز */
 #admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
 #admin-quiz-form input[type="text"],
@@ -534,4 +572,3 @@ body {
     background-color: #c82333; /* أحمر أغمق عند التحويم */
     transform: scale(1.05);
 }
-/* 🛑🛑 نهاية ستايلات إدارة المتجر للأدمن المحسّنة 🛑🛑 */
