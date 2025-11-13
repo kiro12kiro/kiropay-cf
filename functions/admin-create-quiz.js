@@ -1,17 +1,17 @@
 /*
  * API Endpoint: /admin-create-quiz
- * (مُصحح ليتطابق مع الواجهة الأمامية)
+ * (مُصحح ليتطابق مع الأسماء المرسلة من app.js)
  */
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
     const data = await context.request.json();
     
-    // 🛑 التعديل هنا: الأسماء يجب أن تطابق ما يرسله app.js
-    const { question, optionA, optionB, optionC, answer, points } = data;
+    // 🛑🛑 الإصلاح هنا: استخدام الأسماء التي يرسلها app.js
+    const { question, opt_a, opt_b, opt_c, correct_opt, points } = data;
 
-    // 2. التحقق من البيانات (باستخدام الأسماء الجديدة)
-    if (!question || !optionA || !optionB || !optionC || !answer || !points) {
+    // 2. التحقق من البيانات (باستخدام الأسماء الصحيحة)
+    if (!question || !opt_a || !opt_b || !opt_c || !correct_opt || !points) {
       return new Response(JSON.stringify({ error: "الرجاء ملء جميع الحقول (خطأ من الباك إند)" }), { 
         status: 400, 
         headers: { "Content-Type": "application/json" } 
@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
     );
     
     // 5. نفذ الأمر بالبيانات الصحيحة
-    await ps.bind(question, optionA, optionB, optionC, answer, parseInt(points)).run();
+    await ps.bind(question, opt_a, opt_b, opt_c, correct_opt, parseInt(points)).run();
 
     // 6. رجّع رسالة نجاح
     return new Response(JSON.stringify({ success: true, message: "تم إضافة السؤال بنجاح!" }), {
