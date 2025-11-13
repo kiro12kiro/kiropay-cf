@@ -171,6 +171,19 @@ document.addEventListener("DOMContentLoaded", () => {
         storeContainer.style.display = "none";
         unlockedItemsContainer.style.display = "none";
     }
+    
+    // 🛑🛑 دالة العودة للصفحة الرئيسية (المتجر + الكويز + الصدارة) 🛑🛑
+    async function loadMainDashboard() {
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
+        
+        hideUserSections(); // إخفاء الكل قبل العرض
+        
+        // Call all initial load functions to bring back the default view
+        await loadLeaderboards(); // سيظهر لوحة الصدارة
+        await loadActiveQuiz(loggedInUserProfile.email); // سيظهر الكويز
+        await loadStoreItems(); // سيظهر المتجر
+    }
+
 
     // 🛑🛑 فانكشن جلب وعرض مشتريات المستخدم 🛑🛑
     async function loadUserUnlockedItems() {
@@ -331,7 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
     // 🛑🛑 معالجة ضغط زر العودة للمتجر 🛑🛑
-    backToStoreBtn.addEventListener('click', loadStoreItems);
+    backToStoreBtn.addEventListener('click', loadMainDashboard);
     // --- فانكشن سجل المعاملات (مُحصنة) ---
     async function loadTransactionHistory(email) {
         transactionList.innerHTML = "<li>جاري تحميل السجل...</li>";
@@ -367,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
     async function loadLeaderboards() {
-        hideUserSections(); // إخفاء الكل قبل العرض
+        // hideUserSections(); // لا نخفي هنا بل في دالة loadMainDashboard
         leaderboardContainer.style.display = "block"; 
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
         familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
@@ -441,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها بالكامل) 🛑🛑
     async function loadActiveQuiz(email) {
-        hideUserSections(); // إخفاء الكل قبل العرض
+        // hideUserSections(); // لا نخفي هنا بل في دالة loadMainDashboard
         quizContainer.style.display = "block";
 
         try {
@@ -561,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 🛑🛑 فانكشن شراء عنصر 🛑🛑
+    // 🛑🛑 فانكشن شراء عنصر (إصلاح الخطأ الوهمي) 🛑🛑
     async function handleBuyItem(event) {
         const itemId = event.target.dataset.itemId;
         event.target.disabled = true;
@@ -577,14 +590,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     itemId: itemId
                 }),
             });
-            
-            // 🛑🛑 تم التعديل: التعامل مع الرد حتى لو كان هناك خطأ وهمي بعد النجاح 🛑🛑
+
+            // 🛑🛑 التعديل لحل مشكلة الخطأ الوهمي 🛑🛑
+            // نقوم بقراءة الرد JSON أولاً
             const data = await response.json(); 
 
-            if (data.success || response.ok) { // نتحقق من response.ok أيضاً لضمان التحديث
+            if (data.success || response.ok) { 
+                // 1. إظهار رسالة النجاح الفورية
                 storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
                 storeMessage.style.color = "green";
-                await refreshUserData(); // 🛑 تحديث الرصيد والعناصر والسجل
+                
+                // 2. تحديث الواجهة بشكل منفصل لتجنب انهيار الرسالة الخضراء
+                try {
+                    await refreshUserData(); // 🛑 تحديث الرصيد والعناصر والسجل
+                } catch (refreshErr) {
+                    console.error("Failed to refresh UI after purchase:", refreshErr);
+                    storeMessage.textContent += " (لكن حدث خطأ في تحديث الواجهة. يرجى التحديث يدوياً.)";
+                    storeMessage.style.color = "orange";
+                }
+                
             } else {
                 storeMessage.textContent = data.error || "فشل عملية الشراء.";
                 storeMessage.style.color = "red";
@@ -595,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
             storeMessage.style.color = "orange";
             console.error("Buy Item Error:", err);
         } finally {
-            event.target.disabled = false;
+            // لا نعيد تفعيل الزر هنا، لأن refreshUserData سيعيد تحميل المتجر
         }
     }
     
