@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminAddItemForm = document.getElementById("admin-add-item-form");
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
     const adminStoreMessage = document.getElementById("admin-store-message");
+    const storeItemImageFile = document.getElementById("store-item-image-file"); // 🛑 العنصر الجديد لرفع الصورة
 
     const leaderboardContainer = document.getElementById("leaderboard-container");
     const topChampionsList = document.getElementById("top-champions-list");
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resetUI();
 
 
-    // (فانكشن مساعدة لضغط الصور)
+    // 🛑🛑 فانكشن مساعدة لضغط الصور (مطلوبة لرفع صور المنتجات) 🛑🛑
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => { 
             const reader = new FileReader();
@@ -454,9 +455,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     const canAfford = loggedInUserProfile.balance >= item.price;
                     const buttonText = canAfford ? `شراء (${item.price} نقطة)` : `النقاط غير كافية`;
                     
+                    // نستخدم item.name للعرض، مع افتراض أن الـ function (get-store-items) ترسل اسم العمود الصحيح
+                    const itemName = item.name || item.namel || 'منتج غير معروف'; 
+
                     card.innerHTML = `
-                        <img src="${item.image_url || '/default-item.png'}" alt="${item.name}">
-                        <h5>${item.name}</h5>
+                        <img src="${item.image_url || '/default-item.png'}" alt="${itemName}">
+                        <h5>${itemName}</h5>
                         <p class="price">$${item.price}</p>
                         <button class="buy-item-btn" data-item-id="${item.id}" ${canAfford ? '' : 'disabled'}>
                             ${buttonText}
@@ -516,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (تم تغيير method إلى GET) ---
+    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (تستخدم GET) ---
     async function loadAdminStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
 
@@ -524,8 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         adminStoreMessage.textContent = "";
 
         try {
-            // 🛑🛑 التعديل لحل مشكلة 405 (Method Not Allowed) 🛑🛑
-            // حذف { method: "POST" } لاستخدام GET التلقائية
+            // 🛑 تم التعديل: استخدام GET
             const response = await fetch(`/admin-get-items`); 
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
@@ -535,9 +538,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
+                    // نستخدم item.name أو item.namel حسب ما يرجعه الـ function
+                    const itemName = item.name || item.namel || 'غير معروف';
+
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span>${item.name} (${item.price} نقطة) - ID: ${item.id}</span>
+                        <span>${itemName} (${item.price} نقطة) - ID: ${item.id}</span>
                         <button class="delete-store-item-btn" data-item-id="${item.id}">حذف</button>
                     `;
                     adminStoreItemsList.appendChild(li);
@@ -1172,33 +1178,54 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         
-        // --- فورم إضافة عنصر جديد ---
+        // --- فورم إضافة عنصر جديد (المعدل لرفع الملفات) ---
         adminAddItemForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             const name = document.getElementById("store-item-name").value.trim();
             const price = parseInt(document.getElementById("store-item-price").value);
-            const imageUrl = document.getElementById("store-item-image-url").value.trim();
+            const imageFile = storeItemImageFile.files[0]; // 🛑 جلب الملف
 
-            if (!name || isNaN(price) || price <= 0 || !imageUrl) {
-                adminStoreMessage.textContent = "الرجاء ملء جميع حقول إضافة العنصر بشكل صحيح.";
+            if (!name || isNaN(price) || price <= 0 || !imageFile) {
+                adminStoreMessage.textContent = "الرجاء ملء جميع الحقول وإرفاق صورة.";
                 adminStoreMessage.style.color = "red";
                 return;
             }
 
-            adminStoreMessage.textContent = "جاري إضافة العنصر...";
+            adminStoreMessage.textContent = "جاري رفع الصورة وضغطها...";
             adminStoreMessage.style.color = "blue";
             
+            let final_image_url = ''; // ستكون رابط المنتج
+
             try {
+                // 🛑 منطق رفع الصورة إلى Cloudinary مع الضغط 🛑
+                const resizedBlob = await resizeImage(imageFile, 400, 400, 0.8); // ضغط الصورة
+                const formData = new FormData();
+                formData.append('file', resizedBlob);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                
+                const cloudinaryData = await cloudinaryResponse.json();
+                final_image_url = cloudinaryData.secure_url;
+                
+                adminStoreMessage.textContent = "جاري إرسال بيانات المنتج...";
+                
+                // 🛑 إرسال الرابط الناتج إلى الـ Function 🛑
                 const response = await fetch(`/admin-add-item`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, price, image_url: imageUrl }),
+                    body: JSON.stringify({ name, price, image_url: final_image_url }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    adminStoreMessage.textContent = `تم إضافة العنصر: ${name} بنجاح!`;
+                    adminStoreMessage.textContent = `تم إضافة المنتج: ${name} بنجاح!`;
                     adminStoreMessage.style.color = "green";
                     adminAddItemForm.reset(); 
                     await loadAdminStoreItems(); // تحديث القائمة بعد الإضافة
@@ -1207,7 +1234,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     adminStoreMessage.style.color = "red";
                 }
             } catch (err) {
-                adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لإضافة العنصر.";
+                adminStoreMessage.textContent = `خطأ: ${err.message || "فشل غير متوقع أثناء رفع الصورة أو الإضافة."}`;
                 adminStoreMessage.style.color = "red";
                 console.error("Add Item Error:", err);
             }
