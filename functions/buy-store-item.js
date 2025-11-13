@@ -1,46 +1,50 @@
-export async function onRequestPost(context) {
-  try {
-    const db = context.env.DB;
-    const data = await context.request.json();
-    const { email, item_id } = data;
+// File Name: buy-store-item.js
+// الوصف: السماح للمستخدم بشراء عنصر من المتجر وخصم الرصيد.
 
-    // 1. هات بيانات اليوزر (الرصيد)
-    const user = await db.prepare("SELECT balance FROM users WHERE email = ?").bind(email).first();
-    if (!user) return new Response(JSON.stringify({ error: "مستخدم غير موجود" }), { status: 404 });
+export default {
+    async fetch(request, env) {
+        if (request.method !== 'POST') {
+            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        }
 
-    // 2. هات بيانات العقار (السعر)
-    const item = await db.prepare("SELECT * FROM store_items WHERE id = ?").bind(item_id).first();
-    if (!item) return new Response(JSON.stringify({ error: "عقار غير موجود" }), { status: 404 });
+        const { email, itemId } = await request.json();
 
-    // 3. اتأكد إن اليوزر مش شاري العقار ده قبل كده
-    const owned = await db.prepare("SELECT id FROM user_unlocked_items WHERE user_email = ? AND item_id = ?")
-                          .bind(email, item_id).first();
-    if (owned) return new Response(JSON.stringify({ error: "أنت تملك هذا العقار بالفعل!" }), { status: 400 });
+        if (!email || !itemId) {
+            return new Response(JSON.stringify({ error: 'بيانات غير كاملة (الإيميل أو ID العنصر مفقود).' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
 
-    // 4. اتأكد إن الرصيد يكفي
-    if (user.balance < item.price) {
-        return new Response(JSON.stringify({ error: `رصيدك غير كافٍ. تحتاج ${item.price} نقطة.` }), { status: 400 });
+        try {
+            // 🛑 الخطوة 1: جلب بيانات المستخدم والعنصر
+            const user = await env.DB.getUserByEmail(email);
+            const item = await env.DB.getItemById(itemId);
+
+            if (!user) {
+                return new Response(JSON.stringify({ error: 'المستخدم غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            }
+            if (!item) {
+                return new Response(JSON.stringify({ error: 'العنصر غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            }
+
+            const itemPrice = item.price;
+            if (user.balance < itemPrice) {
+                return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية لإتمام عملية الشراء.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+            }
+
+            // 🛑 الخطوة 2: خصم الرصيد وتسجيل المعاملة (يجب أن تكون عملية متكاملة في DB)
+            const newBalance = user.balance - itemPrice;
+            const transactionReason = `شراء عنصر: ${item.name}`;
+            
+            await env.DB.updateBalanceAndLogTransaction(email, -itemPrice, transactionReason);
+            
+            // 🛑 الخطوة 3: تسجيل العنصر للمستخدم (حسب منطق المتجر لديك)
+            await env.DB.assignItemToUser(email, itemId);
+
+
+            return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح. رصيدك الجديد: ${newBalance}`, new_balance: newBalance }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+        } catch (error) {
+            console.error('Buy item error:', error);
+            return new Response(JSON.stringify({ success: false, error: 'حدث خطأ أثناء إتمام عملية الشراء.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
     }
-
-    // 5. نفذ عملية الشراء (Batch Transaction)
-    const batch = [
-        // خصم الرصيد
-        db.prepare("UPDATE users SET balance = balance - ? WHERE email = ?").bind(item.price, email),
-        // تسجيل الملكية
-        db.prepare("INSERT INTO user_unlocked_items (user_email, item_id) VALUES (?, ?)").bind(email, item_id),
-        // تسجيل المعاملة في السجل
-        db.prepare("INSERT INTO transactions (user_email, amount, reason) VALUES (?, ?, ?)")
-          .bind(email, -item.price, `شراء عقار: ${item.name}`)
-    ];
-
-    await db.batch(batch);
-
-    return new Response(JSON.stringify({ success: true, message: `مبروك! تم شراء ${item.name} بنجاح.` }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-  }
-}
+};
