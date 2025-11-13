@@ -457,16 +457,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             messageDiv.textContent = "جاري إرسال بيانات التسجيل...";
             
+            // 🛑 نستخدم FormData هنا لأن الباك إند يتوقعه
+            const dataToFunctions = new FormData();
+            dataToFunctions.append('name', name);
+            dataToFunctions.append('family', family);
+            dataToFunctions.append('email', email);
+            dataToFunctions.append('password', password);
+            dataToFunctions.append('profile_image_url', profile_image_url);
+
             const response = await fetch(`/signup`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    name: name, 
-                    family: family, 
-                    email: email, 
-                    password: password, 
-                    profile_image_url: profile_image_url 
-                }),
+                body: dataToFunctions, 
             });
 
             const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
@@ -854,7 +855,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
                     massUpdateMessage.style.color = "green";
-                    
                     selectedUsersForMassUpdate = [];
                     selectedUsersCount.textContent = "0";
                     massUpdateAmount.value = "";
