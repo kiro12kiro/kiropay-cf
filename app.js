@@ -178,13 +178,14 @@ document.addEventListener("DOMContentLoaded", () => {
         
         hideUserSections(); // إخفاء الكل قبل العرض
         
-        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
-        // نستخدم try/catch منفصل لضمان أن القسم التالي يعمل حتى لو فشل السابق
-        // نعتمد على الدالة الداخلية لضبط display: block
-        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); }
-        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); }
-        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); }
+        // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
+        await Promise.all([
+            loadLeaderboards(),
+            loadActiveQuiz(loggedInUserProfile.email),
+            loadStoreItems()
+        ]);
         
+        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
 
 
@@ -464,8 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 if (response.status === 404) {
                     console.log("لا يوجد سؤال جديد متاح.");
-                    // لا نستخدم display = "none" هنا بل نعرض رسالة خطأ داخل الحاوية المرئية
-                    quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">لا يوجد سؤال جديد متاح حالياً.</p></div>';
+                    quizContainer.innerHTML = '<div class="quiz-options"><p style="color: orange;">لا يوجد سؤال جديد متاح حالياً.</p></div>';
                 } else {
                     throw new Error("فشل جلب الكويز");
                 }
