@@ -250,7 +250,10 @@
                     <h5>إضافة عنصر جديد</h5>
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
-                    <input type="url" id="store-item-image-url" placeholder="رابط صورة العنصر (URL)" required>
+                    
+                    <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (يتم ضغطها تلقائياً):</label>
+                    <input type="file" id="store-item-image-file" accept="image/png, image/jpeg" required>
+                    
                     <button type="submit" style="background-color: #007bff; margin-top: 10px;">إضافة العنصر للمتجر</button>
                 </form>
                 <p id="admin-store-message" style="color: green; margin-top: 10px;"></p>
