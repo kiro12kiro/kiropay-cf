@@ -1,6 +1,5 @@
 // File Name: buy-store-item.js
-// الوصف: السماح للمستخدم بشراء عنصر من المتجر وخصم الرصيد.
-
+// 🛑 تم التعديل النهائي لاستخدام العمود 'user_email' (مع شرطة سفلية)
 export default {
     async fetch(request, env) {
         if (request.method !== 'POST') {
@@ -10,37 +9,42 @@ export default {
         const { email, itemId } = await request.json();
 
         if (!email || !itemId) {
-            return new Response(JSON.stringify({ error: 'بيانات غير كاملة (الإيميل أو ID العنصر مفقود).' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ error: 'بيانات غير كاملة.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
         try {
-            // 🛑 الخطوة 1: جلب بيانات المستخدم والعنصر
-            const user = await env.DB.getUserByEmail(email);
-            const item = await env.DB.getItemById(itemId);
+            // 🛑 الخطوة 1: جلب بيانات المستخدم (نفترض جدول users)
+            const { results: userResults } = await env.DB.prepare('SELECT balance FROM users WHERE email = ?').bind(email).all();
+            const user = userResults[0];
 
-            if (!user) {
-                return new Response(JSON.stringify({ error: 'المستخدم غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-            }
-            if (!item) {
-                return new Response(JSON.stringify({ error: 'العنصر غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-            }
+            // 🛑 الخطوة 2: جلب بيانات العنصر. (نستخدم name حسب آخر تأكيد)
+            const { results: itemResults } = await env.DB.prepare('SELECT id, price, name FROM store_items WHERE id = ?').bind(itemId).all();
+            const item = itemResults[0];
+
+            if (!user) return new Response(JSON.stringify({ error: 'المستخدم غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            if (!item) return new Response(JSON.stringify({ error: 'العنصر غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
 
             const itemPrice = item.price;
             if (user.balance < itemPrice) {
                 return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية لإتمام عملية الشراء.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
             }
 
-            // 🛑 الخطوة 2: خصم الرصيد وتسجيل المعاملة (يجب أن تكون عملية متكاملة في DB)
+            // --- عملية الشراء ---
+            
+            // 🛑 الخطوة 3: تسجيل العنصر للمستخدم في user_unlocked_items
+            // نستخدم user_email
+            await env.DB.prepare('INSERT INTO user_unlocked_items (user_email, item_id) VALUES (?, ?)')
+                .bind(email, itemId)
+                .run();
+            
+            // 🛑 الخطوة 4: تحديث رصيد المستخدم (يتطلب تأكيد أسماء أعمدة جدول users)
             const newBalance = user.balance - itemPrice;
-            const transactionReason = `شراء عنصر: ${item.name}`;
-            
-            await env.DB.updateBalanceAndLogTransaction(email, -itemPrice, transactionReason);
-            
-            // 🛑 الخطوة 3: تسجيل العنصر للمستخدم (حسب منطق المتجر لديك)
-            await env.DB.assignItemToUser(email, itemId);
+            await env.DB.prepare('UPDATE users SET balance = ? WHERE email = ?')
+                .bind(newBalance, email)
+                .run();
 
 
-            return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح. رصيدك الجديد: ${newBalance}`, new_balance: newBalance }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح.`, new_balance: newBalance }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
         } catch (error) {
             console.error('Buy item error:', error);
