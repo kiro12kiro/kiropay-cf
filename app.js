@@ -520,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (تستخدم GET) ---
+    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (مع تحسين معالجة الأخطاء) ---
     async function loadAdminStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
 
@@ -528,17 +528,22 @@ document.addEventListener("DOMContentLoaded", () => {
         adminStoreMessage.textContent = "";
 
         try {
-            // 🛑 تم التعديل: استخدام GET
             const response = await fetch(`/admin-get-items`); 
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
-            const data = await response.json();
-            
+
+            // 🛑🛑 التعديل لمرونة استلام الـ JSON 🛑🛑
+            const text = await response.text();
+            if (!text) throw new Error("استجابة فارغة من الخادم. (DB Binding Error?)");
+
+            const data = JSON.parse(text); // تحويل النص إلى JSON
+
+            // نهاية التعديل 
+
             adminStoreItemsList.innerHTML = '';
 
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
-                    // نستخدم item.name أو item.namel حسب ما يرجعه الـ function
                     const itemName = item.name || item.namel || 'غير معروف';
 
                     const li = document.createElement('li');
@@ -549,7 +554,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     adminStoreItemsList.appendChild(li);
                 });
 
-                // إضافة مُستمعي الأحداث لأزرار الحذف
                 document.querySelectorAll('.delete-store-item-btn').forEach(btn => {
                     btn.addEventListener('click', handleDeleteItem);
                 });
@@ -557,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 adminStoreItemsList.innerHTML = `<li>لا توجد عناصر مضافة حالياً.</li>`;
             }
         } catch(err) {
-            adminStoreItemsList.innerHTML = `<li style="color: red;">خطأ في تحميل العناصر.</li>`;
+            adminStoreItemsList.innerHTML = `<li style="color: red;">خطأ في تحميل العناصر: ${err.message}.</li>`;
             console.error("Admin Store Load Error:", err);
         }
     }
