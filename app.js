@@ -79,8 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const quizBtnC = document.getElementById("quiz-btn-c");
     const quizOptionButtons = document.querySelectorAll(".quiz-option-btn");
     const quizSubmitBtn = document.getElementById("quiz-submit-btn");
-    
-    // 🛑🛑🛑 هذا هو الإصلاح 🛑🛑🛑
     const quizMessage = document.getElementById("quiz-message");
 
     let currentSearchResults = [];
@@ -257,6 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error("فشل جلب السجل"); 
             const data = await response.json();
             transactionList.innerHTML = "";
+            // 🛑🛑 التأكد من أن data.transactions موجود (متطابق مع get-transactions)
             if (data.transactions && data.transactions.length > 0) {
                 data.transactions.forEach(t => {
                     const li = document.createElement("li");
@@ -390,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.style.display = "block"; // اظهر الكويز
 
         } catch (err) {
-            // 🛑🛑 تم إرجاع هذا الكود لوضعه الأصلي 🛑🛑
+            // (تم إرجاعه لوضعه الطبيعي بعد إصلاح الأخطاء)
             console.error("فشل جلب الكويز:", err);
             quizContainer.style.display = "none";
         }
@@ -820,7 +819,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
-        // --- فانكشن تعديل الرصيد الجماعي (مُحصنة) ---
+        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+        // 🛑🛑🛑 التعديل تم هنا (لمنع الإخفاء) 🛑🛑🛑
+        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
         async function handleMassUpdate(amount) {
             if (selectedUsersForMassUpdate.length === 0) {
                 massUpdateMessage.textContent = "الرجاء اختيار مستخدم واحد على الأقل.";
@@ -857,14 +858,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
                 
+                // 🛑🛑🛑 هذا هو التعديل 🛑🛑🛑
                 if (response.ok) {
                     massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
                     massUpdateMessage.style.color = "green";
+                    
+                    // سنقوم بتفريغ المدخلات
                     selectedUsersForMassUpdate = [];
                     selectedUsersCount.textContent = "0";
                     massUpdateAmount.value = "";
-                    adminFamilyResultsDiv.innerHTML = ""; 
-                    massUpdateControls.style.display = 'none';
+                    
+                    // 🛑🛑 تم حذف الأسطر التي تخفي العناصر 🛑🛑
+                    
+                    // قم بإلغاء تحديد كل الـ checkboxes يدوياً
+                    const checkboxes = adminFamilyResultsDiv.querySelectorAll('.mass-update-checkbox');
+                    checkboxes.forEach(cb => cb.checked = false);
+
                     refreshUserData();
                 } else {
                     massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
