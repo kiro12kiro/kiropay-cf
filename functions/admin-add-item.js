@@ -1,13 +1,12 @@
 // File Name: admin-add-item.js
-// الوصف: إضافة عنصر جديد إلى المتجر بواسطة الأدمن.
-
+// 🛑 تم التعديل: استخدام INSERT INTO SQL
 export default {
     async fetch(request, env) {
         if (request.method !== 'POST') {
             return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
+        // 🛑 (يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
 
         const { name, price, image_url } = await request.json();
 
@@ -16,14 +15,18 @@ export default {
         }
 
         try {
-            // 🛑 يجب استبدال هذا بمنطق إضافة عنصر جديد إلى قاعدة البيانات
-            const newItemId = await env.DB.addNewItem({ name, price: parseInt(price), image_url });
+            // 🛑🛑 التعديل لـ D1 SQL: استخدام INSERT
+            const result = await env.DB.prepare(
+                'INSERT INTO store_items (name, price, image_url) VALUES (?, ?, ?)'
+            )
+            .bind(name, parseInt(price), image_url)
+            .run();
 
-            return new Response(JSON.stringify({ success: true, message: `تم إضافة العنصر بنجاح.`, itemId: newItemId }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ success: true, message: `تم إضافة العنصر بنجاح.`, itemId: result.lastRowId }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
         } catch (error) {
             console.error('Admin error adding item:', error);
-            return new Response(JSON.stringify({ error: 'فشل إداري في إضافة العنصر.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ error: `فشل إداري في إضافة العنصر: ${error.message}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
         }
     }
 };
