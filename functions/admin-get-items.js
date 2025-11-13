@@ -1,5 +1,5 @@
 // File Name: admin-get-items.js
-// الوصف: جلب جميع عناصر المتجر لإدارتها (مع متطلبات صلاحيات الأدمن).
+// الوصف: جلب جميع عناصر المتجر لإدارتها.
 
 export default {
     async fetch(request, env) {
@@ -11,14 +11,16 @@ export default {
         // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
 
         try {
-            // 🛑 يجب استبدال هذا بمنطق قراءة جميع العناصر من قاعدة البيانات
-            const items = await env.DB.getAllItemsForAdmin(); 
+            // 🛑🛑 التعديل النهائي لـ D1 SQL 🛑🛑
+            // استخدام SELECT * على جدول store_items، وهو ما كان يسبب الانهيار سابقاً.
+            const { results: items } = await env.DB.prepare('SELECT * FROM store_items').all(); 
 
             return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
         } catch (error) {
             console.error('Admin error fetching store items:', error);
-            return new Response(JSON.stringify({ error: 'فشل إداري في جلب عناصر المتجر.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            // هذا الخطأ الآن سيظهر إذا فشل الربط (Binding) أو اسم الجدول (store_items)
+            return new Response(JSON.stringify({ error: `فشل إداري في جلب العناصر: ${error.message}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
         }
     }
 };
