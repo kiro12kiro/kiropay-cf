@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedUsersCount = document.getElementById("selected-users-count");
     const massUpdateAmount = document.getElementById("mass-update-amount");
     const massUpdateAddBtn = document.getElementById("mass-update-add-btn");
-    const massUpdateSubtractBtn = document.getElementById("mass-update-subtract-btn");
+    const massUpdateSubtractBtn = document.getElementById("admin-subtract-balance-btn");
     const massUpdateMessage = document.getElementById("mass-update-message");
     let selectedUsersForMassUpdate = [];
 
@@ -440,7 +440,9 @@ document.addEventListener("DOMContentLoaded", () => {
         storeMessage.textContent = "";
 
         try {
-            const response = await fetch(`/get-store-items`, { method: "POST" });
+            // 🛑🛑 التعديل لحل مشكلة 405: استخدام GET (عن طريق حذف method: "POST")
+            const response = await fetch(`/get-store-items`); 
+            
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر"); 
             const data = await response.json();
             
@@ -455,7 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const canAfford = loggedInUserProfile.balance >= item.price;
                     const buttonText = canAfford ? `شراء (${item.price} نقطة)` : `النقاط غير كافية`;
                     
-                    // نستخدم item.name للعرض، مع افتراض أن الـ function (get-store-items) ترسل اسم العمود الصحيح
                     const itemName = item.name || item.namel || 'منتج غير معروف'; 
 
                     card.innerHTML = `
@@ -479,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch(err) {
             storeLoadingMessage.style.display = 'none';
-            storeItemsList.innerHTML = `<p style="text-align: center; color: red;">خطأ في تحميل المتجر.</p>`;
+            storeItemsList.innerHTML = `<li style="color: red;">خطأ في تحميل المتجر: ${err.message}.</li>`;
             console.error("Store Load Error:", err);
         }
     }
@@ -532,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
 
-            // 🛑🛑 التعديل لمرونة استلام الـ JSON 🛑🛑
+            // 🛑🛑 التعديل لمرونة استلام الـ JSON (لحماية من أخطاء الـ 500 الخلفية) 🛑🛑
             const text = await response.text();
             if (!text) throw new Error("استجابة فارغة من الخادم. (DB Binding Error?)");
 
