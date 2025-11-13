@@ -416,6 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
                 }
             } else {
+                // في حالة الفشل، نظهر رسالة داخل الحاوية المرئية
                 topChampionsList.innerHTML = '<p style="text-align: center; color: orange;">فشل تحميل أبطال الصدارة.</p>';
             }
 
