@@ -1,14 +1,23 @@
-export async function onRequestGet(context) {
-  try {
-    const db = context.env.DB;
-    const ps = db.prepare("SELECT * FROM store_items");
-    const results = await ps.all();
+// File Name: admin-get-items.js
+// الوصف: جلب جميع عناصر المتجر لإدارتها (مع متطلبات صلاحيات الأدمن).
 
-    return new Response(JSON.stringify({ items: results.results }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-  }
-}
+export default {
+    async fetch(request, env) {
+        if (request.method !== 'POST') {
+            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
+
+        try {
+            // 🛑 يجب استبدال هذا بمنطق قراءة جميع العناصر من قاعدة البيانات
+            const items = await env.DB.getAllItemsForAdmin(); 
+
+            return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+        } catch (error) {
+            console.error('Admin error fetching store items:', error);
+            return new Response(JSON.stringify({ error: 'فشل إداري في جلب عناصر المتجر.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+};
