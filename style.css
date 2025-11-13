@@ -206,13 +206,16 @@ body {
 }
 
 /* ستايل زرار الحذف */
-#admin-delete-user-btn {
+#admin-delete-user-btn,
+.delete-item-btn { /* (تم تعميم زر الحذف) */
     background-color: #dc3545; /* أحمر */
     color: white;
     border: none;
     padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
+}
+#admin-delete-user-btn {
     width: 100%;
     margin-top: 1rem;
 }
@@ -273,7 +276,7 @@ body {
     overflow-y: auto; 
 }
 
-/* 🛑🛑 الكود الجديد اللي طلبته (معدل) 🛑🛑 */
+/* (الكود الخاص بلستة الأسر) */
 #admin-family-results .family-user-item {
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid #eee; padding: 0.5rem 0;
@@ -288,40 +291,184 @@ body {
     margin-right: 15px; transform: scale(1.3); 
 }
 
-/* 🛑🛑 تنسيقات جدول الأدمن (تمت إضافتها هنا) 🛑🛑 */
+/* 🛑🛑 بداية ستايلات لوحة TAKLOPOLY للأدمن 🛑🛑 */
 
-.admin-table {
+.taklopoly-board-container {
+    display: grid;
+    /* (1 ركن + 8 عقارات + 1 ركن = 10 أعمدة) */
+    grid-template-columns: 100px repeat(8, 1fr) 100px;
+    /* (1 ركن + 4 عقارات + 1 ركن = 6 صفوف) */
+    grid-template-rows: 100px repeat(4, 1fr) 100px;
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background-color: #fff; /* خلفية بيضاء للجدول */
+    max-width: 900px; 
+    margin: 2rem auto;
+    border: 3px solid #333;
+    background-color: #f0f0f0;
+    direction: ltr; /* (مهم جداً: اللوحة نفسها تترسم من اليسار لليمين) */
+    box-sizing: border-box;
 }
 
-.admin-table th, 
-.admin-table td {
-    border: 1px solid #ddd;
-    padding: 10px 12px; /* مسافات مريحة */
-    text-align: right; 
-    vertical-align: middle;
-}
-
-.admin-table th {
-    background-color: #f2f2f2; /* خلفية رمادية خفيفة للهيدر */
-    color: #333;
+/* الخانات العامة */
+.board-property, .board-corner {
+    border: 1px solid #999;
+    text-align: center;
+    padding: 5px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em; 
     font-weight: bold;
+    color: #000;
 }
 
-/* زر الحذف داخل الجدول */
-.admin-table .delete-item-btn {
-    background-color: #dc3545; /* أحمر */
+/* الخانات القابلة للضغط (العقارات) */
+.board-property {
+    cursor: pointer;
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+.board-property:hover {
+    background-color: #cce5ff; /* أزرق فاتح عند المرور */
+}
+.board-property .prop-name {
+    margin-bottom: 5px;
+}
+.board-property .prop-price {
+    font-size: 1.1em;
+    color: #007bff;
+}
+/* لو السعر لسه محطش (بيظهر ...) */
+.board-property .prop-price:empty::before {
+    content: "...";
+    color: #999;
+}
+
+/* الأركان (غير قابلة للضغط) */
+.board-corner, [data-name="من ممر"] {
+    background-color: #eee;
+    cursor: default;
+}
+
+/* تحديد أماكن الأركان */
+.start-corner { grid-column: 10 / 11; grid-row: 6 / 7; }
+.prison-corner { grid-column: 1 / 2; grid-row: 6 / 7; }
+.free-parking { grid-column: 1 / 2; grid-row: 1 / 2; }
+.go-to-prison { grid-column: 10 / 11; grid-row: 1 / 2; }
+
+/* الجانب السفلي (مقلوب) */
+.board-property.horizontal { grid-row: 6 / 7; }
+/* (من اليمين لليسار: 9 ثم 8 ... 2) */
+[data-name="رفح"] { grid-column: 9 / 10; }
+[data-name="العريش"] { grid-column: 8 / 9; }
+[data-name="القرمة"] { grid-column: 7 / 8; }
+[data-name="تل بسطا"] { grid-column: 6 / 7; }
+[data-name="الزقازيق"] { grid-column: 5 / 6; }
+[data-name="مسطرد"] { grid-column: 4 / 5; }
+[data-name="بلبيس"] { grid-column: 3 / 4; }
+[data-name="من ممر"] { grid-column: 2 / 3; } 
+
+/* الجانب الأيسر */
+.board-property.vertical { grid-column: 1 / 2; }
+[data-name="سمود"] { grid-row: 5 / 6; }
+[data-name="البرلس"] { grid-row: 4 / 5; }
+[data-name="سخا"] { grid-row: 3 / 4; }
+/* (الصورة فيها 3 بس، والجريد فيه 4 أماكن فاضية، هنسيب صف 2 فاضي) */
+
+
+/* الجانب العلوي */
+.board-property.horizontal.top-row { grid-row: 1 / 2; }
+[data-name="وادي النطرون"] { grid-column: 2 / 3; }
+[data-name="أنبا ويصا"] { grid-column: 3 / 4; }
+[data-name="الاسماعيلية"] { grid-column: 4 / 5; }
+[data-name="جبل الطير"] { grid-column: 5 / 6; }
+[data-name="الجندا"] { grid-column: 6 / 7; }
+[data-name="المعادي"] { grid-column: 7 / 8; }
+[data-name="الفسطاط"] { grid-column: 8 / 9; }
+[data-name="المطرية"] { grid-column: 9 / 10; }
+
+/* الجانب الأيمن */
+.board-property.vertical { grid-column: 10 / 11; }
+[data-name="القومية"] { grid-row: 2 / 3; }
+[data-name="مير"] { grid-row: 3 / 4; }
+[data-name="المحرق"] { grid-row: 4 / 5; }
+[data-name="درنكة"] { grid-row: 5 / 6; }
+
+
+/* مركز اللوحة (اللوجو) */
+.board-center {
+    grid-column: 2 / 10; /* (من العمود 2 إلى 9) */
+    grid-row: 2 / 6; /* (من الصف 2 إلى 5) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 20px;
+}
+.board-center h3 {
+    font-size: 2.5em;
+    color: #333;
+    opacity: 0.8;
+}
+
+/* 🛑 ستايلات المودال (Pop-up) 🛑 */
+.modal-overlay {
+    position: fixed; /* (يغطي الشاشة كلها) */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    direction: rtl; /* (إعادة تفعيل الاتجاه العربي للمودال) */
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    left: 15px; /* (عشان إحنا عربي، الزرار شمال) */
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+}
+.modal-close-btn:hover {
+    color: #000;
+}
+
+/* (إعادة استخدام ستايلات الفورم من ملفك الأساسي) */
+#admin-item-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#admin-item-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+#admin-item-form button {
+    background-color: #007bff;
     color: white;
+    padding: 10px;
     border: none;
-    padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9em;
 }
-
-.admin-table .delete-item-btn:hover {
-    background-color: #c82333;
-}
+/* 🛑🛑 نهاية ستايلات لوحة TAKLOPOLY 🛑🛑 */
