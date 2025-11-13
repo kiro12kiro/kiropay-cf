@@ -272,28 +272,56 @@ body {
     max-height: 300px; 
     overflow-y: auto; 
 }
-#admin-family-results p {
-    border-bottom: 1px solid #eee;
-    padding: 0.5rem 0;
-    display: flex;
-    justify-content: space-between;
-}
-#admin-family-results p:last-child {
-    border-bottom: none;
-}
 
-
-/* 🛑🛑 الكود الجديد اللي طلبته 🛑🛑 */
-/* * ده بيخلي اليوزرز في لستة الأسرة شكلهم قابل للضغط 
-*/
-#admin-family-results p {
-    cursor: pointer; /* بيخلي شكل الماوس يتحول لـ "يد" */
-    transition: background-color 0.2s; /* بيدي تأثير ناعم */
-    border-radius: 4px; 
-    padding: 0.75rem 0.5rem; 
+/* 🛑🛑 الكود الجديد اللي طلبته (معدل) 🛑🛑 */
+#admin-family-results .family-user-item {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #eee; padding: 0.5rem 0;
+}
+#admin-family-results .family-user-item:last-child { border-bottom: none; }
+#admin-family-results .user-info {
+    cursor: pointer; flex-grow: 1; padding: 5px;
+    margin-right: 15px; 
+}
+#admin-family-results .user-info:hover { background-color: #e9ecef; }
+#admin-family-results .mass-update-checkbox {
+    margin-right: 15px; transform: scale(1.3); 
 }
 
-/* لما الماوس يجي فوق اليوزر */
-#admin-family-results p:hover {
-    background-color: #e9ecef; /* بيدي لون رمادي فاتح */
+/* 🛑🛑 تنسيقات جدول الأدمن (تمت إضافتها هنا) 🛑🛑 */
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #fff; /* خلفية بيضاء للجدول */
+}
+
+.admin-table th, 
+.admin-table td {
+    border: 1px solid #ddd;
+    padding: 10px 12px; /* مسافات مريحة */
+    text-align: right; 
+    vertical-align: middle;
+}
+
+.admin-table th {
+    background-color: #f2f2f2; /* خلفية رمادية خفيفة للهيدر */
+    color: #333;
+    font-weight: bold;
+}
+
+/* زر الحذف داخل الجدول */
+.admin-table .delete-item-btn {
+    background-color: #dc3545; /* أحمر */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.admin-table .delete-item-btn:hover {
+    background-color: #c82333;
 }
