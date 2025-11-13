@@ -72,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const familyMargergesList = document.getElementById("family-margerges-list");
     const familyAnbaKarasList = document.getElementById("family-anba-karas-list");
 
-    // 🛑 عناصر الكويز (تم التأكد منها) 🛑
     const quizContainer = document.getElementById("quiz-container");
     const quizQuestionText = document.getElementById("quiz-question-text");
     const quizBtnA = document.getElementById("quiz-btn-a");
@@ -164,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 await loadLeaderboards();
-                await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
+                await loadActiveQuiz(user.email); // 🛑 الإصلاح الأول هنا
                 await loadAnnouncement();
             } else {
                 await loadAnnouncement();
@@ -227,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     await loadAnnouncement();
                 } else {
                     await loadLeaderboards();
-                    await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
+                    await loadActiveQuiz(user.email); // 🛑 الإصلاح الثاني هنا
                     await loadAnnouncement();
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
@@ -870,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         question: question, 
-                        opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
+                        opt_a: optionA, 
                         opt_b: optionB, 
                         opt_c: optionC, 
                         correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
