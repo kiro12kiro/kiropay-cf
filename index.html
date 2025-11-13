@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KiroPay Project</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* (تم الاحتفاظ بالستايلات الضرورية وإخفاء العناصر افتراضياً) */
-        .card-container, .form-container, #logout-btn, #refresh-data-btn, 
-        .admin-panel-container, .leaderboard-container, .quiz-container, 
-        .announcement-container, .mass-update-controls { display: none; }
 
+    <style>
+        /* 🛑 الحل 1: إخفاء الكارت والفورمات في البداية 🛑 */
+        .card-container { display: none; }
+        .form-container { display: none; }
+
+        /* (باقي أكواد الـ CSS زي ما هي) */
+        
         .avatar-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.5); color: white; 
@@ -21,50 +23,229 @@
         }
         .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
         #avatar-upload-input { display: none; }
-        
-        /* باقي الستايلات (للاختصار هي موجودة في ملفك style.css ويتم تحميلها) */
-        /* إضافة ستايلات الكويز والليدربورد والأدمن هنا بشكل سريع لضمان العرض */
-        .quiz-container, .leaderboard-container, .admin-panel-container {
-            max-width: 900px; margin: 2rem auto; padding: 20px; 
-            background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .container .card .card-img { width: 150px; height: 150px; }
+        .transaction-history {
+            width: 100%; margin-top: 1.5rem; padding-top: 1rem;
+            border-top: 1px solid #eee; max-height: 200px; 
+            overflow-y: auto; text-align: right; 
         }
+        .transaction-history h4 { margin: 0 0 0.5rem 0; color: #555; }
+        .transaction-history ul { list-style: none; padding: 0; margin: 0; }
+        .transaction-history li {
+            padding: 0.5rem; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; font-size: 0.9em;
+        }
+        .transaction-history .amount { font-weight: bold; white-space: nowrap; }
+        .transaction-history .positive { color: #28a745; }
+        .transaction-history .negative { color: #dc3545; }
+        .transaction-history .no-history { color: #888; text-align: center; padding: 1rem; }
+        .admin-panel-container { padding: 20px; max-width: 900px; margin: 2rem auto; }
+        #admin-panel {
+            background-color: #f0f0f0; padding: 1.5rem; border-radius: 8px;
+            margin-top: 1rem; border: 2px dashed #007bff;
+        }
+        .admin-section {
+            margin-top: 1.5rem; background: #fafafa; padding: 1rem; border-radius: 4px;
+        }
+        .admin-section h4 { border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+        #admin-search-form { display: flex; gap: 10px; margin-top: 0.5rem; }
+        #admin-search-form input {
+            flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+        }
+        #admin-search-form button {
+            padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;
+            color: white; background-color: #007bff;
+        }
+        #admin-balance-controls { display: flex; gap: 10px; margin-top: 0.5rem; }
+        #admin-balance-controls input {
+            flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+        }
+        #admin-add-balance-btn, #admin-subtract-balance-btn {
+            padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;
+            color: white; font-weight: bold;
+        }
+        #admin-add-balance-btn { background-color: #28a745; }
+        #admin-subtract-balance-btn { background-color: #ffc107; color: #333; }
+        #admin-delete-user-btn {
+            background-color: #dc3545; color: white; border: none;
+            padding: 10px 15px; border-radius: 4px; cursor: pointer;
+            width: 100%; margin-top: 1rem;
+        }
+        #logout-btn {
+            display: none; background-color: #6c757d; color: white; border: none;
+            padding: 10px 20px; border-radius: 4px; cursor: pointer;
+        }
+        #admin-searched-user-card {
+            display: none; background: #fff; padding: 1rem; margin-top: 1rem; 
+            border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #admin-searched-user-card p { margin: 0.5rem 0; }
+        .family-buttons-container {
+            display: flex; justify-content: space-around; gap: 10px; flex-wrap: wrap; 
+        }
+        .family-btn {
+            flex: 1; padding: 10px 15px; font-size: 0.9em; background-color: #17a2b8; 
+            color: white; border: none; border-radius: 4px; cursor: pointer; min-width: 150px; 
+        }
+        .family-btn:hover { background-color: #138496; }
+        #admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
+        #admin-quiz-form input[type="text"],
+        #admin-quiz-form input[type="number"],
+        #admin-quiz-form select {
+            padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;
+        }
+        #admin-quiz-form button {
+            background-color: #17a2b8; color: white; padding: 10px;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em;
+        }
+        #admin-quiz-form button:hover { background-color: #138496; }
+        .announcement-container {
+            display: none; max-width: 900px; margin: 2rem auto;
+            padding: 15px 20px; background-color: #fff3cd; 
+            border: 1px solid #ffeeba; border-radius: 8px; text-align: center;
+        }
+        .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
+        #user-announcement-text { font-size: 1.1em; color: #333; }
+        #admin-announcement-form textarea {
+            width: 100%; min-height: 80px; padding: 10px;
+            border: 1px solid #ccc; border-radius: 4px;
+            font-size: 1em; box-sizing: border-box; 
+        }
+        #admin-announcement-form button {
+            background-color: #ffc107; color: #212529; padding: 10px;
+            border: none; border-radius: 4px; cursor: pointer;
+            font-size: 1.1em; width: 100%; margin-top: 10px;
+        }
+        .mass-update-controls {
+            display: none; background: #e9ecef; padding: 15px;
+            border-radius: 8px; margin-top: 1rem; border: 1px solid #ccc;
+        }
+        .mass-update-controls h5 { margin: 0 0 10px 0; text-align: center; }
+        .mass-update-controls input {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            border-radius: 4px; box-sizing: border-box;
+        }
+        .mass-update-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .mass-update-buttons button {
+            flex: 1; padding: 10px; border: none; border-radius: 4px;
+            color: white; font-weight: bold; cursor: pointer;
+        }
+        #mass-update-add-btn { background-color: #28a745; }
+        #mass-update-subtract-btn { background-color: #dc3545; }
+        #admin-family-results .family-user-item {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #eee; padding: 0.5rem 0;
+        }
+        #admin-family-results .family-user-item:last-child { border-bottom: none; }
+        #admin-family-results .user-info {
+            cursor: pointer; flex-grow: 1; padding: 5px;
+            margin-right: 15px; 
+        }
+        #admin-family-results .user-info:hover { background-color: #e9ecef; }
+        #admin-family-results .mass-update-checkbox {
+            margin-right: 15px; transform: scale(1.3); 
+        }
+        .leaderboard-container {
+            display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
+            background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .leaderboard-container h2 {
+            text-align: center; color: #007bff; margin-top: 0;
+            border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+        }
+        .champions-container {
+            display: flex; justify-content: space-around; text-align: center;
+            margin: 2rem 0; flex-wrap: wrap;
+        }
+        .champion-card { flex-basis: 200px; }
+        .champion-card .rank { font-size: 2.5em; }
+        .champion-card .name {
+            font-size: 1.2em; font-weight: bold; color: #333; display: block;
+        }
+        .leaderboard-columns {
+            display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; 
+        }
+        .leaderboard-column { flex: 1; min-width: 300px; }
+        .leaderboard-column h3 {
+            color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+            font-size: 1.2em; text-align: center; 
+        }
+        .leaderboard-list { list-style: none; padding: 0; margin: 0; }
+        .leaderboard-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid #f0f0f0;
+        }
+        .leaderboard-list li:last-child { border-bottom: none; }
+
+        /* 🛑🛑 الكويز: تم إضافة display: none; 🛑🛑 */
+        .quiz-container {
+            display: none; 
+            max-width: 900px; margin: 2rem auto; padding: 20px;
+            background-color: #fff; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #007bff;
+        }
+        .quiz-container h2 { text-align: center; color: #007bff; margin-top: 0; }
+        #quiz-question-text {
+            font-size: 1.3em; font-weight: bold;
+            margin-bottom: 1.5rem; text-align: center;
+        }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
         .quiz-option-btn {
-            width: 100%; padding: 15px; margin-bottom: 10px; background: #f8f9fa; 
-            border: 1px solid #ddd; cursor: pointer; text-align: right;
+            padding: 15px; font-size: 1.1em; background-color: #f0f2f5;
+            border: 2px solid #ddd; border-radius: 8px; cursor: pointer;
+            text-align: right; transition: background-color 0.2s, border-color 0.2s;
         }
-        .quiz-option-btn.selected { background: #cce5ff; border-color: #007bff; }
-        #quiz-submit-btn { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer;}
+        .quiz-option-btn:hover { background-color: #e9ecef; border-color: #007bff; }
+        .quiz-option-btn.selected {
+            background-color: #cce5ff; border-color: #007bff; font-weight: bold;
+        }
+        #quiz-submit-btn {
+            background-color: #28a745; color: white; padding: 12px;
+            border: none; border-radius: 4px; cursor: pointer;
+            font-size: 1.2em; width: 100%; margin-top: 1.5rem;
+        }
+        #quiz-submit-btn:hover { background-color: #218838; }
+        #quiz-message {
+            text-align: center; font-size: 1.1em;
+            margin-top: 1rem; font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="container">
+        
         <div class="card-and-forms-wrapper">
-            <!-- كارت المستخدم -->
             <div class="card-container">
                 <div class="card">
+                    
                     <div class="avatar-wrapper" style="position: relative; width: 150px; height: 150px; margin: 0 auto 1rem;">
                         <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
-                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">تغيير الصورة</label>
+                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">
+                            تغيير الصورة
+                        </label>
                         <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg">
                     </div>
+                    
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
-                    
+
                     <div class="transaction-history">
                         <h4>سجل المعاملات</h4>
-                        <ul id="transaction-list"></ul>
+                        <ul id="transaction-list">
+                            </ul>
                     </div>
                 </div>
             </div>
             
-            <div class="button-group" style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
-                <button id="refresh-data-btn">تحديث البيانات</button>
+            <div class="button-group">
+                <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
                 <button id="logout-btn">تسجيل الخروج</button>
             </div>
 
-            <!-- فورمات الدخول -->
+
             <div class="form-container">
                 <form id="login-form">
                     <h3>Login</h3>
@@ -76,138 +257,203 @@
                 <form id="signup-form">
                     <h3>Sign Up</h3>
                     <input type="text" id="name" placeholder="Name" required>
-                    <label for="family">Family:</label>
+                    
+                    <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
                     <select id="family" required>
                         <option value="" disabled selected>-- اختر الأسرة --</option>
                         <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
                         <option value="اسرة مارجرس">اسرة مارجرس</option>
                         <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
                     </select>
+                    
                     <input type="email" id="signup-email" placeholder="Email" required>
                     <input type="password" id="signup-password" placeholder="Password" required>
-                    <label for="signup-avatar-file">Profile Picture:</label>
+
+                    <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
                     <input type="file" id="signup-avatar-file" accept="image/png, image/jpeg">
+
                     <button type="submit">Sign Up</button>
                 </form>
             </div>
-        </div> 
+            </div> 
     </div> 
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
-    <!-- قسم الإعلانات -->
     <div class="announcement-container" id="user-announcement-box">
         <h3>📢 إعلان هام</h3>
-        <p id="user-announcement-text"></p>
+        <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
     </div>
 
-    <!-- 🛑 قسم الكويز (لليوزر) 🛑 -->
     <div class="quiz-container" id="quiz-container">
         <h2>سؤال اليوم 🎁</h2>
-        <p id="quiz-question-text">جاري التحميل...</p>
+        <p id="quiz-question-text">جاري تحميل السؤال...</p>
         <div class="quiz-options">
-            <!-- القيم هنا: optionA, optionB, optionC لتطابق الباك إند -->
-            <button class="quiz-option-btn" data-value="optionA" id="quiz-btn-a">الاختيار أ</button>
-            <button class="quiz-option-btn" data-value="optionB" id="quiz-btn-b">الاختيار ب</button>
-            <button class="quiz-option-btn" data-value="optionC" id="quiz-btn-c">الاختيار ج</button>
+            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">الاختيار أ</button>
+            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">الاختيار ب</button>
+            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">الاختيار ج</button>
         </div>
         <button id="quiz-submit-btn">إرسال الإجابة</button>
         <p id="quiz-message"></p>
     </div>
     
-    <!-- لوحة الأدمن -->
     <div class="admin-panel-container">
-        <div id="admin-panel">
+        
+        <div id="admin-panel" style="display: none;">
+            
             <h2>لوحة تحكم الأدمن</h2>
             
-            <!-- البحث -->
             <div class="admin-section">
-                <h4>البحث عن مستخدم</h4>
+                <h4>البحث عن مستخدم (بالاسم)</h4>
                 <form id="admin-search-form">
-                    <input type="text" id="admin-search-name" placeholder="الاسم" required>
+                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
                     <button type="submit">بحث</button>
                 </form>
-                <select id="admin-select-user" style="width: 100%; margin-top: 10px; display: none; padding: 10px;"></select>
-                <p id="admin-search-message"></p>
+                
+                <div id="admin-results-list" style="display: none; margin-top: 15px;">
+                    <label for="admin-select-user" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                        تم العثور على عدة مستخدمين، اختر واحد:
+                    </label>
+                    <select id="admin-select-user" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white;">
+                    </select>
+                </div>
 
-                <div id="admin-searched-user-card" style="display: none; margin-top: 10px; border: 1px solid #ddd; padding: 10px;">
-                    <p id="searched-user-name"></p>
-                    <p id="searched-user-family"></p>
-                    <p id="searched-user-email"></p>
-                    <p id="searched-user-balance"></p>
-                    <hr>
+                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
+
+                <div id="admin-searched-user-card" style="display: none;">
+                    <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
+                    <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
+                    <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
+                    <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
+                    
+                    <hr style="margin: 1rem 0;">
+
+                    <h4>تعديل الرصيد</h4>
                     <div id="admin-balance-controls">
-                        <input type="number" id="admin-balance-amount" placeholder="الكمية">
-                        <button id="admin-add-balance-btn" style="background:green; color:white;">+</button>
-                        <button id="admin-subtract-balance-btn" style="background:orange; color:white;">-</button>
+                        <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
+                        <button id="admin-add-balance-btn">إضافة (+)</button>
+                        <button id="admin-subtract-balance-btn">خصم (-)</button>
                     </div>
-                    <p id="admin-balance-message"></p>
-                    <button id="admin-delete-user-btn" style="background:red; color:white; margin-top:10px; width:100%;">حذف المستخدم</button>
+                    <p id="admin-balance-message" style="color: green;"></p>
+                    
+                    <hr style="margin: 1rem 0;">
+
+                    <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
+                    <button id="admin-delete-user-btn">
+                        حذف هذا المستخدم نهائياً
+                    </button>
                     <p id="admin-delete-message"></p>
                 </div>
             </div>
             
-            <!-- الأسر والتعديل الجماعي -->
             <div class="admin-section">
-                <h4>الأسر والتعديل الجماعي</h4>
+                <h4>عرض المستخدمين حسب الأسرة</h4>
                 <div class="family-buttons-container">
-                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
-                    <button class="family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
-                    <button class="family-btn" data-family="اسرة الانبا كاراس">اسرة الانبا كاراس</button>
+                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">
+                        اسرة الانبا موسي الاسود
+                    </button>
+                    <button class="family-btn" data-family="اسرة مارجرس">
+                        اسرة مارجرس
+                    </button>
+                    <button class="family-btn" data-family="اسرة الانبا كاراس">
+                        اسرة الانبا كاراس
+                    </button>
                 </div>
-                <p id="admin-family-message"></p>
                 
-                <div class="mass-update-controls" id="mass-update-controls" style="display:none;">
-                    <h5>تعديل (<span id="selected-users-count">0</span>) مستخدم</h5>
-                    <input type="number" id="mass-update-amount" placeholder="الكمية">
-                    <button id="mass-update-add-btn" style="background:green; color:white;">+</button>
-                    <button id="mass-update-subtract-btn" style="background:orange; color:white;">-</button>
-                    <p id="mass-update-message"></p>
+                <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
+                
+                <div class="mass-update-controls" id="mass-update-controls">
+                    <h5>تعديل رصيد (<span id="selected-users-count">0</span>) مستخدم:</h5>
+                    <input type="number" id="mass-update-amount" placeholder="الكمية (اكتب سالب للخصم)" required>
+                    <div class="mass-update-buttons">
+                        <button id="mass-update-add-btn">إضافة (+)</button>
+                        <button id="mass-update-subtract-btn">خصم (-)</button>
+                    </div>
+                    <p id="mass-update-message" style="color: green; margin-top: 10px; text-align: center;"></p>
                 </div>
-                <div id="admin-family-results"></div>
+                
+                <div id="admin-family-results" style="margin-top: 1rem;">
+                    </div>
             </div>
             
-            <!-- 🛑 إضافة سؤال (Quiz) 🛑 -->
             <div class="admin-section">
-                <h4>إضافة سؤال جديد</h4>
+                <h4>إضافة سؤال جديد (Quiz)</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    ملحوظة: إضافة سؤال جديد سيقوم بإلغاء تنشيط السؤال القديم أوتوماتيكياً.
+                </p>
                 <form id="admin-quiz-form">
                     <input type="text" id="quiz-question" placeholder="نص السؤال" required>
-                    <input type="text" id="quiz-opt-a" placeholder="الاختيار أ" required>
-                    <input type="text" id="quiz-opt-b" placeholder="الاختيار ب" required>
-                    <input type="text" id="quiz-opt-c" placeholder="الاختيار ج" required>
+                    <input type="text" id="quiz-opt-a" placeholder="الاختيار الأول (أ)" required>
+                    <input type="text" id="quiz-opt-b" placeholder="الاختيار الثاني (ب)" required>
+                    <input type="text" id="quiz-opt-c" placeholder="الاختيار الثالث (ج)" required>
+                    
+                    <label for="quiz-correct-opt">الإجابة الصحيحة:</label>
                     <select id="quiz-correct-opt" required>
-                        <option value="" disabled selected>-- الإجابة الصحيحة --</option>
-                        <option value="optionA">الاختيار أ</option>
-                        <option value="optionB">الاختيار ب</option>
-                        <option value="optionC">الاختيار ج</option>
+                        <option value="" disabled selected>-- اختر الإجابة --</option>
+                        <option value="option_a">الاختيار الأول (أ)</option>
+                        <option value="option_b">الاختيار الثاني (ب)</option>
+                        <option value="option_c">الاختيار الثالث (ج)</option>
                     </select>
-                    <input type="number" id="quiz-points" placeholder="النقاط" required>
-                    <button type="submit">نشر السؤال</button>
+                    
+                    <label for="quiz-points">عدد النقاط:</label>
+                    <input type="number" id="quiz-points" placeholder="النقاط (مثال: 10)" required>
+                    
+                    <button type="submit">إضافة السؤال</button>
                 </form>
-                <p id="admin-quiz-message"></p>
+                <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
             </div>
 
-            <!-- نشر إعلان -->
             <div class="admin-section">
-                <h4>نشر إعلان</h4>
+                <h4>نشر إعلان عام</h4>
                 <form id="admin-announcement-form">
-                    <textarea id="admin-announcement-text" placeholder="نص الإعلان"></textarea>
-                    <button type="submit">نشر</button>
+                    <textarea id="admin-announcement-text" placeholder="اكتب الإعلان هنا..."></textarea>
+                    <button type="submit">نشر أو تحديث الإعلان</button>
                 </form>
-                <p id="admin-announcement-message"></p>
+                <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
             </div>
+
         </div>
     </div>
-
-    <!-- لوحة الصدارة -->
     <div class="leaderboard-container" id="leaderboard-container">
-        <h2>🏆 لوحة الصدارة</h2>
-        <div class="champions-container" id="top-champions-list"></div>
+        <h2>🏆 أبطال الأسر 🏆</h2>
+        <div class="champions-container" id="top-champions-list">
+            </div>
+        
+        <hr style="margin: 2rem 0;">
+
+        <h2>لوحة الصدارة التفصيلية (أعلى 10)</h2>
         <div class="leaderboard-columns">
-            <div class="leaderboard-column"><h3>اسرة الانبا موسي الاسود</h3><ul class="leaderboard-list" id="family-anba-moussa-list"></ul></div>
-            <div class="leaderboard-column"><h3>اسرة مارجرس</h3><ul class="leaderboard-list" id="family-margerges-list"></ul></div>
-            <div class="leaderboard-column"><h3>اسرة الانبا كاراس</h3><ul class="leaderboard-list" id="family-anba-karas-list"></ul></div>
+            
+            <div class="leaderboard-column">
+                <h3>اسرة الانبا موسي الاسود</h3>
+                <ul class="leaderboard-list" id="family-anba-moussa-list">
+                    </ul>
+            </div>
+            
+            <div class="leaderboard-column">
+                <h3>اسرة مارجرس</h3>
+                <ul class="leaderboard-list" id="family-margerges-list">
+                    </ul>
+            </div>
+
+            <div class="leaderboard-column">
+                <h3>اسرة الانبا كاراس</h3>
+                <ul class="leaderboard-list" id="family-anba-karas-list">
+                    </ul>
+            </div>
+
         </div>
+    </div>
+    <div class="quiz-container" id="quiz-container">
+        <h2>سؤال اليوم 🎁</h2>
+        <p id="quiz-question-text">جاري تحميل السؤال...</p>
+        <div class="quiz-options">
+            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">الاختيار أ</button>
+            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">الاختيار ب</button>
+            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">الاختيار ج</button>
+        </div>
+        <button id="quiz-submit-btn">إرسال الإجابة</button>
+        <p id="quiz-message"></p>
     </div>
     
     <script src="app.js"></script>
