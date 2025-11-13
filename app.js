@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
+        // نستخدم try/catch منفصل لضمان أن القسم التالي يعمل حتى لو فشل السابق
         try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
         try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
         try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
@@ -1111,7 +1112,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         massUpdateControls.style.display = "none";
                     } else {
                         adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
-                        adminFamilyMessage.style.color = "green";
                         massUpdateControls.style.display = "block";
                         users.forEach(user => {
                             const userItem = document.createElement("div");
