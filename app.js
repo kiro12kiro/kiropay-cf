@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 await loadLeaderboards();
-                await loadActiveQuiz(user.email); // 🛑 الإصلاح الأول هنا
+                await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
                 await loadAnnouncement();
             } else {
                 await loadAnnouncement();
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     await loadAnnouncement();
                 } else {
                     await loadLeaderboards();
-                    await loadActiveQuiz(user.email); // 🛑 الإصلاح الثاني هنا
+                    await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
                     await loadAnnouncement();
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
@@ -414,11 +414,77 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // --- فورم التسجيل (Signup) ---
+    // 🛑🛑 فورم التسجيل (Signup) (تمت استعادته بالكامل) 🛑🛑
     signupForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         event.stopPropagation();
-        // ... (كود التسجيل)
+        
+        messageDiv.textContent = "جاري إنشاء الحساب...";
+        messageDiv.style.color = "blue";
+
+        const name = document.getElementById("name").value;
+        const family = document.getElementById("family").value;
+        const email = document.getElementById("signup-email").value;
+        const password = document.getElementById("signup-password").value;
+        const avatarFile = signupAvatarFile.files[0];
+
+        if (!name || !family || !email || !password) {
+            messageDiv.textContent = "الرجاء ملء جميع الحقول المطلوبة.";
+            messageDiv.style.color = "red";
+            return;
+        }
+
+        let profile_image_url = DEFAULT_AVATAR_URL;
+
+        try {
+            if (avatarFile) {
+                messageDiv.textContent = "جاري ضغط ورفع الصورة...";
+                const resizedBlob = await resizeImage(avatarFile, 150, 150, 0.7); 
+                const formData = new FormData();
+                formData.append('file', resizedBlob);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                
+                const cloudinaryData = await cloudinaryResponse.json();
+                profile_image_url = cloudinaryData.secure_url;
+            }
+
+            messageDiv.textContent = "جاري إرسال بيانات التسجيل...";
+            
+            const response = await fetch(`/signup`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    name: name, 
+                    family: family, 
+                    email: email, 
+                    password: password, 
+                    profile_image_url: profile_image_url 
+                }),
+            });
+
+            const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+            if (response.ok) {
+                messageDiv.textContent = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
+                messageDiv.style.color = "green";
+                signupForm.reset(); 
+                loginForm.scrollIntoView({ behavior: 'smooth' }); 
+            } else {
+                messageDiv.textContent = `فشل التسجيل: ${data.error || "خطأ غير محدد"}`;
+                messageDiv.style.color = "red";
+            }
+        } catch (err) {
+            messageDiv.textContent = `حدث خطأ: ${err.message || "فشل غير متوقع."}`;
+            messageDiv.style.color = "red";
+            console.error("Signup Error:", err);
+        }
     });
 
 
@@ -593,7 +659,6 @@ document.addEventListener("DOMContentLoaded", () => {
                  balanceMessage.style.color = "red";
                  return;
             }
-
             balanceMessage.textContent = "جاري تحديث الرصيد...";
             balanceMessage.style.color = "blue";
             addBalanceBtn.disabled = true;
@@ -609,21 +674,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
-
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                 if (response.ok) {
                     balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
                     balanceMessage.style.color = "green";
-                    
                     currentSearchedUser.balance = data.new_balance;
                     searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
                     balanceAmountInput.value = "";
-                    
                     if (loggedInUserProfile.email === currentSearchedUser.email) {
                         refreshUserData(); 
                     }
-
                 } else {
                     balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
                     balanceMessage.style.color = "red";
@@ -679,16 +739,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ family: familyName }),
                     });
-
                     const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                     if (!response.ok) {
                         adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
                         adminFamilyMessage.style.color = "red";
                         massUpdateControls.style.display = "none";
                         return;
                     }
-
                     const users = data.users;
 
                     if (!users || users.length === 0) {
@@ -699,7 +756,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
                         adminFamilyMessage.style.color = "green";
                         massUpdateControls.style.display = "block";
-
                         users.forEach(user => {
                             const userItem = document.createElement("div");
                             userItem.className = "family-user-item";
