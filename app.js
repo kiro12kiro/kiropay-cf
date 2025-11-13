@@ -371,6 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // --- لو فيه سؤال جديد ---
             const quiz = data.quiz;
+            // 🛑🛑 ملاحظة: الكود هنا يتوقع الأسماء التي تم إصلاحها في get-active-quiz
             quizQuestionText.textContent = `${quiz.question_text} (+${quiz.points} نقطة)`;
             quizBtnA.textContent = quiz.option_a;
             quizBtnB.textContent = quiz.option_b;
@@ -522,13 +523,16 @@ document.addEventListener("DOMContentLoaded", () => {
         quizSubmitBtn.disabled = true; 
 
         try {
+            // 🛑🛑🛑 التعديل تم هنا 🛑🛑🛑
+            // تم تغيير quiz_id إلى quizId
+            // تم تغيير selected_option إلى selectedOption
             const response = await fetch(`/submit-quiz-answer`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   email: loggedInUserProfile.email,
-                  quiz_id: currentQuizId,
-                  selected_option: selectedOption
+                  quizId: currentQuizId,         // <-- (التصحيح)
+                  selectedOption: selectedOption // <-- (التصحيح)
                 })
             });
 
