@@ -255,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error("فشل جلب السجل"); 
             const data = await response.json();
             transactionList.innerHTML = "";
-            // 🛑🛑 التأكد من أن data.transactions موجود (متطابق مع get-transactions)
             if (data.transactions && data.transactions.length > 0) {
                 data.transactions.forEach(t => {
                     const li = document.createElement("li");
@@ -389,7 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.style.display = "block"; // اظهر الكويز
 
         } catch (err) {
-            // (تم إرجاعه لوضعه الطبيعي بعد إصلاح الأخطاء)
             console.error("فشل جلب الكويز:", err);
             quizContainer.style.display = "none";
         }
@@ -819,9 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
-        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-        // 🛑🛑🛑 التعديل تم هنا (لمنع الإخفاء) 🛑🛑🛑
-        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+        // --- فانكشن تعديل الرصيد الجماعي (مُحصنة ومُعدلة) ---
         async function handleMassUpdate(amount) {
             if (selectedUsersForMassUpdate.length === 0) {
                 massUpdateMessage.textContent = "الرجاء اختيار مستخدم واحد على الأقل.";
@@ -858,19 +854,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
                 
-                // 🛑🛑🛑 هذا هو التعديل 🛑🛑🛑
                 if (response.ok) {
                     massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
                     massUpdateMessage.style.color = "green";
                     
-                    // سنقوم بتفريغ المدخلات
                     selectedUsersForMassUpdate = [];
                     selectedUsersCount.textContent = "0";
                     massUpdateAmount.value = "";
                     
-                    // 🛑🛑 تم حذف الأسطر التي تخفي العناصر 🛑🛑
-                    
-                    // قم بإلغاء تحديد كل الـ checkboxes يدوياً
                     const checkboxes = adminFamilyResultsDiv.querySelectorAll('.mass-update-checkbox');
                     checkboxes.forEach(cb => cb.checked = false);
 
@@ -914,16 +905,14 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault(); 
             event.stopPropagation();
             
-            // 🛑 التأكد من أن IDs الحقول صحيحة ومطابقة لـ index.html
             const question = document.getElementById("quiz-question").value.trim();
             const optionA = document.getElementById("quiz-opt-a").value.trim();
             const optionB = document.getElementById("quiz-opt-b").value.trim();
             const optionC = document.getElementById("quiz-opt-c").value.trim();
-            const answer = document.getElementById("quiz-correct-opt").value.trim(); // ID الصحيح
+            const answer = document.getElementById("quiz-correct-opt").value.trim(); 
             const pointsInput = document.getElementById("quiz-points").value;
             const points = parseInt(pointsInput);
 
-            // منطق التحقق
             if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || pointsInput.trim() === '') {
                 adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
                 adminQuizMessage.style.color = "red";
@@ -939,10 +928,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         question: question, 
-                        opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
+                        opt_a: optionA, 
                         opt_b: optionB, 
                         opt_c: optionC, 
-                        correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
+                        correct_opt: answer, 
                         points: points 
                     }),
                 });
@@ -1004,6 +993,142 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Set Announcement Error:", err);
             }
         });
+
+        // 
+        // --- 🛑🛑 بداية أكواد إدارة المتجر (TAKLOPOLY) - (تمت إضافتها هنا) 🛑🛑 ---
+        // 
+        
+        // مسك عناصر واجهة المتجر
+        const adminAddItemForm = document.getElementById("admin-add-item-form");
+        const adminItemName = document.getElementById("item-name");
+        const adminItemPrice = document.getElementById("item-price");
+        const adminItemImageUrl = document.getElementById("item-image-url");
+        const adminItemMessage = document.getElementById("admin-item-message");
+        const adminStoreItemsTbody = document.getElementById("admin-store-items-tbody");
+
+        // --- (دالة 1: لإضافة سطر جديد للجدول) ---
+        function addRowToStoreTable(item) {
+            const tr = document.createElement("tr");
+            tr.dataset.itemId = item.id; // لتسهيل الحذف لاحقاً
+            tr.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.price} نقطة</td>
+                <td>
+                    <button class="delete-item-btn" data-id="${item.id}">حذف</button>
+                </td>
+            `;
+            
+            // إضافة "مستمع حدث" لزر الحذف الجديد
+            tr.querySelector(".delete-item-btn").addEventListener("click", (e) => {
+                handleDeleteItem(item.id, e.target);
+            });
+            
+            adminStoreItemsTbody.appendChild(tr);
+        }
+
+        // --- (دالة 2: لجلب كل العقارات عند فتح الصفحة) ---
+        async function loadStoreItems() {
+            adminStoreItemsTbody.innerHTML = '<tr><td colspan="3">جاري تحميل العقارات...</td></tr>';
+            try {
+                const response = await fetch('/admin-get-items', { method: 'GET' });
+                const data = await response.json();
+                
+                adminStoreItemsTbody.innerHTML = ''; // تفريغ الجدول
+                
+                if (response.ok && data.items && data.items.length > 0) {
+                    data.items.forEach(item => {
+                        addRowToStoreTable(item);
+                    });
+                } else if (response.ok) {
+                    adminStoreItemsTbody.innerHTML = '<tr><td colspan="3">لا توجد عقارات في المتجر حالياً.</td></tr>';
+                } else {
+                    throw new Error(data.error || "فشل جلب العقارات");
+                }
+            } catch (err) {
+                adminStoreItemsTbody.innerHTML = `<tr><td colspan="3" style="color: red;">${err.message}</td></tr>`;
+            }
+        }
+
+        // --- (دالة 3: للتعامل مع حذف عقار) ---
+        async function handleDeleteItem(itemId, buttonElement) {
+            if (!confirm(`هل أنت متأكد من حذف هذا العقار؟ سيتم حذفه أيضاً من عند كل المستخدمين الذين اشتروه.`)) {
+                return;
+            }
+            
+            buttonElement.textContent = "جاري الحذف...";
+            buttonElement.disabled = true;
+            
+            try {
+                const response = await fetch('/admin-delete-item', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ item_id: itemId })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // إزالة السطر من الجدول في الواجهة
+                    buttonElement.closest('tr').remove();
+                } else {
+                    alert(`فشل الحذف: ${data.error}`);
+                    buttonElement.textContent = "حذف";
+                    buttonElement.disabled = false;
+                }
+            } catch (err) {
+                alert(`فشل الحذف: ${err.message}`);
+                buttonElement.textContent = "حذف";
+                buttonElement.disabled = false;
+            }
+        }
+
+        // --- (مستمع الحدث 1: عند الضغط على زر "إضافة العقار") ---
+        adminAddItemForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            adminItemMessage.textContent = "جاري إضافة العقار...";
+            adminItemMessage.style.color = "blue";
+            
+            try {
+                const response = await fetch('/admin-add-item', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: adminItemName.value,
+                        price: adminItemPrice.value,
+                        image_url: adminItemImageUrl.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    adminItemMessage.textContent = `تم إضافة "${data.item.name}" بنجاح!`;
+                    adminItemMessage.style.color = "green";
+                    
+                    // إضافة العقار الجديد للجدول
+                    if (adminStoreItemsTbody.querySelector('td[colspan="3"]')) {
+                        adminStoreItemsTbody.innerHTML = ''; // إزالة رسالة "لا يوجد"
+                    }
+                    addRowToStoreTable(data.item);
+                    
+                    // تفريغ الفورم
+                    adminAddItemForm.reset();
+                } else {
+                    throw new Error(data.error || "فشل غير معروف");
+                }
+            } catch (err) {
+                adminItemMessage.textContent = `خطأ: ${err.message}`;
+                adminItemMessage.style.color = "red";
+            }
+        });
+        
+        // --- (تشغيل: جلب العقارات أول مرة عند فتح لوحة الأدمن) ---
+        loadStoreItems();
+
+        // --- 🛑🛑 نهاية أكواد إدارة المتجر (TAKLOPOLY) 🛑🛑 ---
+        // 
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
 
