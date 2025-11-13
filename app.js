@@ -593,7 +593,6 @@ document.addEventListener("DOMContentLoaded", () => {
                  balanceMessage.style.color = "red";
                  return;
             }
-
             balanceMessage.textContent = "جاري تحديث الرصيد...";
             balanceMessage.style.color = "blue";
             addBalanceBtn.disabled = true;
@@ -609,21 +608,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
-
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                 if (response.ok) {
                     balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
                     balanceMessage.style.color = "green";
-                    
                     currentSearchedUser.balance = data.new_balance;
                     searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
                     balanceAmountInput.value = "";
-                    
                     if (loggedInUserProfile.email === currentSearchedUser.email) {
                         refreshUserData(); 
                     }
-
                 } else {
                     balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
                     balanceMessage.style.color = "red";
@@ -679,16 +673,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ family: familyName }),
                     });
-
                     const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                     if (!response.ok) {
                         adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
                         adminFamilyMessage.style.color = "red";
                         massUpdateControls.style.display = "none";
                         return;
                     }
-
                     const users = data.users;
 
                     if (!users || users.length === 0) {
@@ -699,7 +690,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
                         adminFamilyMessage.style.color = "green";
                         massUpdateControls.style.display = "block";
-
                         users.forEach(user => {
                             const userItem = document.createElement("div");
                             userItem.className = "family-user-item";
@@ -798,7 +788,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
                     massUpdateMessage.style.color = "green";
-                    
                     selectedUsersForMassUpdate = [];
                     selectedUsersCount.textContent = "0";
                     massUpdateAmount.value = "";
@@ -869,7 +858,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         question: question, 
-                        opt_a: optionA, 
+                        opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
                         opt_b: optionB, 
                         opt_c: optionC, 
                         correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
