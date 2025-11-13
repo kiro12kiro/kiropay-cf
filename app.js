@@ -77,6 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminStoreMessage = document.getElementById("admin-store-message");
     const storeItemImageFile = document.getElementById("store-item-image-file"); // 🛑 العنصر الجديد لرفع الصورة
 
+    // --- عناصر المشتريات (جديدة) ---
+    const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
+    const unlockedItemsContainer = document.getElementById("unlocked-items-container");
+    const unlockedItemsList = document.getElementById("unlocked-items-list");
+    const unlockedItemsMessage = document.getElementById("unlocked-items-message");
+    // --- نهاية عناصر المشتريات ---
+
     const leaderboardContainer = document.getElementById("leaderboard-container");
     const topChampionsList = document.getElementById("top-champions-list");
     const familyAnbaMoussaList = document.getElementById("family-anba-moussa-list");
@@ -103,10 +110,12 @@ document.addEventListener("DOMContentLoaded", () => {
         formContainer.style.display = "flex";
         logoutBtn.style.display = "none";
         refreshDataBtn.style.display = "none";
+        unlockedItemsBtn.style.display = "none"; // 🛑 إضافة إخفاء زر المشتريات
         adminPanelDiv.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
-        storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
+        storeContainer.style.display = "none";
+        unlockedItemsContainer.style.display = "none"; // 🛑 إضافة إخفاء حاوية المشتريات
         avatarOverlayLabel.style.display = "none";
         massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
@@ -154,6 +163,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 🛑🛑 دالة لإخفاء أقسام المستخدم جميعها 🛑🛑
+    function hideUserSections() {
+        leaderboardContainer.style.display = "none";
+        quizContainer.style.display = "none";
+        storeContainer.style.display = "none";
+        unlockedItemsContainer.style.display = "none";
+    }
+
+    // 🛑🛑 فانكشن جلب وعرض مشتريات المستخدم 🛑🛑
+    async function loadUserUnlockedItems() {
+        if (!loggedInUserProfile) return;
+
+        hideUserSections();
+        unlockedItemsContainer.style.display = "block";
+        unlockedItemsList.innerHTML = '<p style="text-align: center;">جاري تحميل المشتريات...</p>';
+        unlockedItemsMessage.textContent = '';
+
+        try {
+            const response = await fetch(`/get-unlocked-items`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loggedInUserProfile.email }),
+            });
+            
+            const data = await response.json();
+
+            unlockedItemsList.innerHTML = '';
+            if (response.ok && data.success && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'store-item-card';
+                    const purchaseDate = new Date(item.purchased_at).toLocaleDateString('ar-EG');
+                    
+                    const itemName = item.name || 'منتج غير معروف';
+
+                    card.innerHTML = `
+                        <img src="${item.image_url || '/default-item.png'}" alt="${itemName}">
+                        <h5>${itemName}</h5>
+                        <p style="color: #28a745;">تم الشراء مقابل ${item.price} نقطة</p>
+                        <small>في: ${purchaseDate}</small>
+                    `;
+                    unlockedItemsList.appendChild(card);
+                });
+            } else {
+                unlockedItemsList.innerHTML = `<p style="text-align: center;">لم تقم بأي مشتريات سابقة.</p>`;
+            }
+        } catch(err) {
+            unlockedItemsMessage.textContent = `خطأ في تحميل المشتريات: ${err.message}`;
+            unlockedItemsMessage.style.color = 'red';
+            console.error("Unlocked Items Error:", err);
+        }
+    }
+
+
     // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
     async function refreshUserData() {
         if (!loggedInUserProfile) return;
@@ -176,13 +239,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
-                await loadLeaderboards();
+                unlockedItemsBtn.style.display = "block"; // 🛑 إظهار الزر
+                hideUserSections(); // إخفاء الكل
+                await loadLeaderboards(); // يتم استدعاؤها لإظهارها
                 await loadActiveQuiz(user.email); 
                 await loadAnnouncement();
-                await loadStoreItems(); // 🛑 إضافة المتجر هنا
+                await loadStoreItems(); 
             } else {
+                unlockedItemsBtn.style.display = "none";
                 await loadAnnouncement();
-                await loadAdminStoreItems(); // 🛑 إضافة تحميل عناصر الأدمن هنا
+                await loadAdminStoreItems(); 
             }
             refreshDataBtn.textContent = "تحديث البيانات";
         } catch(err) {
@@ -198,11 +264,10 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
         
+        // إخفاء الأقسام
         adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
-        leaderboardContainer.style.display = "none";
-        quizContainer.style.display = "none";
-        storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
+        hideUserSections();
         userAnnouncementBox.style.display = "none";
 
         const email = document.getElementById("email").value;
@@ -238,16 +303,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (user.role === 'admin') {
                     messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
                     adminPanelDiv.style.display = "block";
-                    leaderboardContainer.style.display = "none";
-                    userAnnouncementBox.style.display = "none";
-                    storeContainer.style.display = "none"; // 🛑 إضافة إخفاء المتجر
+                    unlockedItemsBtn.style.display = "none";
+                    hideUserSections();
                     await loadAnnouncement();
-                    await loadAdminStoreItems(); // 🛑 إضافة تحميل عناصر الأدمن
+                    await loadAdminStoreItems(); 
                 } else {
+                    unlockedItemsBtn.style.display = "block"; // 🛑 إظهار زر المشتريات
                     await loadLeaderboards();
                     await loadActiveQuiz(user.email); 
                     await loadAnnouncement();
-                    await loadStoreItems(); // 🛑 إضافة تحميل المتجر للمستخدم
+                    await loadStoreItems(); // 🛑 تحميل المتجر تلقائياً
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
@@ -261,6 +326,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
+    unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
     // --- فانكشن سجل المعاملات (مُحصنة) ---
     async function loadTransactionHistory(email) {
         transactionList.innerHTML = "<li>جاري تحميل السجل...</li>";
@@ -296,6 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
     async function loadLeaderboards() {
+        hideUserSections(); // إخفاء الكل قبل العرض
         leaderboardContainer.style.display = "block"; 
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
         familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
@@ -369,6 +437,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها بالكامل) 🛑🛑
     async function loadActiveQuiz(email) {
+        hideUserSections(); // إخفاء الكل قبل العرض
+        quizContainer.style.display = "block";
+
         try {
             const response = await fetch(`/get-active-quiz`, {
                 method: "POST",
@@ -434,9 +505,10 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
 
+        hideUserSections(); // إخفاء الكل قبل العرض
+        storeContainer.style.display = "block";
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
-        storeContainer.style.display = "block";
         storeMessage.textContent = "";
 
         try {
@@ -758,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
         adminSearchForm.addEventListener("submit", async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
-            const name = adminSearchInput.value.trim();
+            const name = document.getElementById("admin-search-name").value.trim();
 
             adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
             adminSearchMessage.style.color = "blue";
@@ -836,7 +908,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- كود الدروب ليست ---
         adminSelectUser.addEventListener("change", () => {
-            const selectedEmail = adminSelectUser.value;
+            const selectedEmail = document.getElementById("admin-select-user").value;
             const user = currentSearchResults.find(u => u.email === selectedEmail);
             if (user) {
                 populateAdminCard(user);
@@ -892,7 +964,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- زراير الرصيد (الفردي) ---
         addBalanceBtn.addEventListener("click", () => {
-            const amount = parseInt(balanceAmountInput.value);
+            const amount = parseInt(document.getElementById("admin-balance-amount").value);
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                  balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                  balanceMessage.style.color = "red";
@@ -901,7 +973,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBalance(amount, "إضافة يدوية من الأدمن");
         });
         subtractBalanceBtn.addEventListener("click", () => {
-            const amount = parseInt(balanceAmountInput.value); 
+            const amount = parseInt(document.getElementById("admin-balance-amount").value); 
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                 balanceMessage.style.color = "red";
@@ -914,7 +986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteUserBtn.addEventListener("click", async () => { /* ... */ });
         
         // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
-        familyButtons.forEach(button => {
+        document.querySelectorAll(".family-btn").forEach(button => {
             button.addEventListener("click", async (event) => {
                 const familyName = button.dataset.family;
                 
@@ -1074,7 +1146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // (ربط زراير التعديل الجماعي)
         massUpdateAddBtn.addEventListener('click', () => {
-            const amount = parseInt(massUpdateAmount.value);
+            const amount = parseInt(document.getElementById("mass-update-amount").value);
             if (!isNaN(amount) && amount > 0) {
                 handleMassUpdate(amount);
             } else {
@@ -1083,7 +1155,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         massUpdateSubtractBtn.addEventListener('click', () => {
-            const amount = parseInt(massUpdateAmount.value);
+            const amount = parseInt(document.getElementById("mass-update-amount").value);
             if (!isNaN(amount) && amount > 0) {
                 handleMassUpdate(-amount); // إرسال قيمة سالبة للخصم
             } else {
@@ -1152,7 +1224,7 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault(); 
             event.stopPropagation();
             
-            const announcementTextValue = adminAnnouncementText.value.trim();
+            const announcementTextValue = document.getElementById("admin-announcement-text").value.trim();
 
             if (!announcementTextValue) {
                 adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان أولاً.";
@@ -1175,7 +1247,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     adminAnnouncementMessage.textContent = "تم نشر الإعلان بنجاح!";
                     adminAnnouncementMessage.style.color = "green";
-                    adminAnnouncementText.value = ""; // تفريغ الحقل
+                    document.getElementById("admin-announcement-text").value = ""; // تفريغ الحقل
                     loadAnnouncement(); // 🛑 تحديث الإعلان لليوزر
                 } else {
                     adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
