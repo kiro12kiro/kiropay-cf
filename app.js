@@ -179,14 +179,17 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
-        // نستخدم Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
         await Promise.all([
             loadLeaderboards(),
             loadActiveQuiz(loggedInUserProfile.email),
             loadStoreItems()
         ]);
         
-        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
+        // 🛑🛑 فرض الإظهار بعد الانتهاء من التحميل 🛑🛑
+        // هذا يحل مشكلة الـ "اختفاء" ويزيل التداخلات
+        leaderboardContainer.style.display = "block"; 
+        quizContainer.style.display = "block"; 
+        storeContainer.style.display = "block"; 
     }
 
 
@@ -522,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
-        // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا (loadMainDashboard هو المسؤول)
+        // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا
         storeContainer.style.display = "block";
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
