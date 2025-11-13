@@ -3,19 +3,18 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    /* ده اللون السادة اللي هيظهر في الخلفية */
     background-color: #f4f4f4; 
     color: #333;
     line-height: 1.6;
-    direction: rtl; /* For Right-to-Left languages */
-    text-align: right; /* For Right-to-Left languages */
+    direction: rtl; 
+    text-align: right; 
 }
 
 .container {
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
-    background-color: transparent; /* شفافة عشان تبين خلفية الكارد كونتينر */
+    background-color: transparent; 
     border-radius: 8px;
     box-shadow: none; 
 }
@@ -33,7 +32,6 @@ body {
     margin-bottom: 20px; 
 }
 
-
 .card-container {
     display: flex;
     justify-content: center;
@@ -41,7 +39,7 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
+    background-color: rgba(255, 255, 255, 0.9); 
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -66,7 +64,7 @@ body {
 }
 
 .form-container form {
-    background-color: rgba(255, 255, 255, 0.9); /* بيضا وشفافة */
+    background-color: rgba(255, 255, 255, 0.9); 
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -117,7 +115,7 @@ body {
     text-align: center;
 }
 
-/* كود تكبير الكارت والصورة (من المرة اللي فاتت) */
+/* كود تكبير الكارت والصورة */
 .container .card {
     max-width: 450px; 
     width: 90%; 
@@ -130,7 +128,7 @@ body {
     height: 150px;
 }
 
-/* ستايلات لوحة الأدمن (بدون تغيير) */
+/* ستايلات لوحة الأدمن */
 .admin-panel-container {
     padding: 20px;
     max-width: 900px;
@@ -177,7 +175,6 @@ body {
     background-color: #007bff;
 }
 
-/* ستايلات لزراير الإضافة والخصم */
 #admin-balance-controls {
     display: flex;
     gap: 10px;
@@ -198,16 +195,15 @@ body {
     font-weight: bold;
 }
 #admin-add-balance-btn {
-    background-color: #28a745; /* أخضر */
+    background-color: #28a745; 
 }
 #admin-subtract-balance-btn {
-    background-color: #ffc107; /* أصفر */
+    background-color: #ffc107; 
     color: #333;
 }
 
-/* ستايل زرار الحذف */
 #admin-delete-user-btn {
-    background-color: #dc3545; /* أحمر */
+    background-color: #dc3545; 
     color: white;
     border: none;
     padding: 10px 15px;
@@ -217,7 +213,6 @@ body {
     margin-top: 1rem;
 }
 
-/* ستايل زرار تسجيل الخروج */
 #logout-btn {
     display: none;
     background-color: #6c757d;
@@ -243,7 +238,7 @@ body {
     margin: 0.5rem 0;
 }
 
-/* ستايلات جديدة لزراير الأسر */
+/* ستايلات زراير الأسر */
 .family-buttons-container {
     display: flex;
     justify-content: space-around;
@@ -272,28 +267,107 @@ body {
     max-height: 300px; 
     overflow-y: auto; 
 }
-#admin-family-results p {
-    border-bottom: 1px solid #eee;
-    padding: 0.5rem 0;
-    display: flex;
-    justify-content: space-between;
+#admin-family-results .family-user-item {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #eee; padding: 0.5rem 0;
 }
-#admin-family-results p:last-child {
-    border-bottom: none;
+#admin-family-results .family-user-item:last-child { border-bottom: none; }
+#admin-family-results .user-info {
+    cursor: pointer; flex-grow: 1; padding: 5px;
+    margin-right: 15px; 
 }
-
-
-/* 🛑🛑 الكود الجديد اللي طلبته 🛑🛑 */
-/* * ده بيخلي اليوزرز في لستة الأسرة شكلهم قابل للضغط 
-*/
-#admin-family-results p {
-    cursor: pointer; /* بيخلي شكل الماوس يتحول لـ "يد" */
-    transition: background-color 0.2s; /* بيدي تأثير ناعم */
-    border-radius: 4px; 
-    padding: 0.75rem 0.5rem; 
+#admin-family-results .user-info:hover { background-color: #e9ecef; }
+#admin-family-results .mass-update-checkbox {
+    margin-right: 15px; transform: scale(1.3); 
 }
 
-/* لما الماوس يجي فوق اليوزر */
-#admin-family-results p:hover {
-    background-color: #e9ecef; /* بيدي لون رمادي فاتح */
+/* 🛑🛑 تنسيقات فورم الكويز (تمت استعادتها) 🛑🛑 */
+#admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
+#admin-quiz-form input[type="text"],
+#admin-quiz-form input[type="number"],
+#admin-quiz-form select {
+    padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;
 }
+#admin-quiz-form button {
+    background-color: #17a2b8; color: white; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em;
+}
+#admin-quiz-form button:hover { background-color: #138496; }
+
+/* 🛑🛑 تنسيقات فورم الإعلان (تمت استعادتها) 🛑🛑 */
+#admin-announcement-form textarea {
+    width: 100%; min-height: 80px; padding: 10px;
+    border: 1px solid #ccc; border-radius: 4px;
+    font-size: 1em; box-sizing: border-box; 
+}
+#admin-announcement-form button {
+    background-color: #ffc107; color: #212529; padding: 10px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.1em; width: 100%; margin-top: 10px;
+}
+
+/* ستايلات الكويز (لليوزر) */
+.quiz-container {
+    display: none; 
+    max-width: 900px; margin: 2rem auto; padding: 20px;
+    background-color: #fff; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #007bff;
+}
+.quiz-container h2 { text-align: center; color: #007bff; margin-top: 0; }
+#quiz-question-text {
+    font-size: 1.3em; font-weight: bold;
+    margin-bottom: 1.5rem; text-align: center;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option-btn {
+    padding: 15px; font-size: 1.1em; background-color: #f0f2f5;
+    border: 2px solid #ddd; border-radius: 8px; cursor: pointer;
+    text-align: right; transition: background-color 0.2s, border-color 0.2s;
+}
+.quiz-option-btn:hover { background-color: #e9ecef; border-color: #007bff; }
+.quiz-option-btn.selected {
+    background-color: #cce5ff; border-color: #007bff; font-weight: bold;
+}
+#quiz-submit-btn {
+    background-color: #28a745; color: white; padding: 12px;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-size: 1.2em; width: 100%; margin-top: 1.5rem;
+}
+#quiz-submit-btn:hover { background-color: #218838; }
+#quiz-message {
+    text-align: center; font-size: 1.1em;
+    margin-top: 1rem; font-weight: bold;
+}
+
+/* ستايلات لوحة الصدارة */
+.leaderboard-container {
+    display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
+    background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.leaderboard-container h2 {
+    text-align: center; color: #007bff; margin-top: 0;
+    border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+}
+.champions-container {
+    display: flex; justify-content: space-around; text-align: center;
+    margin: 2rem 0; flex-wrap: wrap;
+}
+.champion-card { flex-basis: 200px; }
+.champion-card .rank { font-size: 2.5em; }
+.champion-card .name {
+    font-size: 1.2em; font-weight: bold; color: #333; display: block;
+}
+.leaderboard-columns {
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; 
+}
+.leaderboard-column { flex: 1; min-width: 300px; }
+.leaderboard-column h3 {
+    color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+    font-size: 1.2em; text-align: center; 
+}
+.leaderboard-list { list-style: none; padding: 0; margin: 0; }
+.leaderboard-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px; border-bottom: 1px solid #f0f0f0;
+}
+.leaderboard-list li:last-child { border-bottom: none; }
