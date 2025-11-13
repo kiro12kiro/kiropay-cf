@@ -371,7 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // --- لو فيه سؤال جديد ---
             const quiz = data.quiz;
-            // 🛑🛑 ملاحظة: الكود هنا يتوقع الأسماء التي تم إصلاحها في get-active-quiz
             quizQuestionText.textContent = `${quiz.question_text} (+${quiz.points} نقطة)`;
             quizBtnA.textContent = quiz.option_a;
             quizBtnB.textContent = quiz.option_b;
@@ -386,9 +385,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
             quizContainer.style.display = "block"; // اظهر الكويز
 
+        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+        // 🛑🛑🛑 التعديل تم هنا (لإظهار الخطأ) 🛑🛑🛑
+        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
         } catch (err) {
-            console.error("فشل جلب الكويز:", err);
-            quizContainer.style.display = "none";
+            console.error("فشل جلب الكويز:", err); 
+            
+            // 🛑🛑 كود الديباج الجديد 🛑🛑
+            // هذا سيجبر الكويز على الظهور وعرض الخطأ
+            quizContainer.style.display = "block"; 
+            
+            // نحتاج تعريف العناصر هنا لأننا داخل بلوك الكاتش
+            const quizQuestionText = document.getElementById("quiz-question-text");
+            quizQuestionText.textContent = "!! خطأ في جلب البيانات !!";
+            quizQuestionText.style.color = "red";
+            
+            const quizMessage = document.getElementById("quiz-message");
+            // هذا هو السطر الأهم
+            quizMessage.textContent = `Debug Info: ${err.message}`; 
+            quizMessage.style.color = "red";
         }
     }
 
@@ -523,16 +538,13 @@ document.addEventListener("DOMContentLoaded", () => {
         quizSubmitBtn.disabled = true; 
 
         try {
-            // 🛑🛑🛑 التعديل تم هنا 🛑🛑🛑
-            // تم تغيير quiz_id إلى quizId
-            // تم تغيير selected_option إلى selectedOption
             const response = await fetch(`/submit-quiz-answer`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   email: loggedInUserProfile.email,
-                  quizId: currentQuizId,         // <-- (التصحيح)
-                  selectedOption: selectedOption // <-- (التصحيح)
+                  quizId: currentQuizId,
+                  selectedOption: selectedOption
                 })
             });
 
