@@ -1,7 +1,6 @@
 /*
  * API Endpoint: /get-transactions
- * (ملف جديد)
- * وظيفته: يجيب سجل الحركات بتاع يوزر معين
+ * (الكود المُصحح)
  */
 export async function onRequestPost(context) {
   try {
@@ -13,15 +12,16 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: "لم يتم إرسال الإيميل" }), { status: 400 });
     }
 
-    // 🛑 ابحث في جدول transactions عن كل الحركات بتاعة الايميل ده
-    // ورتبهم من الأحدث للأقدم (DESC)
+    // 🛑 التعديل الأول: تم تغيير timestamp إلى created_at
     const ps = db.prepare(
-      "SELECT amount, reason, timestamp FROM transactions WHERE user_email = ? ORDER BY timestamp DESC"
+      "SELECT amount, reason, created_at FROM transactions WHERE user_email = ? ORDER BY created_at DESC"
     );
-    
+
     const results = await ps.bind(email).all();
 
-    return new Response(JSON.stringify({ history: results.results }), {
+    // 🛑 التعديل الثاني: تم تغيير المفتاح 'history' إلى 'transactions'
+    // ليتطابق مع ما يتوقعه app.js
+    return new Response(JSON.stringify({ transactions: results.results }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
