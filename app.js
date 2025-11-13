@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // Call all initial load functions to bring back the default view
+        // نستخدم Promise.all لضمان ظهور الأقسام بشكل أسرع
         await Promise.all([
             loadLeaderboards(), // سيظهر لوحة الصدارة
             loadActiveQuiz(loggedInUserProfile.email), // سيظهر الكويز
@@ -258,12 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 unlockedItemsBtn.style.display = "block"; // 🛑 إظهار الزر
-                hideUserSections(); // إخفاء الكل قبل العرض
                 
-                // يتم استدعاء الثلاثة أدناه لعرضهم بشكل افتراضي
-                await loadLeaderboards(); 
-                await loadActiveQuiz(user.email); 
-                await loadStoreItems(); 
+                // 🛑🛑 نستخدم loadMainDashboard لتهيئة الواجهة بعد التحديث 🛑🛑
+                await loadMainDashboard();
             } else {
                 unlockedItemsBtn.style.display = "none";
                 await loadAnnouncement();
@@ -328,10 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     await loadAdminStoreItems(); 
                 } else {
                     unlockedItemsBtn.style.display = "block"; // 🛑 إظهار زر المشتريات
-                    await loadLeaderboards();
-                    await loadActiveQuiz(user.email); 
-                    await loadAnnouncement();
-                    await loadStoreItems(); // 🛑 تحميل المتجر تلقائياً
+                    await loadMainDashboard(); // 🛑 تحميل لوحة التحكم الرئيسية الكاملة بعد تسجيل الدخول
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
