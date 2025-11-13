@@ -179,9 +179,11 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // Call all initial load functions to bring back the default view
-        await loadLeaderboards(); // سيظهر لوحة الصدارة
-        await loadActiveQuiz(loggedInUserProfile.email); // سيظهر الكويز
-        await loadStoreItems(); // سيظهر المتجر
+        await Promise.all([
+            loadLeaderboards(), // سيظهر لوحة الصدارة
+            loadActiveQuiz(loggedInUserProfile.email), // سيظهر الكويز
+            loadStoreItems() // سيظهر المتجر
+        ]);
         
         // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
