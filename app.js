@@ -178,15 +178,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         hideUserSections(); // إخفاء الكل قبل العرض
         
-        // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
-        // استخدام Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
-        await Promise.all([
-            loadLeaderboards(),
-            loadActiveQuiz(loggedInUserProfile.email),
-            loadStoreItems()
-        ]);
+        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
+        // نستخدم try/catch منفصل لضمان أن القسم التالي يعمل حتى لو فشل السابق
+        // نعتمد على الدالة الداخلية لضبط display: block
+        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); }
+        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); }
+        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); }
         
-        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
 
 
@@ -379,8 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
     async function loadLeaderboards() {
-        // hideUserSections(); // لا نخفي هنا بل في دالة loadMainDashboard
-        leaderboardContainer.style.display = "block"; 
+        leaderboardContainer.style.display = "block"; // 🛑 الإظهار أولاً
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
         familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
         familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
@@ -448,7 +445,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error("Leaderboard Major Error:", err);
-            // في حالة حدوث خطأ كبير (لم يتم التقاطه بواسطة allSettled)
             topChampionsList.innerHTML = '<p style="text-align: center; color: red;">خطأ كارثي في تحميل لوحة الصدارة.</p>';
         }
     }
@@ -456,8 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها بالكامل) 🛑🛑
     async function loadActiveQuiz(email) {
-        // hideUserSections(); // لا نخفي هنا بل في دالة loadMainDashboard
-        quizContainer.style.display = "block";
+        quizContainer.style.display = "block"; // 🛑 الإظهار أولاً
 
         try {
             const response = await fetch(`/get-active-quiz`, {
@@ -469,7 +464,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 if (response.status === 404) {
                     console.log("لا يوجد سؤال جديد متاح.");
-                    quizContainer.style.display = "none";
+                    // لا نستخدم display = "none" هنا بل نعرض رسالة خطأ داخل الحاوية المرئية
+                    quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">لا يوجد سؤال جديد متاح حالياً.</p></div>';
                 } else {
                     throw new Error("فشل جلب الكويز");
                 }
@@ -494,7 +490,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error("فشل جلب الكويز:", err);
-            quizContainer.style.display = "none";
+            // لا نستخدم display = "none" هنا بل نعرض رسالة خطأ داخل الحاوية المرئية
+            quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">خطأ في تحميل بيانات الكويز.</p></div>';
         }
     }
 
@@ -1141,7 +1138,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             userItem.appendChild(userInfo);
                             adminFamilyResultsDiv.appendChild(userItem);
                         });
-                        adminFamilyResultsDiv.style.display = "block";
                         selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
                     }
                 } catch (err) {
