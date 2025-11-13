@@ -30,13 +30,14 @@ export async function onRequestPost(context) {
       });
     }
 
-    // تجهيز البيانات للإرسال (تغيير أسماء الأعمدة لتناسب الـ Frontend)
+    // 🛑🛑🛑 التعديل تم هنا 🛑🛑🛑
+    // تم تغيير الأسماء لتطابق ما يتوقعه app.js
     const formattedQuiz = {
         id: quiz.id,
-        question: quiz.question_text,
-        optionA: quiz.option_a,
-        optionB: quiz.option_b,
-        optionC: quiz.option_c,
+        question_text: quiz.question_text, // <-- (التصحيح)
+        option_a: quiz.option_a,         // <-- (التصحيح)
+        option_b: quiz.option_b,         // <-- (التصحيح)
+        option_c: quiz.option_c,         // <-- (التصحيح)
         points: quiz.points
     };
 
