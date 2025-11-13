@@ -696,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await refreshUserData(); // لتحديث واجهة المستخدمين إذا كان مفتوحاً
             } else {
                 adminStoreMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير محدد"}`;
-                adminStoreMessage.style.color = "red";
+                deleteMessage.style.color = "red";
             }
         } catch (err) {
             adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لحذف العنصر.";
