@@ -1,26 +1,23 @@
 // File Name: admin-get-items.js
-// الوصف: جلب جميع عناصر المتجر لإدارتها.
+// 🛑 تم التحويل إلى صيغة onRequestGet(context)
+export async function onRequestGet(context) {
+    try {
+        const db = context.env.DB; // استخدام context.env.DB
+        
+        // التحقق من صلاحيات الأدمن يجب أن يتم هنا (في الكود الحقيقي)
 
-export default {
-    async fetch(request, env) {
-        // 🛑🛑 تم التعديل لحل مشكلة 405: التوقع الآن هو GET وليس POST 🛑🛑
-        if (request.method !== 'GET') {
-            return new Response(JSON.stringify({ error: 'الطريقة غير مسموحة. يجب استخدام GET.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-        }
+        // جلب جميع البيانات من جدول store_items (وهذا ما كان يسبب الانهيار)
+        const { results: items } = await db.prepare('SELECT * FROM store_items').all(); 
 
-        // 🛑 (ملاحظة: يجب التأكد هنا من صلاحيات الأدمن قبل المتابعة)
+        return new Response(JSON.stringify({ items }), { 
+            status: 200, 
+            headers: { 'Content-Type': 'application/json' } 
+        });
 
-        try {
-            // 🛑🛑 التعديل النهائي لـ D1 SQL 🛑🛑
-            // استخدام SELECT * على جدول store_items، وهو ما كان يسبب الانهيار سابقاً.
-            const { results: items } = await env.DB.prepare('SELECT * FROM store_items').all(); 
-
-            return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-
-        } catch (error) {
-            console.error('Admin error fetching store items:', error);
-            // هذا الخطأ الآن سيظهر إذا فشل الربط (Binding) أو اسم الجدول (store_items)
-            return new Response(JSON.stringify({ error: `فشل إداري في جلب العناصر: ${error.message}` }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: `فشل إداري في جلب العناصر: ${error.message}` }), { 
+            status: 500, 
+            headers: { 'Content-Type': 'application/json' } 
+        });
     }
-};
+}
