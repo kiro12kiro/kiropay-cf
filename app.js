@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
+        // نستخدم Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
         await Promise.all([
             loadLeaderboards(),
             loadActiveQuiz(loggedInUserProfile.email),
@@ -416,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
                 }
             } else {
-                // في حالة الفشل، نظهر رسالة داخل الحاوية المرئية
                 topChampionsList.innerHTML = '<p style="text-align: center; color: orange;">فشل تحميل أبطال الصدارة.</p>';
             }
 
@@ -520,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
         hideUserSections(); // إخفاء الكل قبل العرض
         storeContainer.style.display = "block";
