@@ -1019,6 +1019,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             // 🛑🛑 التحقق الإضافي: التأكد من إيميل الأدمن 🛑🛑
+            // هذا الفحص يحل مشكلة الـ 400 Bad Request
             if (!loggedInUserProfile || !loggedInUserProfile.email) {
                  deleteMessage.textContent = "خطأ: لم يتم التعرف على إيميل الأدمن الحالي. (يرجى إعادة تسجيل الدخول)";
                  deleteMessage.style.color = "red";
