@@ -1,6 +1,6 @@
 /*
  * API Endpoint: /get-active-quiz
- * (الكود المُصحح ليتطابق مع app.js)
+ * (الكود المُصحح والنهائي)
  */
 export async function onRequestPost(context) {
   try {
@@ -12,6 +12,7 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: "الإيميل مطلوب" }), { status: 400 });
     }
 
+    // هذا الاستعلام سيعمل الآن لأن user_answers موجود
     const ps = db.prepare(`
       SELECT q.id, q.question_text, q.option_a, q.option_b, q.option_c, q.points
       FROM quizzes q
@@ -29,14 +30,14 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑🛑🛑 هذا هو التعديل الأهم 🛑🛑🛑
-    // app.js يتوقع هذه الأسماء: question_text, option_a, ...
+    // 🛑🛑 هذا هو التعديل الثاني والمهم 🛑🛑
+    // (إصلاح عدم تطابق الأسماء)
     const formattedQuiz = {
         id: quiz.id,
-        question_text: quiz.question_text, // <-- كان خطأ (question)
-        option_a: quiz.option_a,         // <-- كان خطأ (optionA)
-        option_b: quiz.option_b,         // <-- كان خطأ (optionB)
-        option_c: quiz.option_c,         // <-- كان خطأ (optionC)
+        question_text: quiz.question_text, // <-- تصحيح
+        option_a: quiz.option_a,         // <-- تصحيح
+        option_b: quiz.option_b,         // <-- تصحيح
+        option_c: quiz.option_c,         // <-- تصحيح
         points: quiz.points
     };
 
