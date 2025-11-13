@@ -79,6 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const quizBtnC = document.getElementById("quiz-btn-c");
     const quizOptionButtons = document.querySelectorAll(".quiz-option-btn");
     const quizSubmitBtn = document.getElementById("quiz-submit-btn");
+    
+    // 🛑🛑🛑 هذا هو الإصلاح 🛑🛑🛑
+    const quizMessage = document.getElementById("quiz-message");
+
     let currentSearchResults = [];
     let currentSearchedUser = null; 
     let currentQuizId = null;
@@ -385,25 +389,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             quizContainer.style.display = "block"; // اظهر الكويز
 
-        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-        // 🛑🛑🛑 التعديل تم هنا (لإظهار الخطأ) 🛑🛑🛑
-        // 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
         } catch (err) {
-            console.error("فشل جلب الكويز:", err); 
-            
-            // 🛑🛑 كود الديباج الجديد 🛑🛑
-            // هذا سيجبر الكويز على الظهور وعرض الخطأ
-            quizContainer.style.display = "block"; 
-            
-            // نحتاج تعريف العناصر هنا لأننا داخل بلوك الكاتش
-            const quizQuestionText = document.getElementById("quiz-question-text");
-            quizQuestionText.textContent = "!! خطأ في جلب البيانات !!";
-            quizQuestionText.style.color = "red";
-            
-            const quizMessage = document.getElementById("quiz-message");
-            // هذا هو السطر الأهم
-            quizMessage.textContent = `Debug Info: ${err.message}`; 
-            quizMessage.style.color = "red";
+            // 🛑🛑 تم إرجاع هذا الكود لوضعه الأصلي 🛑🛑
+            console.error("فشل جلب الكويز:", err);
+            quizContainer.style.display = "none";
         }
     }
 
