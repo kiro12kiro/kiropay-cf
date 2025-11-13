@@ -1,4 +1,4 @@
-Document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     // --- مسك العناصر الأساسية ---
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
@@ -520,12 +520,10 @@ Document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        // 🛑🛑🛑 التعديل المطلوب: تأكد من أن الدالة تعمل فقط للمستخدم العادي 🛑🛑🛑
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
-        // 🛑🛑 التعديل: إزالة hideUserSections() من هنا (لأنها في loadMainDashboard) 🛑🛑
-        storeContainer.style.display = "block"; // 🛑 إظهار المتجر
-
+        // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا (loadMainDashboard هو المسؤول)
+        storeContainer.style.display = "block";
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
         storeMessage.textContent = "";
