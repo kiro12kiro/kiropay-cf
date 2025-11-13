@@ -179,7 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
-        // نستخدم try/catch منفصل لضمان أن القسم التالي يعمل حتى لو فشل السابق
         try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
         try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
         try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
@@ -1013,21 +1012,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑 ⬅️ تم إضافة الكود المفقود والمصحح هنا
         deleteUserBtn.addEventListener("click", async () => {
-            if (!currentSearchedUser) {
-                deleteMessage.textContent = "الرجاء البحث واختيار مستخدم أولاً.";
+            // 🛑 CRITICAL EXTRACTION AND FINAL CHECK 🛑
+            const targetEmail = currentSearchedUser && currentSearchedUser.email;
+            const currentAdminEmail = loggedInUserProfile && loggedInUserProfile.email;
+            
+            if (!targetEmail) {
+                deleteMessage.textContent = "خطأ: لم يتم تحديد إيميل المستخدم المراد حذفه بشكل صحيح.";
                 deleteMessage.style.color = "red";
                 return;
             }
-            
-            // 🛑🛑 التحقق الإضافي: التأكد من إيميل الأدمن 🛑🛑
-            // هذا الفحص يحل مشكلة الـ 400 Bad Request
-            if (!loggedInUserProfile || !loggedInUserProfile.email) {
+            if (!currentAdminEmail) {
                  deleteMessage.textContent = "خطأ: لم يتم التعرف على إيميل الأدمن الحالي. (يرجى إعادة تسجيل الدخول)";
                  deleteMessage.style.color = "red";
                  return;
             }
             
-            if (currentSearchedUser.email === loggedInUserProfile.email) {
+            if (targetEmail === currentAdminEmail) {
                  deleteMessage.textContent = "لا يمكن حذف حساب الأدمن الحالي.";
                  deleteMessage.style.color = "red";
                  return;
@@ -1048,8 +1048,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     // نرسل الإيميل لحذفه وإيميل الأدمن للتحقق من الصلاحيات
                     body: JSON.stringify({ 
-                        emailToDelete: currentSearchedUser.email,
-                        adminEmail: loggedInUserProfile.email 
+                        emailToDelete: targetEmail,
+                        adminEmail: currentAdminEmail 
                     }),
                 });
                 
@@ -1112,6 +1112,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         massUpdateControls.style.display = "none";
                     } else {
                         adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                        massUpdateMessage.style.color = "green";
                         massUpdateControls.style.display = "block";
                         users.forEach(user => {
                             const userItem = document.createElement("div");
@@ -1229,7 +1230,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (err) {
                 massUpdateMessage.textContent = "خطأ في الاتصال بالـ API.";
-                massUpdateMessage.style.color = "red";
+                    massUpdateMessage.style.color = "red";
                 console.error("Mass Update Error:", err);
             } finally {
                 massUpdateAddBtn.disabled = false;
