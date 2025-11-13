@@ -140,7 +140,7 @@ body {
     border-radius: 8px;
     margin-top: 1rem;
     border: 2px dashed #007bff;
-    font-size: 1.1em; /* 🛑 تكبير الخط الأساسي */
+    font-size: 1.1em; /* 🛑 تم تكبير الخط الأساسي */
 }
 #admin-panel h2 {
     text-align: center;
@@ -283,6 +283,12 @@ body {
 }
 
 /* ستايلات التعديل الجماعي (لجعل الأزرار أكبر وملونة) */
+.mass-update-controls {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 .mass-update-buttons {
     display: flex;
     gap: 10px;
@@ -460,26 +466,7 @@ body {
     cursor: not-allowed;
 }
 
-/* ستايلات إدارة المتجر للأدمن */
-#admin-store-items-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-}
-#admin-store-items-list button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-#admin-add-item-form input {
-    margin-bottom: 8px;
-}
-/* New styles for the Admin Store Items Card */
+/* ستايلات إدارة المتجر للأدمن (الكارت الكبير الجديد) */
 #admin-store-items-list {
     list-style: none;
     padding: 0;
@@ -498,7 +485,7 @@ body {
     align-items: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: background-color 0.2s;
-    font-size: 1.1em; /* 🛑 تكبير حجم الكارت */
+    font-size: 1.1em; /* تكبير حجم الكارت */
 }
 .admin-item-card:hover {
     background-color: #f9f9f9;
