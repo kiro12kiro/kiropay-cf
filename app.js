@@ -182,6 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadLeaderboards(); // سيظهر لوحة الصدارة
         await loadActiveQuiz(loggedInUserProfile.email); // سيظهر الكويز
         await loadStoreItems(); // سيظهر المتجر
+        
+        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
 
 
@@ -343,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
-    // 🛑🛑 معالجة ضغط زر العودة للمتجر 🛑🛑
+    // 🛑🛑 معالجة ضغط زر العودة للمتجر (يرجع للوحة الرئيسية) 🛑🛑
     backToStoreBtn.addEventListener('click', loadMainDashboard);
     // --- فانكشن سجل المعاملات (مُحصنة) ---
     async function loadTransactionHistory(email) {
@@ -592,7 +594,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             // 🛑🛑 التعديل لحل مشكلة الخطأ الوهمي 🛑🛑
-            // نقوم بقراءة الرد JSON أولاً
             const data = await response.json(); 
 
             if (data.success || response.ok) { 
@@ -746,7 +747,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
                 
                 const cloudinaryData = await cloudinaryResponse.json();
-                profile_image_url = cloudinaryData.secure_url;
+                    profile_image_url = cloudinaryData.secure_url;
             }
 
             messageDiv.textContent = "جاري إرسال بيانات التسجيل...";
