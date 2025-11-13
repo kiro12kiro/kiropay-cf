@@ -105,44 +105,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (فانكشن مساعدة لضغط الصور)
     function resizeImage(file, maxWidth, maxHeight, quality) {
-        return new Promise((resolve, reject) => { /* ... */ });
+        return new Promise((resolve, reject) => { 
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
     }
 
     // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
     async function refreshUserData() {
         if (!loggedInUserProfile) return;
-
         refreshDataBtn.textContent = "جاري التحديث...";
-
         try {
             const response = await fetch(`/get-user-profile`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: loggedInUserProfile.email }),
             });
-            
             if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
             const data = await response.json();
-
             const user = data.user;
             loggedInUserProfile = user;
 
-            // 2. تحديث الكارت
             userNameP.textContent = `الاسم: ${user.name}`;
             userFamilyP.textContent = `العائلة: ${user.family}`;
             userBalanceP.textContent = `الرصيد: $${user.balance}`;
             userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-
-            // 3. تحديث باقي الأقسام
+            
             await loadTransactionHistory(user.email);
             if (user.role !== 'admin') {
                 await loadLeaderboards();
-                // await loadActiveQuiz(user.email); 
+                await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
                 await loadAnnouncement();
             } else {
                 await loadAnnouncement();
             }
-
             refreshDataBtn.textContent = "تحديث البيانات";
         } catch(err) {
             refreshDataBtn.textContent = "فشل التحديث";
@@ -154,11 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         event.stopPropagation();
-
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
-
-        // إعادة ضبط اللوحة قبل اللوجن
+        
         adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         leaderboardContainer.style.display = "none";
@@ -174,23 +197,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
-
             const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
             if (response.ok) {
                 messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
                 messageDiv.style.color = "green";
-
                 const user = data.user;
                 loggedInUserProfile = user;
 
-                // (ملء الكارت)
                 userNameP.textContent = `الاسم: ${user.name}`;
                 userFamilyP.textContent = `العائلة: ${user.family}`;
                 userBalanceP.textContent = `الرصيد: $${user.balance}`;
                 userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-
-                // (إظهار الكارت)
+                
                 cardContainer.style.display = "flex";
                 formContainer.style.display = "none";
                 logoutBtn.style.display = "block";
@@ -200,21 +219,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 await loadTransactionHistory(user.email);
 
                 if (user.role === 'admin') {
-                    // --- لو هو أدمن ---
                     messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
                     adminPanelDiv.style.display = "block";
                     leaderboardContainer.style.display = "none";
                     userAnnouncementBox.style.display = "none";
                     await loadAnnouncement();
                 } else {
-                    // --- لو هو يوزر عادي ---
                     await loadLeaderboards();
-                    // await loadActiveQuiz(user.email); 
+                    await loadActiveQuiz(user.email); // 🛑 استدعاء الكويز
                     await loadAnnouncement();
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
-
             } else {
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
@@ -234,18 +250,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
             });
-
             if (!response.ok) throw new Error("فشل جلب السجل"); 
-
             const data = await response.json();
-
             transactionList.innerHTML = "";
             if (data.transactions && data.transactions.length > 0) {
                 data.transactions.forEach(t => {
                     const li = document.createElement("li");
                     const amountClass = t.amount > 0 ? "positive" : "negative";
                     const sign = t.amount > 0 ? "+" : "";
-                    
                     li.innerHTML = `
                         <span>${t.reason}</span>
                         <span class="amount ${amountClass}">${sign}${t.amount} نقطة</span>
@@ -262,19 +274,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
+    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة) 🛑🛑
     async function loadLeaderboards() {
         leaderboardContainer.style.display = "block"; 
-        
         topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
         familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
         familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
         familyAnbaKarasList.innerHTML = "<li>جاري التحميل...</li>";
-
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
         try {
-            // نداء الملفات المتخصصة بشكل متوازٍ
             const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = await Promise.all([
                 fetch('/get-top-champions', { method: "POST" }),
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
@@ -285,7 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // 1. الأبطال (Top 3)
             if (!championsResponse.ok) throw new Error("فشل تحميل الأبطال");
             const championsData = await championsResponse.json();
-            
             topChampionsList.innerHTML = ""; 
             if (championsData.champions && championsData.champions.length > 0) {
                 championsData.champions.forEach((user, index) => {
@@ -317,7 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     continue;
                 }
                 const data = await item.response.json();
-                
                 item.list.innerHTML = '';
                 if (data.users && data.users.length > 0) {
                     data.users.forEach((user, index) => {
@@ -340,10 +347,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // --- فانكشن جلب الكويز (مُحصنة) ---
-    async function loadActiveQuiz(email) { /* ... */ }
+    // 🛑🛑 فانكشن جلب الكويز (تمت استعادتها) 🛑🛑
+    async function loadActiveQuiz(email) {
+        try {
+            const response = await fetch(`/get-active-quiz`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email }),
+            });
 
-    // 🛑🛑 فانكشن جديدة: جلب الإعلانات (لليوزر - تم إكمالها) 🛑🛑
+            // التحقق إذا كان الـ API أرجع 404 (لا يوجد سؤال)
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log("لا يوجد سؤال جديد متاح.");
+                    quizContainer.style.display = "none";
+                } else {
+                    throw new Error("فشل جلب الكويز");
+                }
+                return;
+            }
+
+            const data = await response.json();
+            
+            // --- لو فيه سؤال جديد ---
+            const quiz = data.quiz;
+            quizQuestionText.textContent = `${quiz.question_text} (+${quiz.points} نقطة)`;
+            quizBtnA.textContent = quiz.option_a;
+            quizBtnB.textContent = quiz.option_b;
+            quizBtnC.textContent = quiz.option_c;
+            currentQuizId = quiz.id; // خزن رقم السؤال
+
+            // تصفير الفورم
+            quizMessage.textContent = "";
+            selectedOption = null;
+            quizOptionButtons.forEach(btn => btn.classList.remove('selected'));
+            quizSubmitBtn.disabled = false;
+
+            quizContainer.style.display = "block"; // اظهر الكويز
+
+        } catch (err) {
+            console.error("فشل جلب الكويز:", err);
+            quizContainer.style.display = "none";
+        }
+    }
+
+    // 🛑🛑 فانكشن جلب الإعلانات (مُصححة) 🛑🛑
     async function loadAnnouncement() {
         userAnnouncementBox.style.display = "none";
         userAnnouncementText.textContent = "";
@@ -374,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // 🛑🛑 زرار تسجيل الخروج (مُصحح نهائياً) 🛑🛑
+    // 🛑🛑 زرار تسجيل الخروج (مُصحح) 🛑🛑
     logoutBtn.addEventListener("click", () => {
         resetUI();
         loginForm.reset();
@@ -386,9 +434,58 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- كود "تغيير الصورة" (زي ما هي) ---
     avatarUploadInput.addEventListener("change", async () => { /* ... */ });
 
-    // --- أكواد الكويز (زي ما هي) ---
-    quizOptionButtons.forEach(button => { /* ... */ });
-    quizSubmitBtn.addEventListener("click", async () => { /* ... */ });
+    // --- أكواد الكويز (لليوزر) ---
+    quizOptionButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            quizOptionButtons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            selectedOption = button.dataset.value; 
+        });
+    });
+
+    quizSubmitBtn.addEventListener("click", async () => {
+        if (!selectedOption) {
+            quizMessage.textContent = "الرجاء اختيار إجابة أولاً";
+            quizMessage.style.color = "red";
+            return;
+        }
+
+        quizMessage.textContent = "جاري التأكد من الإجابة...";
+        quizMessage.style.color = "blue";
+        quizSubmitBtn.disabled = true; 
+
+        try {
+            const response = await fetch(`/submit-quiz-answer`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: loggedInUserProfile.email,
+                  quiz_id: currentQuizId,
+                  selected_option: selectedOption
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                quizMessage.textContent = data.message;
+                quizMessage.style.color = "green";
+                await refreshUserData();
+            } else {
+                quizMessage.textContent = data.message;
+                quizMessage.style.color = "red";
+            }
+
+            setTimeout(() => {
+                quizContainer.style.display = "none";
+            }, 3000);
+
+        } catch (err) {
+            quizMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+            quizMessage.style.color = "red";
+            quizSubmitBtn.disabled = false; 
+        }
+    });
 
     // 🛑 ربط زرار الريفرش 🛑
     refreshDataBtn.addEventListener('click', refreshUserData);
@@ -407,8 +504,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
             adminSearchMessage.style.color = "blue";
-            adminResultsListDiv.innerHTML = "";
             adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>';
+            adminResultsListDiv.style.display = "none";
             searchedUserCard.style.display = "none";
             currentSearchedUser = null;
 
@@ -456,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         adminSelectUser.appendChild(option);
                     });
                     
-                    adminResultsListDiv.style.display = "block"; // 🛑 إظهار الدروب ليست
+                    adminResultsListDiv.style.display = "block";
                     adminSelectUser.value = currentSearchResults[0].email;
                     populateAdminCard(currentSearchResults[0]);
                 }
@@ -491,12 +588,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
         async function updateBalance(amount, reason) {
-             if (!currentSearchedUser) {
+            if (!currentSearchedUser) {
                  balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                  balanceMessage.style.color = "red";
                  return;
             }
-
             balanceMessage.textContent = "جاري تحديث الرصيد...";
             balanceMessage.style.color = "blue";
             addBalanceBtn.disabled = true;
@@ -512,21 +608,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
-
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                 if (response.ok) {
                     balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
                     balanceMessage.style.color = "green";
-                    
                     currentSearchedUser.balance = data.new_balance;
                     searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
                     balanceAmountInput.value = "";
-                    
                     if (loggedInUserProfile.email === currentSearchedUser.email) {
                         refreshUserData(); 
                     }
-
                 } else {
                     balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
                     balanceMessage.style.color = "red";
@@ -606,38 +697,31 @@ document.addEventListener("DOMContentLoaded", () => {
                         users.forEach(user => {
                             const userItem = document.createElement("div");
                             userItem.className = "family-user-item";
-
                             const checkbox = document.createElement("input");
                             checkbox.type = "checkbox";
                             checkbox.className = "mass-update-checkbox";
                             checkbox.dataset.email = user.email;
-
                             if (selectedUsersForMassUpdate.includes(user.email)) {
                                 checkbox.checked = true;
                             }
-
                             const userInfo = document.createElement("div");
                             userInfo.className = "user-info";
                             userInfo.innerHTML = `
                                 <span>${user.name} (${user.email})</span>
                                 <strong>الرصيد: $${user.balance}</strong>
                             `;
-
                             userInfo.addEventListener('click', () => {
                                 user.family = familyName;
                                 populateAdminCard(user);
                                 searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             });
-
                             userItem.appendChild(checkbox);
                             userItem.appendChild(userInfo);
                             adminFamilyResultsDiv.appendChild(userItem);
                         });
-
                         adminFamilyResultsDiv.style.display = "block";
                         selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
                     }
-
                 } catch (err) {
                     adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
                     adminFamilyMessage.style.color = "red";
@@ -657,9 +741,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
                 }
-
                 selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
-
                 if (selectedUsersForMassUpdate.length > 0) {
                     massUpdateControls.style.display = 'block';
                 } else {
@@ -674,6 +756,11 @@ document.addEventListener("DOMContentLoaded", () => {
         async function handleMassUpdate(amount) {
             if (selectedUsersForMassUpdate.length === 0) {
                 massUpdateMessage.textContent = "الرجاء اختيار مستخدم واحد على الأقل.";
+                massUpdateMessage.style.color = "red";
+                return;
+            }
+            if (isNaN(amount) || amount === 0) {
+                massUpdateMessage.textContent = "الرجاء إدخال كمية صحيحة.";
                 massUpdateMessage.style.color = "red";
                 return;
             }
@@ -702,7 +789,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         reason: reason
                     }),
                 });
-
                 const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
                 
                 if (response.ok) {
@@ -716,7 +802,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     massUpdateControls.style.display = 'none';
                     
                     refreshUserData();
-                    
                 } else {
                     massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
                     massUpdateMessage.style.color = "red";
