@@ -1,71 +1,61 @@
 /*
  * API Endpoint: /submit-quiz-answer
- * (جديد - بتاع اليوزر)
- * وظيفته: يستقبل الإجابة، يدي النقط، ويسجل الإجابة
  */
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
     const data = await context.request.json();
-    const { email, quiz_id, selected_option } = data;
+    const { email, quizId, selectedOption } = data; // لاحظ: quizId و selectedOption
 
-    if (!email || !quiz_id || !selected_option) {
+    if (!email || !quizId || !selectedOption) {
       return new Response(JSON.stringify({ error: "بيانات الإجابة ناقصة" }), { status: 400 });
     }
 
-    // --- الخطوة 1: اتأكد (تاني) إن اليوزر مجاوبش قبل كده ---
+    // 1. التأكد من عدم الإجابة مسبقاً
     const checkPs = db.prepare("SELECT * FROM user_answers WHERE user_email = ? AND quiz_id = ?");
-    const existingAnswer = await checkPs.bind(email, quiz_id).first();
-    
+    const existingAnswer = await checkPs.bind(email, quizId).first();
+
     if (existingAnswer) {
-      return new Response(JSON.stringify({ error: "لقد أجبت على هذا السؤال من قبل" }), { status: 403 }); // 403 Forbidden
+      return new Response(JSON.stringify({ error: "لقد أجبت بالفعل." }), { status: 403 });
     }
 
-    // --- الخطوة 2: هات الإجابة الصح والنقط من الداتا بيز ---
-    const quizPs = db.prepare("SELECT correct_option, points FROM quizzes WHERE id = ? AND is_active = 1");
-    const quiz = await quizPs.bind(quiz_id).first();
+    // 2. جلب الإجابة الصحيحة
+    const quizPs = db.prepare("SELECT correct_option, points FROM quizzes WHERE id = ?");
+    const quiz = await quizPs.bind(quizId).first();
 
     if (!quiz) {
-      return new Response(JSON.stringify({ error: "السؤال غير موجود أو غير نشط" }), { status: 404 });
+      return new Response(JSON.stringify({ error: "السؤال غير موجود" }), { status: 404 });
     }
 
-    // --- الخطوة 3: قارن الإجابات ---
-    if (selected_option === quiz.correct_option) {
-      // --- لو الإجابة صح ---
-
-      // 1. حضّر "عملية" (Batch)
+    // 3. التحقق
+    if (selectedOption === quiz.correct_option) {
+      // --- إجابة صحيحة ---
       const batch = [
-        // أ. زود الرصيد
+        // زيادة الرصيد
         db.prepare("UPDATE users SET balance = balance + ? WHERE email = ?").bind(quiz.points, email),
-        // ب. سجل في سجل المعاملات
+        // تسجيل المعاملة
         db.prepare("INSERT INTO transactions (user_email, amount, reason) VALUES (?, ?, ?)")
-          .bind(email, quiz.points, "نقاط إجابة السؤال"),
-        // ج. سجل إنه جاوب (صح)
+          .bind(email, quiz.points, "مكافأة: إجابة صحيحة على سؤال اليوم"),
+        // تسجيل أن المستخدم أجاب
         db.prepare("INSERT INTO user_answers (user_email, quiz_id, answered_correctly) VALUES (?, ?, 1)")
-          .bind(email, quiz_id)
+          .bind(email, quizId)
       ];
-      
-      // 2. نفذ كله مع بعض
       await db.batch(batch);
       
-      // 3. رجع رسالة النجاح
       return new Response(JSON.stringify({ 
         success: true, 
-        message: `إجابة صحيحة! +${quiz.points} نقطة`,
+        message: `إجابة صحيحة! مبروك كسبت ${quiz.points} نقطة 🎉`,
         points_added: quiz.points
       }), { status: 200 });
 
     } else {
-      // --- لو الإجابة غلط ---
+      // --- إجابة خاطئة ---
+      await db.prepare("INSERT INTO user_answers (user_email, quiz_id, answered_correctly) VALUES (?, ?, 0)")
+        .bind(email, quizId).run();
 
-      // 1. سجل إنه جاوب (غلط) عشان ميجاوبش تاني
-      const ps = db.prepare("INSERT INTO user_answers (user_email, quiz_id, answered_correctly) VALUES (?, ?, 0)");
-      await ps.bind(email, quiz_id).run();
-
-      // 2. رجع رسالة
       return new Response(JSON.stringify({ 
         success: false, 
-        message: "إجابة خاطئة. حظ أوفر المرة القادمة!" 
+        message: "إجابة خاطئة 😔 حظ أوفر المرة القادمة." 
       }), { status: 200 });
     }
 
