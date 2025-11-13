@@ -179,7 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // Call all initial load functions to bring back the default view
-        // نستخدم Promise.all لضمان ظهور الأقسام بشكل أسرع
         await Promise.all([
             loadLeaderboards(), // سيظهر لوحة الصدارة
             loadActiveQuiz(loggedInUserProfile.email), // سيظهر الكويز
@@ -388,32 +387,37 @@ document.addEventListener("DOMContentLoaded", () => {
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
         try {
-            // نداء الملفات المتخصصة بشكل متوازٍ
-            const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = await Promise.all([
+            // 🛑🛑 استخدام Promise.allSettled لضمان أن فشل طلب واحد لا يوقف البقية 🛑🛑
+            const results = await Promise.allSettled([
                 fetch('/get-top-champions', { method: "POST" }),
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة مارجرس" }) }),
                 fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) }),
             ]);
 
+            const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = results;
+
             // 1. الأبطال (Top 3)
-            if (!championsResponse.ok) throw new Error("فشل تحميل الأبطال");
-            const championsData = await championsResponse.json();
-            topChampionsList.innerHTML = ""; 
-            if (championsData.champions && championsData.champions.length > 0) {
-                championsData.champions.forEach((user, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'champion-card';
-                    card.innerHTML = `
-                        <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
-                        <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
-                        <span class="name">${user.name}</span>
-                        <small style="display: block; color: #555;">${user.balance} نقطة</small>
-                    `;
-                    topChampionsList.appendChild(card);
-                });
+            if (championsResponse.status === 'fulfilled' && championsResponse.value.ok) {
+                const championsData = await championsResponse.value.json();
+                topChampionsList.innerHTML = ""; 
+                if (championsData.champions && championsData.champions.length > 0) {
+                    championsData.champions.forEach((user, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'champion-card';
+                        card.innerHTML = `
+                            <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
+                            <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
+                            <span class="name">${user.name}</span>
+                            <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                        `;
+                        topChampionsList.appendChild(card);
+                    });
+                } else {
+                    topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
+                }
             } else {
-                topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
+                topChampionsList.innerHTML = '<p style="text-align: center; color: orange;">فشل تحميل أبطال الصدارة.</p>';
             }
 
             // 2. القوائم التفصيلية (Top 10 لكل عائلة)
@@ -422,31 +426,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
                 { list: familyAnbaKarasList, response: karasResponse, name: "اسرة الانبا كاراس" }
             ];
+            
             for (const item of familyResponses) {
-                if (!item.response.ok) {
-                    console.error(`فشل تحميل بيانات أسرة ${item.name}`, await item.response.text());
-                    item.list.innerHTML = `<li style="color: red;">فشل في تحميل القائمة.</li>`;
-                    continue;
-                }
-                const data = await item.response.json();
-                item.list.innerHTML = '';
-                if (data.users && data.users.length > 0) {
-                    data.users.forEach((user, index) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
-                        item.list.appendChild(li);
-                    });
+                if (item.response.status === 'fulfilled' && item.response.value.ok) {
+                    const data = await item.response.value.json();
+                    item.list.innerHTML = '';
+                    if (data.users && data.users.length > 0) {
+                        data.users.forEach((user, index) => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                            item.list.appendChild(li);
+                        });
+                    } else {
+                        item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
+                    }
                 } else {
-                    item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
+                    item.list.innerHTML = `<li style="color: orange;">فشل في تحميل القائمة.</li>`;
                 }
             }
+
         } catch (err) {
-            console.error("Leaderboard Error:", err);
-            topChampionsList.innerHTML = '<p style="text-align: center; color: red;">فشل تحميل لوحة الصدارة.</p>';
-            familyAnbaMoussaList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            familyMargergesList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            familyAnbaKarasList.innerHTML = '<li style="color: red;">فشل في تحميل القائمة.</li>';
-            leaderboardContainer.style.display = "none";
+            console.error("Leaderboard Major Error:", err);
+            // في حالة حدوث خطأ كبير (لم يتم التقاطه بواسطة allSettled)
+            topChampionsList.innerHTML = '<p style="text-align: center; color: red;">خطأ كارثي في تحميل لوحة الصدارة.</p>';
         }
     }
 
@@ -741,7 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: formData
                 });
 
-                if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                    if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
                 
                 const cloudinaryData = await cloudinaryResponse.json();
                     profile_image_url = cloudinaryData.secure_url;
