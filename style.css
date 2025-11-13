@@ -1,66 +1,31 @@
-/* ستايلات أساسية */
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; line-height: 1.6; direction: rtl; text-align: right; }
-.container { max-width: 1200px; margin: 20px auto; padding: 20px; }
-.card-and-forms-wrapper { background-image: url('/hero2.jpg'); background-size: cover; border-radius: 8px; padding: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.2); margin-bottom: 20px; }
-.card-container { display: flex; justify-content: center; margin-bottom: 20px; }
-.card { background-color: rgba(255,255,255,0.9); border-radius: 8px; padding: 20px; text-align: center; width: 200px; margin: 0 auto; }
-.form-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
-.form-container form { background-color: rgba(255,255,255,0.9); padding: 20px; border-radius: 8px; flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 10px; }
-.form-container input, .form-container select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-.form-container button { background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
-.form-container button:hover { background-color: #0056b3; }
+/* نفس الستايلات الأساسية اللي عندك ... */
+/* ... */
 
-/* لوحة الأدمن */
-.admin-panel-container { padding: 20px; max-width: 900px; margin: 2rem auto; }
-#admin-panel { background-color: #f0f0f0; padding: 1.5rem; border-radius: 8px; border: 2px dashed #007bff; }
-.admin-section { margin-top: 1.5rem; background: #fafafa; padding: 1rem; border-radius: 4px; }
-#admin-search-form { display: flex; gap: 10px; }
-#admin-search-form input { flex-grow: 1; }
-#admin-balance-controls input { flex-grow: 1; }
-#admin-add-balance-btn { background-color: #28a745; color: white; padding: 5px 10px; border: none; cursor: pointer; }
-#admin-subtract-balance-btn { background-color: #ffc107; color: #333; padding: 5px 10px; border: none; cursor: pointer; }
-.family-buttons-container { display: flex; gap: 10px; flex-wrap: wrap; }
-.family-btn { flex: 1; padding: 10px; background-color: #17a2b8; color: white; border: none; cursor: pointer; }
-#admin-family-results .family-user-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
-#admin-family-results .user-info { cursor: pointer; flex-grow: 1; }
-#admin-family-results .user-info:hover { background-color: #e9ecef; }
+/* 🛑🛑 تحسين لوحة المتجر للموبايل 🛑🛑 */
+.taklopoly-board-container {
+    display: grid;
+    /* استخدام min-width لضمان عدم انكماش الخلايا بشكل سيء */
+    grid-template-columns: 80px repeat(8, 1fr) 80px;
+    grid-template-rows: 80px repeat(4, 1fr) 80px;
+    width: 100%;
+    /* السماح بالتمرير الأفقي لو الشاشة صغيرة */
+    overflow-x: auto; 
+    min-width: 800px; /* إجبار اللوحة على الحفاظ على حجمها */
+    
+    margin: 2rem auto;
+    border: 3px solid #333;
+    background-color: #f0f0f0;
+    direction: ltr; 
+    box-sizing: border-box;
+}
 
-/* 🛑 ستايلات متجر TAKLOPOLY (لليوزر والأدمن) 🛑 */
-.store-container { display: none; max-width: 900px; margin: 2rem auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.taklopoly-board-container { display: grid; grid-template-columns: 100px repeat(8, 1fr) 100px; grid-template-rows: 100px repeat(4, 1fr) 100px; width: 100%; margin: 2rem auto; border: 3px solid #333; background-color: #f0f0f0; direction: ltr; box-sizing: border-box; }
-.board-property, .board-corner { border: 1px solid #999; text-align: center; padding: 5px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 0.8em; font-weight: bold; color: #000; box-sizing: border-box; }
-.board-property { background-color: #fff; transition: 0.2s; cursor: pointer; }
+/* باقي الستايلات الخاصة بالألوان وحالات العقار كما هي في الرد السابق */
+.board-property { background-color: #fff; transition: 0.2s; cursor: pointer; min-height: 60px; }
 .board-property:hover { background-color: #cce5ff; }
-.board-property .prop-price { font-size: 1.1em; color: #007bff; }
-.board-property .prop-price:empty::before { content: "..."; color: #999; }
-.board-corner, [data-name="من ممر"] { background-color: #eee; cursor: default; }
-
-/* توزيع الخانات (Grid Layout) */
-.start-corner { grid-column: 10 / 11; grid-row: 6 / 7; }
-.prison-corner { grid-column: 1 / 2; grid-row: 6 / 7; }
-.free-parking { grid-column: 1 / 2; grid-row: 1 / 2; }
-.go-to-prison { grid-column: 10 / 11; grid-row: 1 / 2; }
-.board-property.horizontal { grid-row: 6 / 7; }
-[data-name="رفح"] { grid-column: 9 / 10; } [data-name="العريش"] { grid-column: 8 / 9; } [data-name="القرمة"] { grid-column: 7 / 8; } [data-name="تل بسطا"] { grid-column: 6 / 7; } [data-name="الزقازيق"] { grid-column: 5 / 6; } [data-name="مسطرد"] { grid-column: 4 / 5; } [data-name="بلبيس"] { grid-column: 3 / 4; } [data-name="من ممر"] { grid-column: 2 / 3; }
-.board-property.vertical { grid-column: 1 / 2; }
-[data-name="سمود"] { grid-row: 5 / 6; } [data-name="البرلس"] { grid-row: 4 / 5; } [data-name="سخا"] { grid-row: 3 / 4; }
-.board-property.horizontal.top-row { grid-row: 1 / 2; }
-[data-name="وادي النطرون"] { grid-column: 2 / 3; } [data-name="أنبا ويصا"] { grid-column: 3 / 4; } [data-name="الاسماعيلية"] { grid-column: 4 / 5; } [data-name="جبل الطير"] { grid-column: 5 / 6; } [data-name="الجندا"] { grid-column: 6 / 7; } [data-name="المعادي"] { grid-column: 7 / 8; } [data-name="الفسطاط"] { grid-column: 8 / 9; } [data-name="المطرية"] { grid-column: 9 / 10; }
-.board-property.vertical[data-name="القومية"], .board-property.vertical[data-name="مير"], .board-property.vertical[data-name="المحرق"], .board-property.vertical[data-name="درنكة"] { grid-column: 10 / 11; }
-[data-name="القومية"] { grid-row: 2 / 3; } [data-name="مير"] { grid-row: 3 / 4; } [data-name="المحرق"] { grid-row: 4 / 5; } [data-name="درنكة"] { grid-row: 5 / 6; }
-.board-center { grid-column: 2 / 10; grid-row: 2 / 6; display: flex; justify-content: center; align-items: center; background-color: #f0f0f0; }
-
-/* حالات العقار (لليوزر) */
-.property-owned { background-color: #d4edda; color: #155724; cursor: default; border: 2px solid #28a745; }
-.property-owned .prop-price { text-decoration: line-through; color: #155724; }
-.property-owned::after { content: "👑 مملوك"; font-size: 0.8em; }
+.property-owned { background-color: #d4edda; color: #155724; border: 2px solid #28a745; }
 .property-unaffordable { background-color: #f8f9fa; color: #aaa; cursor: not-allowed; }
 .property-not-for-sale { background-color: #eee; color: #777; cursor: not-allowed; }
 
-/* المودال */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; direction: rtl; }
+/* تنسيق المودال */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; direction: rtl; }
 .modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; position: relative; }
-.modal-close-btn { position: absolute; top: 10px; left: 15px; font-size: 24px; cursor: pointer; }
-.buy-btn { background-color: #28a745; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; margin-top: 10px; }
-.buy-btn:hover { background-color: #218838; }
-.delete-item-btn { background-color: #dc3545; color: white; padding: 5px; border: none; cursor: pointer; }
