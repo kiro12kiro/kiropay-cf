@@ -1,4 +1,4 @@
-// File Name: admin-delete-user.js (النهائي)
+// File Name: admin-delete-user.js (النسخة النهائية)
 import { getAuthUser, unauthorizedResponse } from './security-utils'; 
 
 export async function onRequestPost(context) {
@@ -8,9 +8,9 @@ export async function onRequestPost(context) {
         
         const data = await request.json();
         const emailToDelete = data.emailToDelete;
-        const adminEmail = data.adminEmail;
+        const adminEmail = data.adminEmail; // يتم استخدامه للتحقق من الصلاحية
 
-        // 1. التحقق الأساسي (وهذا الذي ترفضه الوظيفة)
+        // 1. التحقق الأساسي من وجود الإيميلات
         if (!emailToDelete || !adminEmail) {
             return new Response(JSON.stringify({ success: false, error: "لم يتم إرسال الإيميل." }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
@@ -34,8 +34,11 @@ export async function onRequestPost(context) {
 
         // 4. تنفيذ الحذف المتسلسل (D1 Batch)
         const batch = [
+            // حذف سجلات المعاملات
             db.prepare('DELETE FROM transactions WHERE user_email = ?').bind(emailToDelete),
+            // حذف سجلات المشتريات
             db.prepare('DELETE FROM user_unlocked_items WHERE user_email = ?').bind(emailToDelete),
+            // حذف المستخدم نفسه
             db.prepare('DELETE FROM users WHERE email = ?').bind(emailToDelete),
         ];
 
