@@ -345,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
-    // 🛑🛑 معالجة ضغط زر العودة للمتجر (يرجع للوحة الرئيسية) 🛑🛑
+    // 🛑🛑 معالجة ضغط زر العودة للمتجر 🛑🛑
     backToStoreBtn.addEventListener('click', loadMainDashboard);
     // --- فانكشن سجل المعاملات (مُحصنة) ---
     async function loadTransactionHistory(email) {
