@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح الخطأ هنا
     // --- مسك العناصر الأساسية ---
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none"; 
+        unlockedItemsContainer.style.display = "none"; // 🛑 إضافة إخفاء حاوية المشتريات
         avatarOverlayLabel.style.display = "none";
         massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
@@ -192,17 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
         
         hideUserSections(); // إخفاء الكل قبل العرض
         
-        // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
-        await Promise.all([
-            loadLeaderboards(),
-            loadActiveQuiz(loggedInUserProfile.email),
-            loadStoreItems()
-        ]);
+        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
+        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
+        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
+        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
         
-        // 🛑🛑 فرض الظهور بعد الانتهاء من التحميل (الحل النهائي) 🛑🛑
-        leaderboardContainer.style.display = "block"; 
-        quizContainer.style.display = "block"; 
-        storeContainer.style.display = "block";
+        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
     }
 
 
@@ -536,9 +531,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
+        if (loggedInUserProfile && loggedInUserProfile.role === 'admin') return; 
 
-        // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا
         storeContainer.style.display = "block"; // 🛑 الإظهار أولاً
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
@@ -559,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const card = document.createElement('div');
                     card.className = 'store-item-card';
                     
-                    const canAfford = loggedInUserProfile.balance >= item.price;
+                    const canAfford = loggedInUserProfile && loggedInUserProfile.balance >= item.price;
                     const buttonText = canAfford ? `شراء (${item.price} نقطة)` : `النقاط غير كافية`;
                     
                     const itemName = item.name || item.namel || 'منتج غير معروف'; 
@@ -646,54 +640,99 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const newName = prompt(`تعديل اسم المنتج: ${name}`, name);
-        if (newName === null) return; // المستخدم ألغى
-
-        const newPrice = prompt(`تعديل سعر المنتج: ${price}`, price);
-        const finalPrice = parseInt(newPrice);
-        if (newPrice === null || isNaN(finalPrice) || finalPrice <= 0) {
-            adminStoreMessage.textContent = "تم الإلغاء أو السعر غير صالح.";
-            adminStoreMessage.style.color = 'orange';
-            return;
-        }
+        // 1. ملء النموذج وعرضه
+        editItemId.value = itemId;
+        editItemName.value = name;
+        editItemPrice.value = price;
+        editItemCurrentUrl.value = imageUrl;
+        editCurrentImage.src = imageUrl || DEFAULT_AVATAR_URL;
+        editItemNewFile.value = null; // تفريغ حقل الملف
+        editUploadStatusMessage.textContent = '';
         
-        const newImageUrl = prompt(`تعديل رابط الصورة (اتركه فارغاً للحفاظ على الصورة الحالية):`, imageUrl || '');
-        
-        if (!confirm(`هل أنت متأكد من حفظ التعديلات التالية على ${name}؟\n- الاسم الجديد: ${newName}\n- السعر الجديد: $${finalPrice}\n- رابط الصورة: ${newImageUrl || '(الحالي)'}`)) {
-            return;
-        }
+        editModalOverlay.style.display = 'flex'; // إظهار النافذة
 
-        adminStoreMessage.textContent = "جاري إرسال التعديلات...";
-        adminStoreMessage.style.color = "blue";
+        // 2. معالج إغلاق النافذة
+        closeEditModal.onclick = () => {
+            editModalOverlay.style.display = 'none';
+            adminStoreMessage.textContent = ''; // مسح الرسائل بعد الإغلاق
+        };
 
-        try {
-            const response = await fetch(`/admin-update-item`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    itemId: itemId,
-                    name: newName,
-                    price: finalPrice,
-                    image_url: newImageUrl,
-                    adminEmail: loggedInUserProfile.email 
-                }),
-            });
+        // 3. معالج إرسال النموذج
+        editItemForm.onsubmit = async (event) => {
+            event.preventDefault();
             
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                adminStoreMessage.textContent = `تم تحديث المنتج بنجاح!`;
-                adminStoreMessage.style.color = "green";
-                await loadAdminStoreItems(); // تحديث القائمة بعد التعديل
-            } else {
-                adminStoreMessage.textContent = `فشل التعديل: ${data.error || "خطأ غير محدد"}`;
-                adminStoreMessage.style.color = "red";
+            const newName = editItemName.value.trim();
+            const newPrice = parseInt(editItemPrice.value);
+            const fileToUpload = editItemNewFile.files[0];
+            
+            // التحقق من صلاحية البيانات الأساسية
+            if (!newName || isNaN(newPrice) || newPrice <= 0) {
+                editUploadStatusMessage.textContent = "الرجاء إدخال اسم وسعر صالحين.";
+                editUploadStatusMessage.style.color = 'red';
+                return;
             }
-        } catch (err) {
-            adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لتعديل العنصر.";
-            adminStoreMessage.style.color = "red";
-            console.error("Edit Item Error:", err);
-        }
+
+            editUploadStatusMessage.textContent = "جاري معالجة التعديلات...";
+            editUploadStatusMessage.style.color = 'blue';
+
+            let finalImageUrl = editItemCurrentUrl.value; // القيمة الافتراضية: الرابط القديم
+
+            try {
+                if (fileToUpload) {
+                    editUploadStatusMessage.textContent = "جاري رفع الصورة وضغطها...";
+                    // 🛑 منطق رفع الصورة إلى Cloudinary 🛑
+                    const resizedBlob = await resizeImage(fileToUpload, 400, 400, 0.8); 
+                    const formData = new FormData();
+                    formData.append('file', resizedBlob);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    
+                    const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                    
+                    const cloudinaryData = await cloudinaryResponse.json();
+                    finalImageUrl = cloudinaryData.secure_url;
+                }
+                
+                editUploadStatusMessage.textContent = "جاري حفظ التعديلات في قاعدة البيانات...";
+
+                // 4. إرسال التعديلات إلى الدالة الخلفية
+                const response = await fetch(`/admin-update-item`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        itemId: itemId,
+                        name: newName,
+                        price: newPrice,
+                        image_url: finalImageUrl,
+                        adminEmail: loggedInUserProfile.email 
+                    }),
+                });
+                
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    editUploadStatusMessage.textContent = `تم تحديث المنتج بنجاح!`;
+                    editUploadStatusMessage.style.color = "green";
+                    
+                    // إغلاق النموذج وتحديث القائمة
+                    setTimeout(() => {
+                        editModalOverlay.style.display = 'none';
+                        loadAdminStoreItems(); 
+                    }, 1000);
+                } else {
+                    editUploadStatusMessage.textContent = `فشل التعديل: ${data.error || "خطأ غير محدد"}`;
+                    editUploadStatusMessage.style.color = "red";
+                }
+            } catch (err) {
+                editUploadStatusMessage.textContent = `خطأ: فشل أثناء الرفع/الاتصال.`;
+                editUploadStatusMessage.style.color = "red";
+                console.error("Edit Submit Error:", err);
+            }
+        };
     }
     
     // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (مع زر التعديل الجديد) ---
@@ -753,7 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const itemPrice = e.currentTarget.dataset.itemPrice;
                         const imageUrl = e.currentTarget.dataset.itemUrl;
                         
-                        // 🛑 استدعاء دالة التعديل 🛑
+                        // 🛑 استدعاء دالة التعديل (لفتح النموذج) 🛑
                         handleEditItem(itemId, itemName, itemPrice, imageUrl); 
                     });
                 });
@@ -1492,7 +1531,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const response = await fetch(`/admin-add-item`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, price, image_url: final_image_url }),
+                    body: JSON.stringify({ 
+                        name, 
+                        price, 
+                        image_url: final_image_url,
+                        email: loggedInUserProfile.email // 🛑 إرسال إيميل الأدمن للتحقق
+                    }),
                 });
 
                 const data = await response.json();
@@ -1514,7 +1558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         // 🛑 استدعاء وظائف الأدمن عند اللوجن 🛑
-        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshDataBtn)
+        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
 
