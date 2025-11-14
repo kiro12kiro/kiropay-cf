@@ -3,308 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KiroPay Project</title>
+    <title>Kiropay</title>
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* 🛑 إعدادات الظهور الأولية 🛑 */
-        .card-container { display: none; }
-        .form-container { display: flex; } 
-
-        /* (باقي أكواد الـ CSS موجودة في style.css الآن) */
-        
-        .avatar-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); color: white; 
-            display: flex; justify-content: center; align-items: center; 
-            font-weight: bold; border-radius: 50%;
-            opacity: 0.7; transition: opacity 0.2s;
-            cursor: pointer; text-align: center; font-size: 1rem; 
-        }
-        .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
-        #avatar-upload-input { display: none; }
-        
-        .announcement-container {
-            display: none; max-width: 900px; margin: 2rem auto;
-            padding: 15px 20px; background-color: #fff3cd; 
-            border: 1px solid #ffeeba; border-radius: 8px; text-align: center;
-        }
-        .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
-        #user-announcement-text { font-size: 1.1em; color: #333; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="container">
-        
-        <div class="card-and-forms-wrapper">
-            <div class="card-container">
-                <div class="card">
-                    
-                    <div class="avatar-wrapper" style="position: relative; width: 150px; height: 150px; margin: 0 auto 1rem;">
-                        <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
-                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">
-                            تغيير الصورة
-                        </label>
-                        <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg">
-                    </div>
-                    
-                    <p id="user-name">Name: </p>
-                    <p id="user-family">Family: </p>
-                    <p id="user-balance">Balance: </p>
+        <div id="message" class="system-message"></div>
 
-                    <div class="transaction-history">
-                        <h4>سجل المعاملات</h4>
-                        <ul id="transaction-list">
-                            </ul>
+        <div class="form-container">
+            <h2>تسجيل الدخول</h2>
+            <form id="login-form" class="form-group">
+                <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+                <input type="password" id="password" placeholder="كلمة المرور" required>
+                <button type="submit">دخول</button>
+            </form>
+
+            <h2 style="margin-top: 30px;">تسجيل جديد</h2>
+            <form id="signup-form" class="form-group">
+                <input type="text" id="name" placeholder="الاسم الشخصي" required>
+                <select id="family" required>
+                    <option value="" disabled selected>اختر عائلتك</option>
+                    <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
+                    <option value="اسرة مارجرس">اسرة مارجرس</option>
+                    <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
+                </select>
+                <input type="email" id="signup-email" placeholder="البريد الإلكتروني" required>
+                <input type="password" id="signup-password" placeholder="كلمة المرور (أقل شيء 6 حروف)" required>
+
+                <div class="avatar-upload-section">
+                    <label for="signup-avatar-file" class="custom-file-upload">
+                        اختيار صورة شخصية (اختياري)
+                    </label>
+                    <input type="file" id="signup-avatar-file" accept="image/*" style="display: none;">
+                </div>
+                
+                <button type="submit">تسجيل</button>
+            </form>
+        </div>
+
+        <div class="card-container" id="card-container" style="display: none;">
+            
+            <div class="user-card">
+                <div class="avatar-container">
+                    <img id="user-avatar" src="/default-avatar.png" alt="صورة المستخدم" class="user-avatar">
+                    <label id="avatar-overlay-label" for="avatar-upload-input" class="avatar-overlay" style="display: none;">
+                        <span>تغيير</span>
+                    </label>
+                    <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;">
+                </div>
+                
+                <p id="user-name">الاسم: </p>
+                <p id="user-family">العائلة: </p>
+                <p id="user-balance">الرصيد: $0</p>
+                <div class="action-buttons-group">
+                    <button id="logout-btn" class="logout-btn">تسجيل الخروج</button>
+                    <button id="refresh-data-btn" class="refresh-data-btn">تحديث البيانات</button>
+                    <button id="unlocked-items-btn" class="unlocked-items-btn" style="display: none;">مشترياتي</button>
+                </div>
+            </div>
+
+            <div class="transaction-history">
+                <h3>سجل المعاملات</h3>
+                <ul id="transaction-list">
+                    </ul>
+            </div>
+            
+            <div id="user-announcement-box" class="announcement-box" style="display: none;">
+                <h3>إعلان هام</h3>
+                <p id="user-announcement-text"></p>
+            </div>
+
+
+            <div id="unlocked-items-container" class="unlocked-items-container" style="display: none;">
+                <button id="back-to-store-btn" class="back-to-store-btn">العودة للرئيسية</button>
+                <h3>مشترياتي السابقة</h3>
+                <div id="unlocked-items-list" class="store-items-grid">
+                    </div>
+                <p id="unlocked-items-message" class="system-message"></p>
+            </div>
+            
+            <div id="store-container" class="store-container" style="display: none;">
+                <h3>متجر النقاط</h3>
+                <p id="store-loading-message" style="text-align: center; color: blue;"></p>
+                <div id="store-items-list" class="store-items-grid">
+                    </div>
+                <p id="store-message" class="system-message"></p>
+            </div>
+
+            <div id="quiz-container" class="quiz-container" style="display: none;">
+                <h3>سؤال اليوم</h3>
+                <div class="quiz-box">
+                    <p id="quiz-question-text" class="quiz-question-text">جاري تحميل السؤال...</p>
+                    <div class="quiz-options">
+                        <button class="quiz-option-btn" id="quiz-btn-a" data-value="A"></button>
+                        <button class="quiz-option-btn" id="quiz-btn-b" data-value="B"></button>
+                        <button class="quiz-option-btn" id="quiz-btn-c" data-value="C"></button>
+                    </div>
+                    <button id="quiz-submit-btn" class="quiz-submit-btn" disabled>تأكيد الإجابة</button>
+                    <p id="quiz-message" class="system-message"></p>
+                </div>
+            </div>
+
+            <div id="leaderboard-container" class="leaderboard-container" style="display: none;">
+                <h3>لوحة الصدارة</h3>
+                
+                <div class="champions-section">
+                    <h4>أبطال الصدارة</h4>
+                    <div id="top-champions-list" class="champions-grid">
+                        </div>
+                </div>
+
+                <div class="family-leaderboards">
+                    <h4>صدارة العائلات (أعلى 10)</h4>
+                    <div class="leaderboard-columns">
+                        <div class="family-column">
+                            <h5>أسرة الأنبا موسى الأسود</h5>
+                            <ol id="family-anba-moussa-list"><li>جاري التحميل...</li></ol>
+                        </div>
+                        <div class="family-column">
+                            <h5>أسرة مارجرجس</h5>
+                            <ol id="family-margerges-list"><li>جاري التحميل...</li></ol>
+                        </div>
+                        <div class="family-column">
+                            <h5>أسرة الأنبا كاراس</h5>
+                            <ol id="family-anba-karas-list"><li>جاري التحميل...</li></ol>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="button-group">
-                <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
-                <button id="unlocked-items-btn" style="display: none;">مشترياتي</button>
-                <button id="logout-btn">تسجيل الخروج</button>
-            </div>
 
-
-            <div class="form-container">
-                <form id="login-form">
-                    <h3>Login</h3>
-                    <input type="email" id="email" placeholder="Email" required>
-                    <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
-                </form>
-
-                <form id="signup-form">
-                    <h3>Sign Up</h3>
-                    <input type="text" id="name" placeholder="Name" required>
-                    
-                    <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
-                    <select id="family" required>
-                        <option value="" disabled selected>-- اختر الأسرة --</option>
-                        <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
-                        <option value="اسرة مارجرس">اسرة مارجرس</option>
-                        <option value="اسرة الانبا كاراس">اسرة الانبا كاراس</option>
-                    </select>
-                    
-                    <input type="email" id="signup-email" placeholder="Email" required>
-                    <input type="password" id="signup-password" placeholder="Password" required>
-
-                    <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
-                    <input type="file" id="signup-avatar-file" accept="image/png, image/jpeg">
-
-                    <button type="submit">Sign Up</button>
-                </form>
-            </div>
-            </div> 
-    </div> 
-    
-    <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
-    
-    <div class="announcement-container" id="user-announcement-box">
-        <h3>📢 إعلان هام</h3>
-        <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
-    </div>
-
-    <div class="quiz-container" id="quiz-container">
-        <h2>سؤال اليوم 🎁</h2>
-        <p id="quiz-question-text">جاري تحميل السؤال...</p>
-        <div class="quiz-options">
-            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">الاختيار أ</button>
-            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">الاختيار ب</button>
-            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">الاختيار ج</button>
-        </div>
-        <button id="quiz-submit-btn">إرسال الإجابة</button>
-        <p id="quiz-message"></p>
-    </div>
-
-    <div class="store-container" id="store-container" style="display: none;">
-        <h2>🛒 متجر KiroPay</h2>
-        <p style="text-align: center; color: #555;">استبدل نقاطك بعناصر مميزة.</p>
-        <div class="store-items-grid" id="store-items-list">
-            <p style="text-align: center;" id="store-loading-message">جاري تحميل عناصر المتجر...</p>
-        </div>
-        <p id="store-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
-    </div>
-    <div class="unlocked-items-container" id="unlocked-items-container" style="display: none;">
-        <button id="back-to-store-btn" style="margin-bottom: 20px;">▶️ العودة للقائمة الرئيسية</button>
-        
-        <h2>🛒 مشترياتي السابقة</h2>
-        <div class="store-items-grid" id="unlocked-items-list">
-            </div>
-        <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
-    </div>
-    <div class="admin-panel-container">
-        
-        <div id="admin-panel" style="display: none;">
-            
+        </div> <div id="admin-panel" class="admin-panel" style="display: none;">
             <h2>لوحة تحكم الأدمن</h2>
             
             <div class="admin-section">
-                <h4>البحث عن مستخدم (بالاسم)</h4>
-                <form id="admin-search-form">
-                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
+                <h3>إدارة الإعلانات</h3>
+                <form id="admin-announcement-form" class="form-group">
+                    <textarea id="admin-announcement-text" placeholder="نص الإعلان الذي سيظهر للمستخدمين" rows="3"></textarea>
+                    <button type="submit">نشر الإعلان</button>
+                </form>
+                <p id="admin-announcement-message" class="system-message"></p>
+            </div>
+
+            <div class="admin-section">
+                <h3>إدارة المتجر</h3>
+                
+                <h4>إضافة عنصر جديد</h4>
+                <form id="admin-add-item-form" class="form-group">
+                    <input type="text" id="store-item-name" placeholder="اسم المنتج" required>
+                    <input type="number" id="store-item-price" placeholder="سعر المنتج (نقاط)" required min="1">
+                    <label for="store-item-image-file" class="custom-file-upload">
+                        صورة المنتج (اختياري)
+                    </label>
+                    <input type="file" id="store-item-image-file" accept="image/*" style="display: none;">
+                    <button type="submit">إضافة المنتج</button>
+                </form>
+                <p id="admin-store-message" class="system-message"></p>
+
+                <h4 style="margin-top: 20px;">العناصر المضافة حالياً</h4>
+                <ul id="admin-store-items-list" class="admin-store-list">
+                    </ul>
+            </div>
+            
+            <div class="admin-section">
+                <h3>البحث عن مستخدم وتعديل رصيده</h3>
+                <form id="admin-search-form" class="form-group">
+                    <input type="text" id="admin-search-name" placeholder="ابحث بالاسم">
                     <button type="submit">بحث</button>
                 </form>
+                <p id="admin-search-message" class="system-message"></p>
                 
-                <div id="admin-results-list" style="display: none; margin-top: 15px;">
-                    <label for="admin-select-user" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                        تم العثور على عدة مستخدمين، اختر واحد:
-                    </label>
-                    <select id="admin-select-user" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white;">
-                    </select>
+                <div id="admin-results-list" style="display: none;">
+                    <select id="admin-select-user"></select>
                 </div>
-
-                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
-
-                <div id="admin-searched-user-card" style="display: none;">
-                    <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
-                    <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
-                    <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
-                    <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
+                
+                <div id="admin-searched-user-card" class="searched-user-card" style="display: none;">
+                    <p id="searched-user-name"></p>
+                    <p id="searched-user-family"></p>
+                    <p id="searched-user-email"></p>
+                    <p id="searched-user-balance"></p>
                     
-                    <hr style="margin: 1rem 0;">
-
-                    <h4>تعديل الرصيد</h4>
-                    <div id="admin-balance-controls">
-                        <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
-                        <button id="admin-add-balance-btn">إضافة (+)</button>
-                        <button id="admin-subtract-balance-btn">خصم (-)</button>
+                    <div class="balance-controls">
+                        <input type="number" id="admin-balance-amount" placeholder="مقدار النقطة">
+                        <button id="admin-add-balance-btn" class="add-btn">إضافة</button>
+                        <button id="admin-subtract-balance-btn" class="subtract-btn">خصم</button>
                     </div>
-                    <p id="admin-balance-message" style="color: green;"></p>
+                    <p id="admin-balance-message" class="system-message"></p>
                     
-                    <hr style="margin: 1rem 0;">
-
-                    <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
-                    <button id="admin-delete-user-btn">
-                        حذف هذا المستخدم نهائياً
-                    </button>
-                    <p id="admin-delete-message"></p>
+                    <button id="admin-delete-user-btn" class="delete-btn" style="margin-top: 15px;">حذف المستخدم</button>
+                    <p id="admin-delete-message" class="system-message"></p>
                 </div>
             </div>
-            
+
             <div class="admin-section">
-                <h4>عرض المستخدمين حسب الأسرة</h4>
-                <div class="family-buttons-container">
-                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">
-                        اسرة الانبا موسي الاسود
-                    </button>
-                    <button class="family-btn" data-family="اسرة مارجرس">
-                        اسرة مارجرس
-                    </button>
-                    <button class="family-btn" data-family="اسرة الانبا كاراس">
-                        اسرة الانبا كاراس
-                    </button>
+                <h3>إدارة الأسر (تحديث جماعي)</h3>
+                <div class="family-buttons-group">
+                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">الأنبا موسى الأسود</button>
+                    <button class="family-btn" data-family="اسرة مارجرس">مارجرجس</button>
+                    <button class="family-btn" data-family="اسرة الانبا كاراس">الأنبا كاراس</button>
                 </div>
-                
-                <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
-                
-                <div class="mass-update-controls" id="mass-update-controls">
-                    <h5>تعديل رصيد (<span id="selected-users-count">0</span>) مستخدم:</h5>
-                    <input type="number" id="mass-update-amount" placeholder="الكمية (اكتب سالب للخصم)" required>
-                    <div class="mass-update-buttons">
-                        <button id="mass-update-add-btn">إضافة (+)</button>
-                        <button id="mass-update-subtract-btn">خصم (-)</button>
+                <p id="admin-family-message" class="system-message"></p>
+
+                <div id="mass-update-controls" class="mass-update-controls" style="display: none;">
+                    <p>تم تحديد: <strong id="selected-users-count">0</strong> مستخدم</p>
+                    <div class="balance-controls">
+                        <input type="number" id="mass-update-amount" placeholder="مقدار النقطة" min="1">
+                        <button id="mass-update-add-btn" class="add-btn">إضافة جماعية</button>
+                        <button id="mass-update-subtract-btn" class="subtract-btn">خصم جماعي</button>
                     </div>
-                    <p id="mass-update-message" style="color: green; margin-top: 10px; text-align: center;"></p>
+                    <p id="mass-update-message" class="system-message"></p>
                 </div>
-                
-                <div id="admin-family-results" style="margin-top: 1rem;">
+
+                <div id="admin-family-results" class="admin-family-results">
                     </div>
             </div>
-            
+
             <div class="admin-section">
-                <h4>إضافة سؤال جديد (Quiz)</h4>
-                <p style="font-size: 0.9em; color: #555;">
-                    ملحوظة: إضافة سؤال جديد سيقوم بإلغاء تنشيط السؤال القديم أوتوماتيكياً.
-                </p>
-                <form id="admin-quiz-form">
+                <h3>إضافة سؤال جديد (كويز)</h3>
+                <form id="admin-quiz-form" class="form-group">
                     <input type="text" id="quiz-question" placeholder="نص السؤال" required>
-                    <input type="text" id="quiz-opt-a" placeholder="الاختيار الأول (أ)" required>
-                    <input type="text" id="quiz-opt-b" placeholder="الاختيار الثاني (ب)" required>
-                    <input type="text" id="quiz-opt-c" placeholder="الاختيار الثالث (ج)" required>
-                    
-                    <label for="quiz-correct-opt">الإجابة الصحيحة:</label>
+                    <input type="text" id="quiz-opt-a" placeholder="الخيار أ" required>
+                    <input type="text" id="quiz-opt-b" placeholder="الخيار ب" required>
+                    <input type="text" id="quiz-opt-c" placeholder="الخيار ج" required>
                     <select id="quiz-correct-opt" required>
-                        <option value="" disabled selected>-- اختر الإجابة --</option>
-                        <option value="option_a">الاختيار الأول (أ)</option>
-                        <option value="option_b">الاختيار الثاني (ب)</option>
-                        <option value="option_c">الاختيار الثالث (ج)</option>
+                        <option value="" disabled selected>الإجابة الصحيحة</option>
+                        <option value="A">أ</option>
+                        <option value="B">ب</option>
+                        <option value="C">ج</option>
                     </select>
-                    
-                    <label for="quiz-points">عدد النقاط:</label>
-                    <input type="number" id="quiz-points" placeholder="النقاط (مثال: 10)" required>
-                    
+                    <input type="number" id="quiz-points" placeholder="نقاط السؤال" required min="1">
                     <button type="submit">إضافة السؤال</button>
                 </form>
-                <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
+                <p id="admin-quiz-message" class="system-message"></p>
             </div>
 
-            <div class="admin-section">
-                <h4>نشر إعلان عام</h4>
-                <form id="admin-announcement-form">
-                    <textarea id="admin-announcement-text" placeholder="اكتب الإعلان هنا..."></textarea>
-                    <button type="submit">نشر أو تحديث الإعلان</button>
-                </form>
-                <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
-            </div>
-            
-            <div class="admin-section">
-                <h4>إدارة عناصر المتجر</h4>
-                <p style="font-size: 0.9em; color: #555;">
-                    أضف أو احذف العناصر المتاحة للشراء في المتجر.
-                </p>
-                <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
-                    <h5>إضافة عنصر جديد</h5>
-                    <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
-                    <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
-                    
-                    <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (اختياري):</label>
-                    <input type="file" id="store-item-image-file" accept="image/png, image/jpeg">
-                    
-                    <button type="submit" style="background-color: #007bff; margin-top: 10px;">إضافة العنصر للمتجر</button>
-                </form>
-                <p id="admin-store-message" style="color: green; margin-top: 10px;"></p>
-                
-                <h5>العناصر الحالية في المتجر:</h5>
-                <ul id="admin-store-items-list" style="list-style: none; padding: 0;">
-                    <li>جاري تحميل العناصر...</li>
-                </ul>
-            </div>
-            </div>
-    </div>
-    <div class="leaderboard-container" id="leaderboard-container">
-        <h2>🏆 أبطال الأسر 🏆</h2>
-        <div class="champions-container" id="top-champions-list">
-            </div>
-        
-        <hr style="margin: 2rem 0;">
 
-        <h2>لوحة الصدارة التفصيلية (أعلى 10)</h2>
-        <div class="leaderboard-columns">
-            
-            <div class="leaderboard-column">
-                <h3>اسرة الانبا موسي الاسود</h3>
-                <ul class="leaderboard-list" id="family-anba-moussa-list">
-                    </ul>
-            </div>
-            
-            <div class="leaderboard-column">
-                <h3>اسرة مارجرس</h3>
-                <ul class="leaderboard-list" id="family-margerges-list">
-                    </ul>
-            </div>
+        </div> </div>
 
-            <div class="leaderboard-column">
-                <h3>اسرة الانبا كاراس</h3>
-                <ul class="leaderboard-list" id="family-anba-karas-list">
-                    </ul>
-            </div>
-
-        </div>
-    </div>
-    
     <script src="app.js"></script>
 </body>
 </html>
