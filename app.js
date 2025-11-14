@@ -104,6 +104,19 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentSearchedUser = null; 
     let currentQuizId = null;
     let selectedOption = null;
+    
+    // 🛑 عناصر نافذة التعديل (Modal) 🛑
+    const editModalOverlay = document.getElementById("edit-modal-overlay");
+    const closeEditModal = document.getElementById("close-edit-modal");
+    const editItemForm = document.getElementById("edit-item-form");
+    const editItemId = document.getElementById("edit-item-id");
+    const editItemCurrentUrl = document.getElementById("edit-item-current-url");
+    const editItemName = document.getElementById("edit-item-name");
+    const editItemPrice = document.getElementById("edit-item-price");
+    const editItemNewFile = document.getElementById("edit-item-new-file");
+    const editCurrentImage = document.getElementById("edit-current-image");
+    const editUploadStatusMessage = document.getElementById("edit-upload-status-message");
+
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
@@ -116,12 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none"; // 🛑 إضافة إخفاء حاوية المشتريات
+        unlockedItemsContainer.style.display = "none"; 
         avatarOverlayLabel.style.display = "none";
         massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
         loggedInUserProfile = null; 
         transactionList.innerHTML = "";
+        editModalOverlay.style.display = "none"; // 🛑 إخفاء النموذج عند Reset
     };
 
     resetUI();
@@ -694,14 +708,10 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
 
-            // 🛑🛑 التعديل لمرونة استلام الـ JSON (لحماية من أخطاء الـ 500 الخلفية) 🛑🛑
             const text = await response.text();
             if (!text) throw new Error("استجابة فارغة من الخادم. (DB Binding Error?)");
 
-            const data = JSON.parse(text); // تحويل النص إلى JSON
-
-            // نهاية التعديل 
-
+            const data = JSON.parse(text); 
             adminStoreItemsList.innerHTML = '';
 
             if (data.items && data.items.length > 0) {
@@ -1504,7 +1514,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         // 🛑 استدعاء وظائف الأدمن عند اللوجن 🛑
-        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
+        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshDataBtn)
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
 
