@@ -1,8 +1,6 @@
-// File Name: admin-update-item.js
-// 🛑 وظيفة تعديل عنصر المتجر (Final Secure Version) 🛑
+// 🛑 وظيفة تعديل عنصر المتجر (مُعدلة لإضافة المستوى) 🛑
 
-// 🛑🛑 الدوال المساعدة المدمجة محلياً (لتجنب أخطاء الاستيراد) 🛑🛑
-// يجب عليك التأكد أن جدول users موجود ويحتوي على الأعمدة: email و role.
+// 🛑🛑 الدوال المساعدة (كما هي) 🛑🛑
 async function getAuthUser(email, db) {
     if (!email) return null;
     try {
@@ -32,8 +30,8 @@ export async function onRequestPost(context) {
         const request = context.request;
 
         const data = await request.json();
-        // نستقبل البيانات من الواجهة الأمامية
-        const { itemId, name, price, image_url, adminEmail } = data;
+        // 🛑🛑 التعديل: استقبال المستوى المطلوب 🛑🛑
+        const { itemId, name, price, image_url, required_level, adminEmail } = data;
 
         // 1. التحقق من الصلاحيات (Authorization)
         const authUser = await getAuthUser(adminEmail, db);
@@ -41,18 +39,22 @@ export async function onRequestPost(context) {
             return unauthorizedResponse();
         }
 
-        if (!itemId || !name || price === undefined || isNaN(price) || price <= 0) {
+        const itemPrice = parseInt(price);
+        const itemLevel = parseInt(required_level) || 1;
+
+        // 🛑🛑 التعديل: إضافة المستوى للتحقق 🛑🛑
+        if (!itemId || !name || isNaN(itemPrice) || itemPrice <= 0 || isNaN(itemLevel) || itemLevel < 1) {
             return new Response(JSON.stringify({ success: false, error: 'بيانات التعديل غير كاملة أو غير صالحة.' }), { 
                 status: 400, 
                 headers: { 'Content-Type': 'application/json' } 
             });
         }
         
-        // 2. تنفيذ التحديث على جدول store_items
+        // 🛑🛑 التعديل: إضافة "required_level" للـ UPDATE 🛑🛑
         const result = await db.prepare(
-            'UPDATE store_items SET name = ?, price = ?, image_url = ? WHERE id = ?'
+            'UPDATE store_items SET name = ?, price = ?, image_url = ?, required_level = ? WHERE id = ?'
         )
-        .bind(name, parseInt(price), image_url, itemId)
+        .bind(name, itemPrice, image_url, itemLevel, itemId)
         .run();
 
         if (result.changes === 0) {
