@@ -11,6 +11,8 @@
         .card-container { display: none; }
         .form-container { display: flex; } 
 
+        /* (باقي أكواد الـ CSS موجودة في style.css الآن) */
+        
         .avatar-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.5); color: white; 
@@ -29,10 +31,6 @@
         }
         .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
         #user-announcement-text { font-size: 1.1em; color: #333; }
-        
-        .button-group {
-            display: flex; justify-content: center; gap: 10px; margin-top: 15px;
-        }
     </style>
 </head>
 <body>
@@ -82,7 +80,7 @@
                     <h3>Sign Up</h3>
                     <input type="text" id="name" placeholder="Name" required>
                     
-                    <label for="family" style="text-align: right; font-size: 0.9em; color: #555;">الأسرة:</label>
+                    <label for="family" style="text-align: left; font-size: 0.9em; color: #555;">Family:</label>
                     <select id="family" required>
                         <option value="" disabled selected>-- اختر الأسرة --</option>
                         <option value="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</option>
@@ -93,7 +91,7 @@
                     <input type="email" id="signup-email" placeholder="Email" required>
                     <input type="password" id="signup-password" placeholder="Password" required>
 
-                    <label for="signup-avatar-file" style="text-align: right; font-size: 0.9em; color: #555;">صورة شخصية (اختياري):</label>
+                    <label for="avatar-file" style="text-align: left; font-size: 0.9em; color: #555;">Profile Picture (Optional):</label>
                     <input type="file" id="signup-avatar-file" accept="image/png, image/jpeg">
 
                     <button type="submit">Sign Up</button>
@@ -134,7 +132,7 @@
         
         <h2>🛒 مشترياتي السابقة</h2>
         <div class="store-items-grid" id="unlocked-items-list">
-        </div>
+            </div>
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
     <div class="admin-panel-container">
@@ -146,7 +144,7 @@
             <div class="admin-section">
                 <h4>البحث عن مستخدم (بالاسم)</h4>
                 <form id="admin-search-form">
-                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم أو الإيميل" required>
+                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
                     <button type="submit">بحث</button>
                 </form>
                 
