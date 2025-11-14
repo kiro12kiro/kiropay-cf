@@ -123,6 +123,18 @@ body {
     padding: 1.5rem; 
 }
 
+/* 🛑🛑 تم التعديل هنا 🛑🛑 */
+/* ستايلات كارت المستخدم (الاسم والعائلة والرصيد) */
+.container .card #user-name,
+.container .card #user-family,
+.container .card #user-balance {
+    font-size: 1.25em; /* تكبير الخط */
+    font-weight: bold;  /* خط عريض */
+    color: #333;       /* لون أغمق لزيادة الوضوح */
+    margin: 0.75rem 0; /* إضافة مسافات */
+}
+
+
 .container .card .card-img {
     width: 150px;
     height: 150px;
