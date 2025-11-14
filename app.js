@@ -179,14 +179,16 @@ document.addEventListener("DOMContentLoaded", () => {
         hideUserSections(); // إخفاء الكل قبل العرض
         
         // 🛑🛑 تحميل الأقسام بشكل متزامن 🛑🛑
-        // نستخدم Promise.all لضمان أنهم يحاولون التحميل في نفس الوقت
         await Promise.all([
             loadLeaderboards(),
             loadActiveQuiz(loggedInUserProfile.email),
             loadStoreItems()
         ]);
         
-        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
+        // 🛑🛑 فرض الظهور بعد الانتهاء من التحميل (الحل النهائي) 🛑🛑
+        leaderboardContainer.style.display = "block"; 
+        quizContainer.style.display = "block"; 
+        storeContainer.style.display = "block";
     }
 
 
@@ -520,10 +522,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return; 
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return; 
 
         // hideUserSections(); // 🛑 تم حذف أمر الإخفاء من هنا
-        storeContainer.style.display = "block";
+        storeContainer.style.display = "block"; // 🛑 الإظهار أولاً
         storeLoadingMessage.style.display = 'block';
         storeItemsList.innerHTML = '';
         storeMessage.textContent = "";
@@ -619,6 +621,64 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Buy Item Error:", err);
         } finally {
             // لا نعيد تفعيل الزر هنا، لأن refreshUserData سيعيد تحميل المتجر
+        }
+    }
+    
+    // 🛑🛑 دالة معالجة تعديل عنصر المتجر (جديدة) 🛑🛑
+    async function handleEditItem(itemId, name, price, imageUrl) {
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
+            adminStoreMessage.textContent = "غير مصرح لك بالتعديل.";
+            adminStoreMessage.style.color = 'red';
+            return;
+        }
+
+        const newName = prompt(`تعديل اسم المنتج: ${name}`, name);
+        if (newName === null) return; // المستخدم ألغى
+
+        const newPrice = prompt(`تعديل سعر المنتج: ${price}`, price);
+        const finalPrice = parseInt(newPrice);
+        if (newPrice === null || isNaN(finalPrice) || finalPrice <= 0) {
+            adminStoreMessage.textContent = "تم الإلغاء أو السعر غير صالح.";
+            adminStoreMessage.style.color = 'orange';
+            return;
+        }
+        
+        const newImageUrl = prompt(`تعديل رابط الصورة (اتركه فارغاً للحفاظ على الصورة الحالية):`, imageUrl || '');
+        
+        if (!confirm(`هل أنت متأكد من حفظ التعديلات التالية على ${name}؟\n- الاسم الجديد: ${newName}\n- السعر الجديد: $${finalPrice}\n- رابط الصورة: ${newImageUrl || '(الحالي)'}`)) {
+            return;
+        }
+
+        adminStoreMessage.textContent = "جاري إرسال التعديلات...";
+        adminStoreMessage.style.color = "blue";
+
+        try {
+            const response = await fetch(`/admin-update-item`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    itemId: itemId,
+                    name: newName,
+                    price: finalPrice,
+                    image_url: newImageUrl,
+                    adminEmail: loggedInUserProfile.email 
+                }),
+            });
+            
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                adminStoreMessage.textContent = `تم تحديث المنتج بنجاح!`;
+                adminStoreMessage.style.color = "green";
+                await loadAdminStoreItems(); // تحديث القائمة بعد التعديل
+            } else {
+                adminStoreMessage.textContent = `فشل التعديل: ${data.error || "خطأ غير محدد"}`;
+                adminStoreMessage.style.color = "red";
+            }
+        } catch (err) {
+            adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لتعديل العنصر.";
+            adminStoreMessage.style.color = "red";
+            console.error("Edit Item Error:", err);
         }
     }
     
@@ -836,7 +896,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             setTimeout(() => {
-                quizContainer.style.display = "none";
+                quizContainer.style.display = "block"; // 🛑 يجب أن يظل مرئياً أو يتم إخفاؤه حسب رغبة المستخدم
+                loadActiveQuiz(loggedInUserProfile.email); // تحميل السؤال التالي
             }, 3000);
 
         } catch (err) {
@@ -1006,7 +1067,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
                 balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
                 balanceMessage.style.color = "red";
-                 return;
+                return;
             }
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
