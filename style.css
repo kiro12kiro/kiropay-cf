@@ -127,7 +127,8 @@ body {
 /* ستايلات كارت المستخدم (الاسم والعائلة والرصيد) */
 .container .card #user-name,
 .container .card #user-family,
-.container .card #user-balance {
+.container .card #user-balance,
+.container .card #user-level { /* 🛑 إضافة المستوى */
     font-size: 1.25em; /* تكبير الخط */
     font-weight: bold;  /* خط عريض */
     color: #333;       /* لون أغمق لزيادة الوضوح */
@@ -214,6 +215,32 @@ body {
     background-color: #ffc107; 
     color: #333;
 }
+
+/* 🛑🛑 قسم تعديل المستوى الجديد (للأدمن) 🛑🛑 */
+#admin-level-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+}
+#admin-level-controls input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#admin-update-level-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    background-color: #17a2b8; /* Info Blue */
+    font-weight: bold;
+}
+#admin-update-level-btn:hover {
+    background-color: #138496;
+}
+
 
 #admin-delete-user-btn {
     background-color: #dc3545; 
@@ -470,6 +497,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     background-color: #fff; border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #28a745;
 }
+/* 🛑 تغيير اسم المتجر 🛑 */
 .store-container h2 { text-align: center; color: #28a745; margin-top: 0; }
 
 /* 🛑🛑 التعديل الرئيسي هنا: استخدام Grid 🛑🛑 */
@@ -495,6 +523,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     /* 🛑 تم حذف العرض الثابت (width: 180px) ليتحكم به الـ Grid */
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: opacity 0.3s ease; /* 🛑 إضافة transition */
 }
 .store-item-card img {
     width: 100px;
@@ -508,6 +537,15 @@ form#admin-add-item-form button[type="submit"]:hover {
     color: #333;
     font-size: 1.1em;
 }
+
+/* 🛑 ستايل المستوى المطلوب للمنتج 🛑 */
+.store-item-card p.level-req {
+    font-size: 0.9em;
+    color: #dc3545; /* أحمر تحذيري */
+    font-weight: bold;
+    margin: 5px 0 10px 0;
+}
+
 .store-item-card p.price {
     font-weight: bold;
     color: #28a745;
@@ -527,6 +565,15 @@ form#admin-add-item-form button[type="submit"]:hover {
 .store-item-card button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+/* 🛑 ستايل المنتج المقفول (المستوى غير كافٍ) 🛑 */
+.store-item-card.locked {
+    opacity: 0.6;
+    background-color: #e9ecef;
+}
+.store-item-card.locked img {
+    opacity: 0.7;
 }
 
 /* 🛑🛑 ستايلات إدارة المتجر للأدمن (المحسّنة) 🛑🛑 */

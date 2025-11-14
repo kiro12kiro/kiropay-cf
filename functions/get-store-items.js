@@ -1,12 +1,11 @@
-// File Name: get-store-items.js
 // 🛑 تم التحويل إلى صيغة Cloudflare Pages Function (onRequestGet)
 export async function onRequestGet(context) {
     try {
         const db = context.env.DB; // الوصول لـ DB عن طريق context.env
 
-        // 🛑 تم التعديل: اختيار name (حسب آخر تأكيد)
+        // 🛑🛑 التعديل: إضافة "required_level" للـ SELECT 🛑🛑
         const { results: items } = await db.prepare(
-            'SELECT id, name, price, image_url FROM store_items'
+            'SELECT id, name, price, image_url, required_level FROM store_items'
         ).all();
 
         return new Response(JSON.stringify({ items }), { status: 200, headers: { 'Content-Type': 'application/json' } });

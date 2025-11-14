@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح الخطأ هنا
+document.addEventListener("DOMContentLoaded", () => {
     // --- مسك العناصر الأساسية ---
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
     const userNameP = document.getElementById("user-name");
     const userFamilyP = document.getElementById("user-family");
     const userBalanceP = document.getElementById("user-balance");
+    const userLevelP = document.getElementById("user-level"); // 🛑 إضافة عنصر المستوى
     const userAvatarImg = document.getElementById("user-avatar");
     const DEFAULT_AVATAR_URL = "/default-avatar.png";
 
@@ -41,10 +42,17 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
     const searchedUserFamily = document.getElementById("searched-user-family");
     const searchedUserEmail = document.getElementById("searched-user-email");
     const searchedUserBalance = document.getElementById("searched-user-balance");
+    const searchedUserLevel = document.getElementById("searched-user-level"); // 🛑 إضافة عنصر مستوى المستخدم (الأدمن)
     const balanceAmountInput = document.getElementById("admin-balance-amount");
     const addBalanceBtn = document.getElementById("admin-add-balance-btn");
     const subtractBalanceBtn = document.getElementById("admin-subtract-balance-btn");
     const balanceMessage = document.getElementById("admin-balance-message");
+    
+    // 🛑 عناصر التحكم في المستوى (الأدمن)
+    const adminLevelAmount = document.getElementById("admin-level-amount");
+    const adminUpdateLevelBtn = document.getElementById("admin-update-level-btn");
+    const adminLevelMessage = document.getElementById("admin-level-message"); 
+    
     const deleteUserBtn = document.getElementById("admin-delete-user-btn");
     const deleteMessage = document.getElementById("admin-delete-message");
     const familyButtons = document.querySelectorAll(".family-btn");
@@ -76,13 +84,14 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
     const adminStoreMessage = document.getElementById("admin-store-message");
     const storeItemImageFile = document.getElementById("store-item-image-file"); 
+    const storeItemRequiredLevel = document.getElementById("store-item-required-level"); // 🛑 إضافة عنصر المستوى للمنتج
 
     // --- عناصر المشتريات (جديدة) ---
     const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
     const unlockedItemsContainer = document.getElementById("unlocked-items-container");
     const unlockedItemsList = document.getElementById("unlocked-items-list");
     const unlockedItemsMessage = document.getElementById("unlocked-items-message");
-    const backToStoreBtn = document.getElementById("back-to-store-btn"); // 🛑 الزر الجديد
+    const backToStoreBtn = document.getElementById("back-to-store-btn"); 
     // --- نهاية عناصر المشتريات ---
 
     const leaderboardContainer = document.getElementById("leaderboard-container");
@@ -113,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
     const editItemCurrentUrl = document.getElementById("edit-item-current-url");
     const editItemName = document.getElementById("edit-item-name");
     const editItemPrice = document.getElementById("edit-item-price");
+    const editItemRequiredLevel = document.getElementById("edit-item-required-level"); // 🛑 إضافة عنصر تعديل المستوى
     const editItemNewFile = document.getElementById("edit-item-new-file");
     const editCurrentImage = document.getElementById("edit-current-image");
     const editUploadStatusMessage = document.getElementById("edit-upload-status-message");
@@ -129,13 +139,15 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none"; // 🛑 إضافة إخفاء حاوية المشتريات
+        unlockedItemsContainer.style.display = "none"; 
         avatarOverlayLabel.style.display = "none";
         massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
         loggedInUserProfile = null; 
         transactionList.innerHTML = "";
-        editModalOverlay.style.display = "none"; // 🛑 إخفاء النموذج عند Reset
+        // 🛑🛑 تم تصحيح الخطأ: يجب أن يكون المتغير userLevelP موجوداً في HTML 🛑🛑
+        if (userLevelP) userLevelP.textContent = ""; 
+        editModalOverlay.style.display = "none"; 
     };
 
     resetUI();
@@ -265,6 +277,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             userNameP.textContent = `الاسم: ${user.name}`;
             userFamilyP.textContent = `العائلة: ${user.family}`;
             userBalanceP.textContent = `الرصيد: $${user.balance}`;
+            userLevelP.textContent = `المستوى: ${user.level || 1}`; // 🛑 تحديث المستوى
             userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
             
             await loadTransactionHistory(user.email);
@@ -319,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                 userNameP.textContent = `الاسم: ${user.name}`;
                 userFamilyP.textContent = `العائلة: ${user.family}`;
                 userBalanceP.textContent = `الرصيد: $${user.balance}`;
+                userLevelP.textContent = `المستوى: ${user.level || 1}`; // 🛑 تحديث المستوى
                 userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
                 
                 cardContainer.style.display = "flex";
@@ -541,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
         storeMessage.textContent = "";
 
         try {
-            // 🛑🛑 تم تعديلها إلى GET 🛑🛑
+            // 🛑🛑 تم التعديل لإضافة المستوى المطلوب 🛑🛑
             const response = await fetch(`/get-store-items`); 
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر"); 
@@ -555,16 +569,39 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                     const card = document.createElement('div');
                     card.className = 'store-item-card';
                     
-                    const canAfford = loggedInUserProfile && loggedInUserProfile.balance >= item.price;
-                    const buttonText = canAfford ? `شراء (${item.price} نقطة)` : `النقاط غير كافية`;
+                    // 🛑🛑 منطق التحقق الجديد (الرصيد + المستوى) 🛑🛑
+                    const userLevel = loggedInUserProfile ? loggedInUserProfile.level : 1;
+                    const userBalance = loggedInUserProfile ? loggedInUserProfile.balance : 0;
+                    const requiredLevel = item.required_level || 1;
+
+                    const canAfford = userBalance >= item.price;
+                    const highEnoughLevel = userLevel >= requiredLevel;
+                    const canBuy = canAfford && highEnoughLevel;
+
+                    let buttonText = `شراء (${item.price} نقطة)`;
                     
+                    if (!highEnoughLevel) {
+                        buttonText = `يتطلب مستوى ${requiredLevel}`;
+                        card.classList.add('locked'); // 🛑 إضافة كلاس للقفل
+                    } else if (!canAfford) {
+                        buttonText = `النقاط غير كافية`;
+                    }
+                    // 🛑🛑 نهاية منطق التحقق الجديد 🛑🛑
+
                     const itemName = item.name || item.namel || 'منتج غير معروف'; 
+                    
+                    // 🛑 إضافة نص المستوى المطلوب
+                    const requiredLevelText = (requiredLevel > 1) 
+                        ? `<p class="level-req">يتطلب مستوى ${requiredLevel}</p>` 
+                        : '<p class="level-req" style="color: #28a745;">متاح للجميع</p>';
+
 
                     card.innerHTML = `
                         <img src="${item.image_url || '/default-item.png'}" alt="${itemName}">
                         <h5>${itemName}</h5>
+                        ${requiredLevelText} 
                         <p class="price">$${item.price}</p>
-                        <button class="buy-item-btn" data-item-id="${item.id}" ${canAfford ? '' : 'disabled'}>
+                        <button class="buy-item-btn" data-item-id="${item.id}" ${canBuy ? '' : 'disabled'}>
                             ${buttonText}
                         </button>
                     `;
@@ -635,7 +672,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
     }
     
     // 🛑🛑 دالة معالجة تعديل عنصر المتجر (جديدة) 🛑🛑
-    async function handleEditItem(itemId, name, price, imageUrl) {
+    async function handleEditItem(itemId, name, price, imageUrl, requiredLevel) { // 🛑 إضافة المستوى
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
             adminStoreMessage.textContent = "غير مصرح لك بالتعديل.";
             adminStoreMessage.style.color = 'red';
@@ -646,6 +683,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
         editItemId.value = itemId;
         editItemName.value = name;
         editItemPrice.value = price;
+        editItemRequiredLevel.value = requiredLevel || 1; // 🛑 ملء المستوى
         editItemCurrentUrl.value = imageUrl;
         editCurrentImage.src = imageUrl || DEFAULT_AVATAR_URL;
         editItemNewFile.value = null; // تفريغ حقل الملف
@@ -665,11 +703,12 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             
             const newName = editItemName.value.trim();
             const newPrice = parseInt(editItemPrice.value);
+            const newRequiredLevel = parseInt(editItemRequiredLevel.value); // 🛑 جلب المستوى
             const fileToUpload = editItemNewFile.files[0];
             
             // التحقق من صلاحية البيانات الأساسية
-            if (!newName || isNaN(newPrice) || newPrice <= 0) {
-                editUploadStatusMessage.textContent = "الرجاء إدخال اسم وسعر صالحين.";
+            if (!newName || isNaN(newPrice) || newPrice <= 0 || isNaN(newRequiredLevel) || newRequiredLevel < 1) { // 🛑 إضافة التحقق
+                editUploadStatusMessage.textContent = "الرجاء إدخال اسم وسعر ومستوى صالحين.";
                 editUploadStatusMessage.style.color = 'red';
                 return;
             }
@@ -709,6 +748,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                         itemId: itemId,
                         name: newName,
                         price: newPrice,
+                        required_level: newRequiredLevel, // 🛑 إرسال المستوى
                         image_url: finalImageUrl,
                         adminEmail: loggedInUserProfile.email 
                     }),
@@ -745,6 +785,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
         adminStoreMessage.textContent = "";
 
         try {
+            // 🛑🛑 تم التعديل لإضافة المستوى المطلوب 🛑🛑
             const response = await fetch(`/admin-get-items`); 
             
             if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
@@ -758,13 +799,14 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
                     const itemName = item.name || item.namel || 'غير معروف';
+                    const itemLevel = item.required_level || 1; // 🛑 جلب المستوى
 
                     const li = document.createElement('li');
                     li.className = 'admin-item-card'; // 🛑 تطبيق كلاس الكارت الجديد
                     li.innerHTML = `
                         <div class="admin-item-info">
                             <strong>${itemName}</strong>
-                            <small>السعر: $${item.price} | ID: ${item.id}</small>
+                            <small>السعر: $${item.price} | المستوى المطلوب: ${itemLevel} | ID: ${item.id}</small>
                             <small>صورة: ${item.image_url ? 'مرفوعة' : 'لا يوجد'}</small>
                         </div>
                         <div class="admin-item-actions">
@@ -773,6 +815,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                                 data-item-name="${itemName}" 
                                 data-item-price="${item.price}" 
                                 data-item-url="${item.image_url || ''}"
+                                data-item-level="${itemLevel}" // 🛑 إضافة المستوى لزر التعديل
                                 style="background-color: #ffc107; color: #333; margin-left: 10px; padding: 10px 15px; border-radius: 6px; font-weight: bold;">
                                 تعديل
                             </button>
@@ -793,9 +836,10 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                         const itemName = e.currentTarget.dataset.itemName;
                         const itemPrice = e.currentTarget.dataset.itemPrice;
                         const imageUrl = e.currentTarget.dataset.itemUrl;
+                        const itemLevel = e.currentTarget.dataset.itemLevel; // 🛑 جلب المستوى
                         
                         // 🛑 استدعاء دالة التعديل (لفتح النموذج) 🛑
-                        handleEditItem(itemId, itemName, itemPrice, imageUrl); 
+                        handleEditItem(itemId, itemName, itemPrice, imageUrl, itemLevel); // 🛑 تمرير المستوى
                     });
                 });
             } else {
@@ -1064,10 +1108,13 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             searchedUserFamily.textContent = `العائلة: ${user.family}`;
             searchedUserEmail.textContent = `الإيميل: ${user.email}`;
             searchedUserBalance.textContent = `الرصيد: $${user.balance}`;
+            searchedUserLevel.textContent = `المستوى: ${user.level || 1}`; // 🛑 تحديث المستوى
             searchedUserCard.style.display = "block";
             currentSearchedUser = user; 
             balanceMessage.textContent = "";
             deleteMessage.textContent = "";
+            adminLevelMessage.textContent = ""; // 🛑 إضافة
+            adminLevelAmount.value = user.level || 1; // 🛑 إضافة
         }
 
         // --- كود الدروب ليست ---
@@ -1145,6 +1192,60 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             }
             updateBalance(-amount, "خصم يدوي من الأدمن");
         });
+
+        // 🛑🛑 زرار تحديث المستوى (جديد) 🛑🛑
+        adminUpdateLevelBtn.addEventListener("click", async () => {
+            const newLevel = parseInt(adminLevelAmount.value);
+            if (!currentSearchedUser) {
+                adminLevelMessage.textContent = "الرجاء اختيار مستخدم أولاً.";
+                adminLevelMessage.style.color = "red";
+                return;
+            }
+            if (isNaN(newLevel) || newLevel < 1) {
+                adminLevelMessage.textContent = "الرجاء إدخال مستوى صحيح (1 أو أعلى).";
+                adminLevelMessage.style.color = "red";
+                return;
+            }
+
+            adminLevelMessage.textContent = "جاري تحديث المستوى...";
+            adminLevelMessage.style.color = "blue";
+            adminUpdateLevelBtn.disabled = true;
+
+            try {
+                // نفترض وجود API endpoint جديد
+                const response = await fetch(`/admin-update-level`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        adminEmail: loggedInUserProfile.email,
+                        targetEmail: currentSearchedUser.email,
+                        newLevel: newLevel
+                    }),
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    adminLevelMessage.textContent = `تم تحديث المستوى بنجاح إلى ${data.new_level}.`;
+                    adminLevelMessage.style.color = "green";
+                    currentSearchedUser.level = data.new_level;
+                    searchedUserLevel.textContent = `المستوى: ${data.new_level}`;
+                    
+                    // إذا كان الأدمن يعدل مستواه، نحدث الكارت الرئيسي
+                    if (loggedInUserProfile.email === currentSearchedUser.email) {
+                        refreshUserData(); 
+                    }
+                } else {
+                    adminLevelMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                    adminLevelMessage.style.color = "red";
+                }
+            } catch (err) {
+                adminLevelMessage.textContent = "خطأ في الاتصال بالـ API.";
+                adminLevelMessage.style.color = "red";
+            } finally {
+                adminUpdateLevelBtn.disabled = false;
+            }
+        });
+
 
         // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑 ⬅️ تم إضافة الكود المفقود والمصحح هنا
         deleteUserBtn.addEventListener("click", async () => {
@@ -1493,11 +1594,12 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
             event.preventDefault(); 
             const name = document.getElementById("store-item-name").value.trim();
             const price = parseInt(document.getElementById("store-item-price").value);
+            const requiredLevel = parseInt(document.getElementById("store-item-required-level").value) || 1; // 🛑 جلب المستوى
             const imageFile = storeItemImageFile.files[0]; // 🛑 جلب الملف
 
             // 🛑🛑 التعديل لجعل الصورة اختيارية 🛑🛑
-            if (!name || isNaN(price) || price <= 0) {
-                adminStoreMessage.textContent = "الرجاء ملء الاسم والسعر بشكل صحيح.";
+            if (!name || isNaN(price) || price <= 0 || isNaN(requiredLevel) || requiredLevel < 1) { // 🛑 إضافة التحقق
+                adminStoreMessage.textContent = "الرجاء ملء الاسم والسعر والمستوى المطلوب بشكل صحيح.";
                 adminStoreMessage.style.color = "red";
                 return;
             }
@@ -1537,6 +1639,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                         name, 
                         price, 
                         image_url: final_image_url,
+                        required_level: requiredLevel, // 🛑 إرسال المستوى
                         email: loggedInUserProfile.email // 🛑 إرسال إيميل الأدمن للتحقق
                     }),
                 });

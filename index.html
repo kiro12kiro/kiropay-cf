@@ -58,6 +58,8 @@
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
+                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <p id="user-level">المستوى: </p>
 
                     <div class="transaction-history">
                         <h4>سجل المعاملات</h4>
@@ -125,14 +127,16 @@
         <p id="quiz-message"></p>
     </div>
 
+    <!-- 🛑🛑 تغيير اسم المتجر 🛑🛑 -->
     <div class="store-container" id="store-container" style="display: none;">
-        <h2>🛒 متجر KiroPay</h2>
+        <h2>🛒 TAKLOPOLY STORE</h2> 
         <p style="text-align: center; color: #555;">استبدل نقاطك بعناصر مميزة.</p>
         <div class="store-items-grid" id="store-items-list">
             <p style="text-align: center;" id="store-loading-message">جاري تحميل عناصر المتجر...</p>
         </div>
         <p id="store-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
     </div>
+    
     <div class="unlocked-items-container" id="unlocked-items-container" style="display: none;">
         <button id="back-to-store-btn" style="margin-bottom: 20px;">▶️ العودة للقائمة الرئيسية</button>
         
@@ -141,6 +145,7 @@
             </div>
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
+
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
@@ -169,6 +174,8 @@
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
+                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
                     
                     <hr style="margin: 1rem 0;">
 
@@ -179,6 +186,15 @@
                         <button id="admin-subtract-balance-btn">خصم (-)</button>
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
+                    
+                    <!-- 🛑🛑 الإضافة المطلوبة: قسم تعديل المستوى 🛑🛑 -->
+                    <hr style="margin: 1rem 0;">
+                    <h4>تعديل مستوى المستخدم</h4>
+                    <div id="admin-level-controls">
+                        <input type="number" id="admin-level-amount" placeholder="المستوى الجديد" required min="1">
+                        <button id="admin-update-level-btn">تحديث المستوى</button>
+                    </div>
+                    <p id="admin-level-message" style="color: green;"></p>
                     
                     <hr style="margin: 1rem 0;">
 
@@ -266,6 +282,10 @@
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
                     
+                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
+                    <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
+
                     <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (اختياري):</label>
                     <input type="file" id="store-item-image-file" accept="image/png, image/jpeg">
                     
@@ -330,6 +350,10 @@
 
                 <label for="edit-item-price">السعر (نقاط):</label>
                 <input type="number" id="edit-item-price" required min="1">
+
+                <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
+                <input type="number" id="edit-item-required-level" required min="1">
 
                 <label for="edit-item-new-file" style="margin-top: 15px;">تغيير الصورة (اختياري):</label>
                 <input type="file" id="edit-item-new-file" accept="image/png, image/jpeg">
