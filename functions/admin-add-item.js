@@ -1,5 +1,4 @@
-// File Name: admin-add-item.js
-// 🛑 تم التعديل: إزالة التحقق الإلزامي من وجود image_url
+// 🛑 تم التعديل: إضافة "required_level"
 export async function onRequestPost(context) {
     try {
         const db = context.env.DB; 
@@ -7,22 +6,26 @@ export async function onRequestPost(context) {
 
         // التحقق من صلاحيات الأدمن يجب أن يتم هنا (في الكود الحقيقي)
 
-        const { name, price, image_url } = await request.json();
+        // 🛑🛑 التعديل: استقبال المستوى المطلوب 🛑🛑
+        const { name, price, image_url, required_level } = await request.json();
 
-        // 🛑🛑 التحقق الجديد: لا نشترط وجود image_url، ونفحص فقط الاسم والسعر
-        if (!name || price === undefined || isNaN(price) || price <= 0) {
-            return new Response(JSON.stringify({ error: 'بيانات العنصر غير كاملة أو غير صالحة (الاسم والسعر ضروريان).' }), { 
+        // 🛑🛑 التعديل: إضافة المستوى للتحقق 🛑🛑
+        const itemPrice = parseInt(price);
+        const itemLevel = parseInt(required_level) || 1; // الافتراضي 1
+
+        if (!name || isNaN(itemPrice) || itemPrice <= 0 || isNaN(itemLevel) || itemLevel < 1) {
+            return new Response(JSON.stringify({ error: 'بيانات العنصر غير كاملة (الاسم، السعر، والمستوى مطلوبين).' }), { 
                 status: 400, 
                 headers: { 'Content-Type': 'application/json' } 
             });
         }
 
         try {
-            // 🛑🛑 التعديل لـ D1 SQL: استخدام INSERT
+            // 🛑🛑 التعديل: إضافة "required_level" للـ INSERT 🛑🛑
             const result = await db.prepare(
-                'INSERT INTO store_items (name, price, image_url) VALUES (?, ?, ?)'
+                'INSERT INTO store_items (name, price, image_url, required_level) VALUES (?, ?, ?, ?)'
             )
-            .bind(name, parseInt(price), image_url) // image_url يمكن أن تكون ''
+            .bind(name, itemPrice, image_url, itemLevel) // image_url يمكن أن تكون ''
             .run();
 
             return new Response(JSON.stringify({ success: true, message: `تم إضافة العنصر بنجاح.`, itemId: result.lastRowId }), { 
