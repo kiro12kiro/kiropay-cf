@@ -451,7 +451,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 }
 .leaderboard-list li:last-child { border-bottom: none; }
 
-/* ستايلات المتجر الجديدة (لليوزر) */
+/* 🛑🛑 ستايلات المتجر (معدلة) 🛑🛑 */
 .store-container {
     display: none; 
     max-width: 900px; margin: 2rem auto; padding: 20px;
@@ -459,19 +459,28 @@ form#admin-add-item-form button[type="submit"]:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #28a745;
 }
 .store-container h2 { text-align: center; color: #28a745; margin-top: 0; }
+
+/* 🛑🛑 التعديل الرئيسي هنا: استخدام Grid 🛑🛑 */
 .store-items-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    /* هذا الكود يعني:
+      - كرر (auto-fit) الأعمدة طالما هناك مساحة.
+      - كل عمود يجب أن يكون على الأقل 200px (minmax).
+      - إذا كانت الشاشة 900px، ستظهر 4 أعمدة.
+      - إذا كانت الشاشة 500px، ستظهر 2 (اثنينات).
+      - إذا كانت الشاشة 320px، ستظهر 1 (عمود واحد).
+    */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    justify-content: center;
     margin-top: 1.5rem;
 }
+
 .store-item-card {
     background-color: #f8f9fa;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
-    width: 180px;
+    /* 🛑 تم حذف العرض الثابت (width: 180px) ليتحكم به الـ Grid */
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
@@ -508,7 +517,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     cursor: not-allowed;
 }
 
-/* 🛑🛑 ستايلات إدارة المتجر للأدمن (الكارت الكبير الجديد والمحسن) 🛑🛑 */
+/* 🛑🛑 ستايلات إدارة المتجر للأدمن (المحسّنة) 🛑🛑 */
 #admin-store-items-list {
     list-style: none;
     padding: 0;
