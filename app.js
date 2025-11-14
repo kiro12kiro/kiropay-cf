@@ -273,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                 
                 // 🛑🛑 نستخدم loadMainDashboard لتهيئة الواجهة بعد التحديث 🛑🛑
                 await loadMainDashboard();
+                await loadAnnouncement(); // 🛑🛑 تم الإصلاح: تحميل الإعلان للمستخدم
             } else {
                 unlockedItemsBtn.style.display = "none";
                 await loadAnnouncement();
@@ -338,6 +339,7 @@ document.addEventListener("DOMContentLoaded", () => { // 🛑 تم إصلاح ا
                 } else {
                     unlockedItemsBtn.style.display = "block"; // 🛑 إظهار زر المشتريات
                     await loadMainDashboard(); // 🛑 تحميل لوحة التحكم الرئيسية الكاملة بعد تسجيل الدخول
+                    await loadAnnouncement(); // 🛑🛑 تم الإصلاح: تحميل الإعلان للمستخدم
                     leaderboardContainer.style.display = "block";
                     adminPanelDiv.style.display = "none";
                 }
