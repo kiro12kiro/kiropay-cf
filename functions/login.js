@@ -1,6 +1,6 @@
 /*
  * API Endpoint: /login
- * (النسخة الجديدة المُعدلة - بتجيب لينك الصورة)
+ * (مُعدلة لإضافة "المستوى")
  */
 export async function onRequestPost(context) {
   try {
@@ -15,23 +15,21 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑🛑 التعديل الأول هنا 🛑🛑
-    // ضفنا "profile_image_url" لأمر البحث
+    // 🛑 SELECT * ستجلب المستوى أوتوماتيكياً (level)
     const ps = db.prepare("SELECT * FROM users WHERE email = ?");
     const user = await ps.bind(email).first();
 
     // (دي مقارنة غير آمنة بس للتجربة)
     if (user && user.password === password) {
       
-      // 🛑🛑 التعديل الثاني هنا 🛑🛑
-      // ضفنا "profile_image_url" للبيانات اللي بترجع
       const userData = {
         name: user.name,
         family: user.family,
         email: user.email,
         balance: user.balance,
-        role: user.role, // اتأكدنا إن الـ role بيرجع عشان الأدمن
-        profile_image_url: user.profile_image_url // ⬅️ دي الإضافة المهمة
+        role: user.role, 
+        profile_image_url: user.profile_image_url,
+        level: user.level || 1 // 🛑🛑 التعديل: إضافة المستوى هنا 🛑🛑
       };
       
       return new Response(JSON.stringify({ success: true, user: userData }), {
