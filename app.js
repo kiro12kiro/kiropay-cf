@@ -682,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (مع تحسين معالجة الأخطاء وهيكل الكارت الجديد) ---
+    // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (مع زر التعديل الجديد) ---
     async function loadAdminStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
 
@@ -716,13 +716,36 @@ document.addEventListener("DOMContentLoaded", () => {
                             <small>السعر: $${item.price} | ID: ${item.id}</small>
                             <small>صورة: ${item.image_url ? 'مرفوعة' : 'لا يوجد'}</small>
                         </div>
-                        <button class="delete-store-item-btn" data-item-id="${item.id}">حذف</button>
+                        <div class="admin-item-actions">
+                            <button class="edit-item-btn" 
+                                data-item-id="${item.id}" 
+                                data-item-name="${itemName}" 
+                                data-item-price="${item.price}" 
+                                data-item-url="${item.image_url || ''}"
+                                style="background-color: #ffc107; color: #333; margin-left: 10px; padding: 10px 15px; border-radius: 6px; font-weight: bold;">
+                                تعديل
+                            </button>
+                            <button class="delete-store-item-btn" data-item-id="${item.id}" style="padding: 10px 15px; border-radius: 6px; font-weight: bold;">حذف</button>
+                        </div>
                     `;
                     adminStoreItemsList.appendChild(li);
                 });
 
                 document.querySelectorAll('.delete-store-item-btn').forEach(btn => {
                     btn.addEventListener('click', handleDeleteItem);
+                });
+                
+                // 🛑 إضافة مُستمعي الأحداث لأزرار التعديل 🛑
+                document.querySelectorAll('.edit-item-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const itemId = e.currentTarget.dataset.itemId;
+                        const itemName = e.currentTarget.dataset.itemName;
+                        const itemPrice = e.currentTarget.dataset.itemPrice;
+                        const imageUrl = e.currentTarget.dataset.itemUrl;
+                        
+                        // 🛑 استدعاء دالة التعديل 🛑
+                        handleEditItem(itemId, itemName, itemPrice, imageUrl); 
+                    });
                 });
             } else {
                 adminStoreItemsList.innerHTML = `<li style="text-align: center;">لا توجد عناصر مضافة حالياً.</li>`;
