@@ -155,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrListMessage = document.getElementById("admin-qr-list-message");
     const generatePrintCardsBtn = document.getElementById("admin-generate-print-cards-btn"); // 🛑 زر التوليد
     const printableCardsContainer = document.getElementById("admin-printable-cards-container"); // 🛑 حاوية الكروت
+    const downloadCardsAsImageBtn = document.getElementById("admin-download-cards-as-image-btn"); // 🛑 زر التحميل
 
     // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
     const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
@@ -1946,9 +1947,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             setTimeout(processBatch, 100);
                         } else {
                             // خلصنا
-                            qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للطباعة.`;
+                            qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كصورة أو للطباعة.`;
                             qrListMessage.style.color = 'green';
-                            alert("اكتمل توليد الكروت. اضغط OK ثم استخدم (Ctrl+P) أو (File > Print) لطباعة الصفحة.");
+                            alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كصورة أو استخدام (Ctrl+P) لطباعتها.");
                         }
                     }
                     
@@ -1961,9 +1962,49 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
+        
+        // 🛑🛑 6. كود تحميل الكروت كصورة (جديد) 🛑🛑
+        if (downloadCardsAsImageBtn) {
+            downloadCardsAsImageBtn.addEventListener('click', () => {
+                const containerToCapture = printableCardsContainer; // The <div> with all the cards
+                if (containerToCapture.children.length === 0) {
+                    qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
+                    qrListMessage.style.color = "red";
+                    return;
+                }
+
+                qrListMessage.textContent = "جاري تحويل الكروت إلى صورة... قد يستغرق هذا بعض الوقت...";
+                qrListMessage.style.color = "blue";
+                
+                // استخدام html2canvas (المكتبة التي أضفناها في index.html)
+                html2canvas(containerToCapture, {
+                    scrollX: 0,
+                    scrollY: -window.scrollY, // بدء الالتقاط من أعلى الحاوية
+                    scale: 2 // زيادة الدقة (Scale) لجودة طباعة أفضل
+                }).then(canvas => {
+                    // إنشاء لينك لتحميل الصورة
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'kiropay-qr-cards.png';
+                    
+                    // تفعيل التحميل
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    qrListMessage.textContent = "✅ تم تحميل الصورة بنجاح! يمكنك الآن طباعتها.";
+                    qrListMessage.style.color = "green";
+                    
+                }).catch(err => {
+                    qrListMessage.textContent = "❌ فشل تحويل الصورة. حاول مرة أخرى.";
+                    qrListMessage.style.color = "red";
+                    console.error("html2canvas error:", err);
+                });
+            });
+        }
 
 
-        // 🛑🛑 6. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
+        // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
         if (adminQuizForm) {
             adminQuizForm.addEventListener("submit", async (event) => {
                 event.preventDefault(); 
@@ -2020,7 +2061,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 🛑 7. كود فورم الإعلانات (مُصحح) 🛑
+        // 🛑 8. كود فورم الإعلانات (مُصحح) 🛑
         if (adminAnnouncementForm) {
             adminAnnouncementForm.addEventListener("submit", async (event) => {
                 event.preventDefault(); 
@@ -2063,7 +2104,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
         
-        // 8. --- فورم إضافة عنصر جديد (المعدل لرفع الملفات) ---
+        // 9. --- فورم إضافة عنصر جديد (المعدل لرفع الملفات) ---
         if (adminAddItemForm) {
             adminAddItemForm.addEventListener("submit", async (event) => {
                 event.preventDefault(); 
