@@ -1,7 +1,32 @@
 /*
  * API Endpoint: /admin-get-qr-list
- * الوظيفة: جلب قائمة المستخدمين (الاسم والإيميل) لغرض الطباعة
+ * الوظيفة: جلب قائمة بكل المستخدمين (الاسم، الإيميل، العائلة) لغرض طباعة QR Codes
  */
+
+// 🛑🛑 الدوال المساعدة (مطلوبة للأمان) 🛑🛑
+async function getAuthUser(email, db) {
+    if (!email) return null;
+    try {
+        const { results } = await db.prepare('SELECT role FROM users WHERE email = ?').bind(email).all();
+        return results[0] || null;
+    } catch (e) { 
+        return null; 
+    }
+}
+
+function unauthorizedResponse() {
+    return new Response(JSON.stringify({ 
+        success: false, 
+        error: "غير مصرح لك بتنفيذ هذا الإجراء.",
+        auth_error: true
+    }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+    });
+}
+// 🛑🛑 نهاية الدوال المساعدة 🛑🛑
+
+
 export async function onRequestPost(context) {
     try {
         const db = context.env.DB; 
@@ -9,15 +34,14 @@ export async function onRequestPost(context) {
 
         const { adminEmail } = await request.json();
 
-        // 🛑🛑 يجب أن تستورد أو تعرف دالة التحقق من صلاحيات الأدمن هنا 🛑🛑
-        // (افتراض أن التحقق من صلاحيات الأدمن قد تم مسبقاً)
-
-        if (!adminEmail) {
-            return new Response(JSON.stringify({ success: false, error: 'غير مصرح لك: مطلوب إيميل الأدمن.' }), { status: 403 });
+        // 1. التحقق من صلاحيات الأدمن
+        const authUser = await getAuthUser(adminEmail, db);
+        if (!authUser || authUser.role !== 'admin') {
+            return unauthorizedResponse();
         }
 
-        // 1. جلب قائمة المستخدمين
-        // لا نحتاج الباسورد أو الرصيد لغرض الطباعة
+        // 2. جلب قائمة المستخدمين (بدون الأدمن)
+        // نجلب فقط البيانات المطلوبة للطباعة، ومرتبة
         const { results: users } = await db.prepare(
             'SELECT name, email, family FROM users WHERE role != ? ORDER BY family, name'
         ).bind('admin').all(); // نستثني الأدمن من القائمة
