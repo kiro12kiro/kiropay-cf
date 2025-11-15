@@ -10,6 +10,9 @@
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
+    <!-- 🛑🛑 المكتبة الجديدة لتحويل HTML إلى صورة (للتحميل) 🛑🛑 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         /* 🛑 إعدادات الظهور الأولية 🛑 */
         .card-container { display: none; }
@@ -334,7 +337,7 @@
             <div class="admin-section">
                 <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
                 <p style="font-size: 0.9em; color: #555;">
-                    الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت للطباعة.
+                    الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت. الخطوة 3: تحميل الكروت كصورة للطباعة.
                 </p>
                 <div id="admin-qr-list-controls">
                     <button id="admin-fetch-qr-list-btn">
@@ -343,9 +346,13 @@
                     <!-- مربع نص لعرض النتائج (مخفي، يستخدم للتخزين فقط) -->
                     <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
                     
-                    <!-- 🛑🛑 الزر الجديد للتوليد 🛑🛑 -->
                     <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
                         الخطوة 2: توليد بطاقات الطباعة
+                    </button>
+                    
+                    <!-- 🛑🛑 الزر الجديد للتحميل كصورة 🛑🛑 -->
+                    <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
+                        الخطوة 3: تحميل الكروت كصورة (PNG)
                     </button>
                 </div>
                 <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
