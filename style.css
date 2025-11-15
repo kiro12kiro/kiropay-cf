@@ -13,7 +13,7 @@
 }
 
 .header-side {
-    font-size: 1.2em;
+    font-size: 1.6em;
     flex: 1; /* يأخذ مساحة ويساعد في التوسيط */
 }
 
@@ -33,13 +33,13 @@
 }
 
 .header-title-main {
-    font-size: 1.8em; /* خط كبير */
+    font-size: 2.5em; /* خط كبير */
     margin: 0;
     line-height: 1.2;
 }
 
 .header-title-sub {
-    font-size: 1.4em; /* خط كبير */
+    font-size: 2em; /* خط كبير */
     margin: 5px 0 0 0;
     letter-spacing: 1.5px; /* لإعطاء شكل مميز لـ TAKLOPOLY */
 }
