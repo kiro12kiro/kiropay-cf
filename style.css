@@ -835,52 +835,38 @@ form#admin-add-item-form button[type="submit"]:hover {
 }
 
 /* 🛑🛑 ستايلات واجهة الزائر (جديدة) 🛑🛑 */
-.guest-container {
-    max-width: 600px;
+.guest-panel {
+    max-width: 900px; /* نفس عرض لوحة الأدمن */
     margin: 2rem auto;
     padding: 20px;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid #007bff;
+    border-top: 5px solid #17a2b8; /* لون مختلف للزائر */
 }
-.guest-container h2 {
+.guest-panel h2 {
     text-align: center;
-    color: #007bff;
+    color: #17a2b8;
     margin-top: 0;
 }
-.guest-family-buttons {
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-}
-.guest-family-btn {
-    flex: 1;
-    padding: 12px 15px;
-    font-size: 1em;
-    font-weight: bold;
-    background-color: #17a2b8;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    min-width: 150px;
-    transition: background-color 0.2s;
-}
-.guest-family-btn:hover {
-    background-color: #138496;
-}
-.guest-results-container {
+.guest-results-list {
     margin-top: 1.5rem;
     border: 1px solid #eee;
     border-radius: 4px;
     padding: 10px;
     min-height: 100px;
     background-color: #fdfdfd;
+    list-style: none; /* إزالة النقط */
 }
-/* نستخدم نفس تنسيق لوحة الصدارة */
-.guest-results-container .leaderboard-list {
-    margin: 0;
+/* تنسيق قايمة الزائر (للقراءة فقط) */
+.guest-results-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1.1em;
+}
+.guest-results-list li:last-child {
+    border-bottom: none;
 }
