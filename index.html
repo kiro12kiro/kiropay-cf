@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KiroPay Project</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 🛑🛑 المكتبات المطلوبة للـ QR 🛑🛑 -->
+    
+    <!-- 🛑🛑 المكتبات المطلوبة للـ QR (مهم جداً) 🛑🛑 -->
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -34,7 +35,6 @@
         }
         .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
         
-        /* 🛑🛑 تم التعديل هنا 🛑🛑 */
         #user-announcement-text { 
             font-size: 1.3em; /* تكبير الخط */
             color: #333; 
@@ -81,6 +81,7 @@
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
+                    <!-- 🛑🛑 حقل المستوى الجديد للمستخدم 🛑🛑 -->
                     <p id="user-level">المستوى: </p>
 
                     <div class="transaction-history">
@@ -198,7 +199,13 @@
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
+                    <!-- 🛑🛑 حقل المستوى الجديد في كارت الأدمن 🛑🛑 -->
                     <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
+                    
+                    <!-- 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑 -->
+                    <button id="admin-show-user-qr-btn">
+                        عرض كود QR لهذا المستخدم
+                    </button>
                     
                     <hr style="margin: 1rem 0;">
 
@@ -210,6 +217,7 @@
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
                     
+                    <!-- 🛑🛑 قسم تعديل المستوى الجديد 🛑🛑 -->
                     <hr style="margin: 1rem 0;">
                     <h4>تعديل مستوى المستخدم</h4>
                     <div id="admin-level-controls">
@@ -289,6 +297,23 @@
             </div>
             <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
             
+            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (جديد) 🛑🛑 -->
+            <div class="admin-section">
+                <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    استخدم هذا الزر لجلب قائمة بيانات (JSON) لجميع المستخدمين لغرض طباعة أكواد QR الخاصة بهم.
+                </p>
+                <div id="admin-qr-list-controls">
+                    <button id="admin-fetch-qr-list-btn">
+                        جلب قائمة المستخدمين للطباعة
+                    </button>
+                    <!-- مربع نص لعرض النتائج -->
+                    <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
+                </div>
+                <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+            <!-- 🛑🛑 نهاية قسم طباعة الـ QR 🛑🛑 -->
+
             <div class="admin-section">
                 <h4>إضافة سؤال جديد (Quiz)</h4>
                 <p style="font-size: 0.9em; color: #555;">
@@ -335,6 +360,7 @@
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
                     
+                    <!-- 🛑🛑 حقل المستوى المطلوب للمنتج 🛑🛑 -->
                     <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
                     <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
 
@@ -403,6 +429,7 @@
                 <label for="edit-item-price">السعر (نقاط):</label>
                 <input type="number" id="edit-item-price" required min="1">
 
+                <!-- 🛑🛑 حقل تعديل المستوى المطلوب 🛑🛑 -->
                 <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
                 <input type="number" id="edit-item-required-level" required min="1">
 
