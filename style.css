@@ -833,3 +833,54 @@ form#admin-add-item-form button[type="submit"]:hover {
     border: none;
     cursor: pointer;
 }
+
+/* 🛑🛑 ستايلات واجهة الزائر (جديدة) 🛑🛑 */
+.guest-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #007bff;
+}
+.guest-container h2 {
+    text-align: center;
+    color: #007bff;
+    margin-top: 0;
+}
+.guest-family-buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+.guest-family-btn {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 1em;
+    font-weight: bold;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 150px;
+    transition: background-color 0.2s;
+}
+.guest-family-btn:hover {
+    background-color: #138496;
+}
+.guest-results-container {
+    margin-top: 1.5rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    min-height: 100px;
+    background-color: #fdfdfd;
+}
+/* نستخدم نفس تنسيق لوحة الصدارة */
+.guest-results-container .leaderboard-list {
+    margin: 0;
+}
