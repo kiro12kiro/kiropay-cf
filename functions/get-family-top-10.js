@@ -1,33 +1,29 @@
 /*
  * API Endpoint: /get-family-top-10
- * (جديد - بتاع لستات الأسر)
- * وظيفته: يجيب أعلى 10 في أسرة معينة
+ * (مُعدل لاستثناء الأدمن والجيست)
  */
 export async function onRequestPost(context) {
-  try {
-    const db = context.env.DB;
-    const data = await context.request.json();
-    const familyName = data.family; // هناخد اسم الأسرة من الـ JS
+    try {
+        const db = context.env.DB; 
+        const { family } = await context.request.json();
 
-    if (!familyName) {
-      return new Response(JSON.stringify({ error: "لم يتم إرسال اسم الأسرة" }), { status: 400 });
+        if (!family) {
+            return new Response(JSON.stringify({ error: 'اسم العائلة مطلوب.' }), { status: 400 });
+        }
+
+        // 🛑🛑 التعديل هنا 🛑🛑
+        // أضفنا "AND role = 'user'" للـ query
+        const { results } = await db.prepare(
+            "SELECT name, balance FROM users WHERE family = ? AND role = 'user' ORDER BY balance DESC LIMIT 10"
+        ).bind(family).all();
+
+        return new Response(JSON.stringify({ users: results }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+        });
+
+    } catch (e) {
+        console.error("Get Family Top 10 Error:", e);
+        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }
-
-    // 🛑 ابحث عن اليوزرز اللي في الأسرة دي بس، واخفي الأدمن، ورتبهم، وهات 10
-    const ps = db.prepare(
-      "SELECT name, balance FROM users WHERE family = ? AND role != 'admin' ORDER BY balance DESC LIMIT 10"
-    );
-    
-    const results = await ps.bind(familyName).all();
-
-    return new Response(JSON.stringify({ users: results.results }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500
-    });
-  }
 }

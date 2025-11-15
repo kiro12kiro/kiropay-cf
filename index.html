@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KiroPay Project</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- 🛑🛑 المكتبات المطلوبة للـ QR (مهم جداً) 🛑🛑 -->
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- 🛑🛑 المكتبة الجديدة لتحويل HTML إلى صورة (للتحميل) 🛑🛑 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* 🛑 إعدادات الظهور الأولية 🛑 */
@@ -31,11 +38,30 @@
         }
         .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
         
-        /* 🛑🛑 تم التعديل هنا 🛑🛑 */
         #user-announcement-text { 
             font-size: 1.3em; /* تكبير الخط */
             color: #333; 
             font-weight: bold; /* خط عريض */
+        }
+        
+        /* 🛑🛑 ستايلات نافذة QR المنبثقة 🛑🛑 */
+        #qr-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); display: none; /* مخفي افتراضياً */
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #qr-modal-content {
+            background-color: white; padding: 25px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); text-align: center;
+            max-width: 300px; width: 90%; position: relative;
+        }
+        #qr-code-container {
+            margin: 15px auto; width: 250px; height: 250px;
+            border: 1px solid #ccc; padding: 5px;
+        }
+        .close-qr-btn {
+            position: absolute; top: 10px; left: 10px; font-size: 24px;
+            font-weight: bold; color: #aaa; cursor: pointer;
         }
     </style>
 </head>
@@ -58,7 +84,7 @@
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
-                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <!-- 🛑🛑 حقل المستوى الجديد للمستخدم 🛑🛑 -->
                     <p id="user-level">المستوى: </p>
 
                     <div class="transaction-history">
@@ -70,6 +96,8 @@
             </div>
             
             <div class="button-group">
+                <!-- 🛑🛑 زر كود الحضور الجديد 🛑🛑 -->
+                <button id="show-qr-btn" style="display: none; background-color: #28a745; color: white;">كود الحضور 📋</button>
                 <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
                 <button id="unlocked-items-btn" style="display: none;">مشترياتي</button>
                 <button id="logout-btn">تسجيل الخروج</button>
@@ -146,6 +174,39 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
+    <!-- 🛑🛑 حاوية الزائر الجديدة (مخفية افتراضياً) 🛑🛑 -->
+    <div class="guest-container" id="guest-container" style="display: none;">
+        <h2>🏆 عرض نقاط الأسر 🏆</h2>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض أعلى 10 مستخدمين ونقاطهم.</p>
+        
+        <div class="guest-family-buttons">
+            <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">
+                اسرة الانبا موسي الاسود
+            </button>
+            <button class="guest-family-btn" data-family="اسرة مارجرس">
+                اسرة مارجرس
+            </button>
+            <button class="guest-family-btn" data-family="اسرة الانبا كاراس">
+                اسرة الانبا كاراس
+            </button>
+        </div>
+
+        <p id="guest-message" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+        
+        <div class="guest-results-container">
+            <ul class="leaderboard-list" id="guest-results-list">
+                <!-- ستظهر النتائج هنا -->
+            </ul>
+        </div>
+        
+        <!-- هذا الزر سيظهر للزائر (سنعيد استخدام الزر الرئيسي) -->
+        <div class="button-group" style="max-width: 600px;">
+             <button id="logout-btn-guest" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
+        </div>
+    </div>
+    <!-- 🛑🛑 نهاية حاوية الزائر 🛑🛑 -->
+
+
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
@@ -174,8 +235,13 @@
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
-                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <!-- 🛑🛑 حقل المستوى الجديد في كارت الأدمن 🛑🛑 -->
                     <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
+                    
+                    <!-- 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑 -->
+                    <button id="admin-show-user-qr-btn">
+                        عرض كود QR لهذا المستخدم
+                    </button>
                     
                     <hr style="margin: 1rem 0;">
 
@@ -187,7 +253,7 @@
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
                     
-                    <!-- 🛑🛑 الإضافة المطلوبة: قسم تعديل المستوى 🛑🛑 -->
+                    <!-- 🛑🛑 قسم تعديل المستوى الجديد 🛑🛑 -->
                     <hr style="margin: 1rem 0;">
                     <h4>تعديل مستوى المستخدم</h4>
                     <div id="admin-level-controls">
@@ -235,7 +301,70 @@
                 <div id="admin-family-results" style="margin-top: 1rem;">
                     </div>
             </div>
+
+            <!-- 🛑🛑 قسم مسح الحضور والمكافآت (جديد) 🛑🛑 -->
+            <div class="admin-section scan-section">
+                <h4>📷 مسح كود الحضور والمكافأة</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية.
+                </p>
+                <div id="admin-scan-controls">
+                    <label for="reward-reason-select">نوع المكافأة:</label>
+                    <!-- 🛑🛑 تم تحديث قائمة المكافآت هنا 🛑🛑 -->
+                    <select id="reward-reason-select">
+                        <option value="300:القداس">القداس (300 نقطة)</option>
+                        <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+                        <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+                        <option value="200:عشية">عشية (200 نقطة)</option>
+                        <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+                        <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+                        <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+                        <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+                        <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+                        <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+                    </select>
+                    <button id="start-scan-btn" style="background-color: #f472b6;">
+                        تشغيل الكاميرا والمسح
+                    </button>
+                    <!-- حاوية عرض الكاميرا -->
+                    <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
+                </div>
+                <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+            <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
             
+            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
+            <div class="admin-section">
+                <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت. الخطوة 3: تحميل الكروت كصورة للطباعة.
+                </p>
+                <div id="admin-qr-list-controls">
+                    <button id="admin-fetch-qr-list-btn">
+                        الخطوة 1: جلب قائمة المستخدمين
+                    </button>
+                    <!-- مربع نص لعرض النتائج (مخفي، يستخدم للتخزين فقط) -->
+                    <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
+                    
+                    <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
+                        الخطوة 2: توليد بطاقات الطباعة
+                    </button>
+                    
+                    <!-- 🛑🛑 الزر الجديد للتحميل كصورة 🛑🛑 -->
+                    <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
+                        الخطوة 3: تحميل الكروت كصورة (PNG)
+                    </button>
+                </div>
+                <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
+
+                <!-- 🛑🛑 الحاوية الجديدة للطباعة 🛑🛑 -->
+                <div id="admin-printable-cards-container">
+                    <!-- سيتم ملء الكروت هنا بواسطة الجافاسكريبت -->
+                </div>
+            </div>
+            <!-- 🛑🛑 نهاية قسم طباعة الـ QR 🛑🛑 -->
+
+
             <div class="admin-section">
                 <h4>إضافة سؤال جديد (Quiz)</h4>
                 <p style="font-size: 0.9em; color: #555;">
@@ -282,7 +411,7 @@
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
                     
-                    <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                    <!-- 🛑🛑 حقل المستوى المطلوب للمنتج 🛑🛑 -->
                     <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
                     <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
 
@@ -351,7 +480,7 @@
                 <label for="edit-item-price">السعر (نقاط):</label>
                 <input type="number" id="edit-item-price" required min="1">
 
-                <!-- 🛑🛑 الإضافة المطلوبة: حقل المستوى 🛑🛑 -->
+                <!-- 🛑🛑 حقل تعديل المستوى المطلوب 🛑🛑 -->
                 <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
                 <input type="number" id="edit-item-required-level" required min="1">
 
@@ -362,6 +491,18 @@
 
                 <button type="submit" id="save-edit-btn" style="margin-top: 20px;">حفظ التعديلات</button>
             </form>
+        </div>
+    </div>
+    <!-- 🛑🛑 نافذة عرض كود QR المنبثقة 🛑🛑 -->
+    <div id="qr-modal-overlay">
+        <div id="qr-modal-content">
+            <span class="close-qr-btn">&times;</span>
+            <h3>كود الحضور الخاص بك</h3>
+            <p style="font-size: 0.9em; color: #6c757d;">اعرض هذا الكود للأدمن ليتم تسجيل حضورك.</p>
+            <div id="qr-code-container">
+                <!-- سيتم وضع كود QR هنا -->
+            </div>
+            <small id="qr-user-email-display" style="display: block; margin-top: 10px; font-weight: bold;"></small>
         </div>
     </div>
     <script src="app.js"></script>
