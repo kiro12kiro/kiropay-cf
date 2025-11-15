@@ -171,39 +171,37 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- 🛑🛑 لوحة الزائر الجديدة (مخفية افتراضياً) 🛑🛑 -->
-    <div class="guest-panel" id="guest-panel" style="display: none;">
-        <h2>عرض نقاط الأسر (للزائرين)</h2>
+    <!-- 🛑🛑 حاوية الزائر الجديدة (مخفية افتراضياً) 🛑🛑 -->
+    <div class="guest-container" id="guest-container" style="display: none;">
+        <h2>🏆 عرض نقاط الأسر 🏆</h2>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض أعلى 10 مستخدمين ونقاطهم.</p>
         
-        <!-- 1. نفس زراير الأدمن -->
-        <div class="admin-section">
-            <h4>اختر أسرة لعرض المستخدمين والنقاط</h4>
-            <div class="family-buttons-container">
-                <button class="family-btn" data-family="اسرة الانبا موسي الاسود">
-                    اسرة الانبا موسي الاسود
-                </button>
-                <button class="family-btn" data-family="اسرة مارجرس">
-                    اسرة مارجرس
-                </button>
-                <button class="family-btn" data-family="اسرة الانبا كاراس">
-                    اسرة الانبا كاراس
-                </button>
-            </div>
-            
-            <p id="guest-family-message" style="color: blue; margin-top: 10px;"></p>
-            
-            <!-- 2. قايمة "للقراءة فقط" -->
-            <div id="guest-family-results" class="guest-results-list">
-                <!-- النتائج هتظهر هنا كقايمة -->
-            </div>
+        <div class="guest-family-buttons">
+            <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">
+                اسرة الانبا موسي الاسود
+            </button>
+            <button class="guest-family-btn" data-family="اسرة مارجرس">
+                اسرة مارجرس
+            </button>
+            <button class="guest-family-btn" data-family="اسرة الانبا كاراس">
+                اسرة الانبا كاراس
+            </button>
         </div>
 
-        <!-- 3. زرار خروج خاص بالزائر -->
-        <div class="button-group" style="max-width: 600px; margin-top: 20px;">
-             <button id="guest-logout-btn" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
+        <p id="guest-message" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+        
+        <div class="guest-results-container">
+            <ul class="leaderboard-list" id="guest-results-list">
+                <!-- ستظهر النتائج هنا -->
+            </ul>
+        </div>
+        
+        <!-- هذا الزر سيظهر للزائر (سنعيد استخدام الزر الرئيسي) -->
+        <div class="button-group" style="max-width: 600px;">
+             <button id="logout-btn-guest" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
         </div>
     </div>
-    <!-- 🛑🛑 نهاية لوحة الزائر 🛑🛑 -->
+    <!-- 🛑🛑 نهاية حاوية الزائر 🛑🛑 -->
 
 
     <div class="admin-panel-container">
@@ -332,22 +330,33 @@
             </div>
             <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
             
-            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (جديد) 🛑🛑 -->
+            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
             <div class="admin-section">
                 <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
                 <p style="font-size: 0.9em; color: #555;">
-                    استخدم هذا الزر لجلب قائمة بيانات (JSON) لجميع المستخدمين لغرض طباعة أكواد QR الخاصة بهم.
+                    الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت للطباعة.
                 </p>
                 <div id="admin-qr-list-controls">
                     <button id="admin-fetch-qr-list-btn">
-                        جلب قائمة المستخدمين للطباعة
+                        الخطوة 1: جلب قائمة المستخدمين
                     </button>
-                    <!-- مربع نص لعرض النتائج -->
+                    <!-- مربع نص لعرض النتائج (مخفي، يستخدم للتخزين فقط) -->
                     <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
+                    
+                    <!-- 🛑🛑 الزر الجديد للتوليد 🛑🛑 -->
+                    <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
+                        الخطوة 2: توليد بطاقات الطباعة
+                    </button>
                 </div>
                 <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
+
+                <!-- 🛑🛑 الحاوية الجديدة للطباعة 🛑🛑 -->
+                <div id="admin-printable-cards-container">
+                    <!-- سيتم ملء الكروت هنا بواسطة الجافاسكريبت -->
+                </div>
             </div>
             <!-- 🛑🛑 نهاية قسم طباعة الـ QR 🛑🛑 -->
+
 
             <div class="admin-section">
                 <h4>إضافة سؤال جديد (Quiz)</h4>
