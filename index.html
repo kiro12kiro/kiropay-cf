@@ -171,6 +171,39 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
+    <!-- 🛑🛑 حاوية الزائر الجديدة (مخفية افتراضياً) 🛑🛑 -->
+    <div class="guest-container" id="guest-container" style="display: none;">
+        <h2>🏆 عرض نقاط الأسر 🏆</h2>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض أعلى 10 مستخدمين ونقاطهم.</p>
+        
+        <div class="guest-family-buttons">
+            <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">
+                اسرة الانبا موسي الاسود
+            </button>
+            <button class="guest-family-btn" data-family="اسرة مارجرس">
+                اسرة مارجرس
+            </button>
+            <button class="guest-family-btn" data-family="اسرة الانبا كاراس">
+                اسرة الانبا كاراس
+            </button>
+        </div>
+
+        <p id="guest-message" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+        
+        <div class="guest-results-container">
+            <ul class="leaderboard-list" id="guest-results-list">
+                <!-- ستظهر النتائج هنا -->
+            </ul>
+        </div>
+        
+        <!-- هذا الزر سيظهر للزائر (سنعيد استخدام الزر الرئيسي) -->
+        <div class="button-group" style="max-width: 600px;">
+             <button id="logout-btn-guest" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
+        </div>
+    </div>
+    <!-- 🛑🛑 نهاية حاوية الزائر 🛑🛑 -->
+
+
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
