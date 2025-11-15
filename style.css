@@ -816,6 +816,22 @@ form#admin-add-item-form button[type="submit"]:hover {
     background-color: #218838;
 }
 
+/* 🛑 الزر الجديد للتحميل كصورة 🛑 */
+#admin-download-cards-as-image-btn {
+    background-color: #ffc107; /* أصفر */
+    color: #212529;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+#admin-download-cards-as-image-btn:hover {
+    background-color: #e0a800;
+}
+
 
 #admin-qr-list-results {
     width: 100%;
@@ -840,6 +856,8 @@ form#admin-add-item-form button[type="submit"]:hover {
     padding: 10px;
     border: 1px dashed #007bff;
     background: #fff;
+    /* 🛑 مهم: التأكد من أن الحاوية فارغة في البداية */
+    min-height: 0; 
 }
 
 .print-card {
@@ -867,6 +885,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     background: white;
     border: 1px solid #eee;
 }
+/* 🛑 ضمان أن الـ QR يملأ الحاوية المخصصة له */
 .print-card-qr img,
 .print-card-qr canvas {
     width: 100% !important;
@@ -951,24 +970,41 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin: 0;
 }
 
-/* 🛑🛑 ستايلات خاصة بالطباعة (جديدة) 🛑🛑 */
+/* 🛑🛑 ستايلات خاصة بالطباعة (معدلة لتجنب الصفحة البيضاء) 🛑🛑 */
 @media print {
     /* إخفاء كل شيء افتراضياً */
     body > * {
         display: none !important;
     }
+    
+    /* * إظهار حاوية الكروت فقط. 
+     * يجب أن تكون الحاوية هي "ابن" مباشر للـ body لضمان عمل هذا الكود.
+     * بما أنها ليست كذلك (هي داخل .admin-panel-container)، سنغير الاستراتيجية.
+    */
+    
+    /* استراتيجية بديلة: إخفاء كل شيء ما عدا الحاوية المطلوبة */
+    body * {
+        visibility: hidden; /* إخفاء كل العناصر */
+    }
 
-    /* إظهار حاوية الكروت فقط */
+    #admin-printable-cards-container, 
+    #admin-printable-cards-container * {
+        visibility: visible; /* إظهار حاوية الطباعة وكل ما بداخلها */
+    }
+
     #admin-printable-cards-container {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
-        gap: 10px;
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
         margin: 0;
         padding: 0;
+        border: none !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
+        gap: 10px;
     }
 
-    /* تنسيق الكارت للطباعة */
     .print-card {
         display: block !important;
         page-break-inside: avoid; /* منع الكارت من الانقسام بين صفحتين */
@@ -989,5 +1025,6 @@ form#admin-add-item-form button[type="submit"]:hover {
         width: 100% !important;
         height: 100% !important;
         display: block !important;
+        visibility: visible !important; /* تأكيد إظهارها */
     }
 }
