@@ -1157,7 +1157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -----------------------------------------------------
-    // 🛑🛑🛑 منطق واجهة الزائر (جديد) 🛑🛑🛑
+    // 🛑🛑🛑 منطق واجهة الزائر (جديد ومُصحح) 🛑🛑🛑
     // -----------------------------------------------------
     guestFamilyButtons.forEach(button => {
         button.addEventListener('click', async () => {
@@ -1167,8 +1167,8 @@ document.addEventListener("DOMContentLoaded", () => {
             guestResultsList.innerHTML = '';
 
             try {
-                // 🛑 نعيد استخدام الفانكشن العامة الخاصة بلوحة الصدارة
-                const response = await fetch('/get-family-top-10', {
+                // 🛑🛑 التعديل: استدعاء الفانكشن الجديدة 🛑🛑
+                const response = await fetch('/guest-get-family', { // ⬅️ الرابط المُصحح
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ family: familyName })
@@ -1179,7 +1179,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
                 
                 if (data.users && data.users.length > 0) {
-                    guestMessage.textContent = `أعلى 10 في: ${familyName}`;
+                    // 🛑 عرض العدد الإجمالي (مُصحح)
+                    guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
                     guestMessage.style.color = 'green';
                     data.users.forEach((user, index) => {
                         const li = document.createElement('li');
