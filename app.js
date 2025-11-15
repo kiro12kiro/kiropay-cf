@@ -9,11 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshDataBtn = document.getElementById("refresh-data-btn");
 
     // --- 🛑🛑 عناصر واجهة الزائر (جديدة) 🛑🛑 ---
-    const guestContainer = document.getElementById("guest-container");
-    const guestFamilyButtons = document.querySelectorAll(".guest-family-btn");
-    const guestResultsList = document.getElementById("guest-results-list");
-    const guestMessage = document.getElementById("guest-message");
-    const logoutBtnGuest = document.getElementById("logout-btn-guest"); // زر اللوج أوت الخاص بالزائر
+    const guestPanel = document.getElementById("guest-panel");
+    // 🛑 استخدمنا querySelectorAll لاستهداف الزراير داخل لوحة الزائر فقط
+    const guestFamilyButtons = guestPanel.querySelectorAll(".family-btn"); 
+    const guestFamilyResults = document.getElementById("guest-family-results");
+    const guestFamilyMessage = document.getElementById("guest-family-message");
+    const guestLogoutBtn = document.getElementById("guest-logout-btn"); // زر اللوج أوت الخاص بالزائر
 
 
     // --- عناصر كارت المستخدم (اللي عامل لوجن) ---
@@ -63,7 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const deleteUserBtn = document.getElementById("admin-delete-user-btn");
     const deleteMessage = document.getElementById("admin-delete-message");
-    const familyButtons = document.querySelectorAll(".family-btn");
+    // 🛑 تم تغيير اسم المتغير هذا ليكون خاصاً بالأدمن فقط
+    const adminFamilyButtons = adminPanelDiv.querySelectorAll(".family-btn");
     const adminFamilyResultsDiv = document.getElementById("admin-family-results");
     const adminFamilyMessage = document.getElementById("admin-family-message");
     const adminQuizForm = document.getElementById("admin-quiz-form");
@@ -163,8 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardContainer.style.display = "none";
         formContainer.style.display = "flex";
         logoutBtn.style.display = "none";
-        logoutBtnGuest.style.display = "none"; // 🛑 إخفاء زر خروج الزائر
-        guestContainer.style.display = "none"; // 🛑 إخفاء واجهة الزائر
+        guestLogoutBtn.style.display = "none"; // 🛑 إخفاء زر خروج الزائر
+        guestPanel.style.display = "none"; // 🛑 إخفاء واجهة الزائر
         refreshDataBtn.style.display = "none";
         unlockedItemsBtn.style.display = "none"; 
         if (showQrBtn) showQrBtn.style.display = "none";
@@ -403,12 +405,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else if (user.role === 'guest') {
                     // 2. عرض لوحة الزائر (GUEST VIEW)
                     messageDiv.textContent = "مرحباً أيها الزائر!";
-                    guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
-                    logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
+                    guestPanel.style.display = "block"; // 🛑 إظهار واجهة الزائر
+                    guestLogoutBtn.style.display = "block"; // 🛑 إظهار زر خروج الزائر
                     
                     // 🛑 إخفاء كل شيء آخر
                     cardContainer.style.display = "none";
                     formContainer.style.display = "none";
+                    logoutBtn.style.display = "none";
                     avatarOverlayLabel.style.display = "none";
                     refreshDataBtn.style.display = "none";
                     unlockedItemsBtn.style.display = "none";
@@ -1050,7 +1053,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.style.color = "blue";
     }
     logoutBtn.addEventListener("click", handleLogout);
-    logoutBtnGuest.addEventListener("click", handleLogout); // 🛑 ربط الزر الجديد
+    guestLogoutBtn.addEventListener("click", handleLogout); // 🛑 ربط الزر الجديد
 
 
     // --- كود "تغيير الصورة" ---
@@ -1159,16 +1162,16 @@ document.addEventListener("DOMContentLoaded", () => {
     guestFamilyButtons.forEach(button => {
         button.addEventListener('click', async () => {
             const familyName = button.dataset.family;
-            guestMessage.textContent = `جاري تحميل أسرة ${familyName}...`;
-            guestMessage.style.color = 'blue';
-            guestResultsList.innerHTML = '';
+            guestFamilyMessage.textContent = `جاري تحميل أسرة ${familyName}...`;
+            guestFamilyMessage.style.color = 'blue';
+            guestFamilyResults.innerHTML = '';
 
             try {
-                // 🛑 نعيد استخدام الفانكشن العامة الخاصة بلوحة الصدارة
-                const response = await fetch('/get-family-top-10', {
+                // 🛑 نستخدم الفانكشن الخاصة بالأدمن (لأنها تجلب كل المستخدمين)
+                const response = await fetch(`/admin-get-family`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family: familyName })
+                    body: JSON.stringify({ family: familyName }),
                 });
 
                 if (!response.ok) throw new Error('فشل تحميل القائمة');
@@ -1176,21 +1179,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
                 
                 if (data.users && data.users.length > 0) {
-                    guestMessage.textContent = `أعلى 10 في: ${familyName}`;
-                    guestMessage.style.color = 'green';
+                    guestFamilyMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
+                    guestFamilyMessage.style.color = 'green';
+                    
+                    // 🛑 عرض "للقراءة فقط" (بدون Checkbox أو Click)
                     data.users.forEach((user, index) => {
                         const li = document.createElement('li');
                         // نستخدم نفس تنسيق لوحة الصدارة
                         li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
-                        guestResultsList.appendChild(li);
+                        guestFamilyResults.appendChild(li);
                     });
                 } else {
-                    guestMessage.textContent = 'لا يوجد مستخدمين لعرضهم في هذه الأسرة.';
-                    guestMessage.style.color = 'black';
+                    guestFamilyMessage.textContent = 'لا يوجد مستخدمين لعرضهم في هذه الأسرة.';
+                    guestFamilyMessage.style.color = 'black';
                 }
             } catch (err) {
-                guestMessage.textContent = `خطأ: ${err.message}`;
-                guestMessage.style.color = 'red';
+                guestFamilyMessage.textContent = `خطأ: ${err.message}`;
+                guestFamilyMessage.style.color = 'red';
             }
         });
     });
@@ -1528,7 +1533,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
-        document.querySelectorAll(".family-btn").forEach(button => {
+        adminFamilyButtons.forEach(button => {
             button.addEventListener("click", async (event) => {
                 const familyName = button.dataset.family;
                 
