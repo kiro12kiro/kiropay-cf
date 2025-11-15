@@ -13,7 +13,7 @@
 }
 
 .header-side {
-    font-size: 1.6em;
+    font-size: 1.9em;
     flex: 1; /* يأخذ مساحة ويساعد في التوسيط */
 }
 
@@ -1065,4 +1065,68 @@ form#admin-add-item-form button[type="submit"]:hover {
         height: 100% !important;
         display: block !important;
     }
+}
+
+/* ---------------------------------- */
+/* 🛑🛑 أكواد الـ CSS المفقودة (تمت إضافتها هنا) 🛑🛑 */
+/* ---------------------------------- */
+
+/* 1. ستايلات تغيير الصورة (الأوڤرلاي) */
+.avatar-wrapper {
+    position: relative; /* ضروري لتثبيت الأوڤرلاي */
+}
+
+#avatar-overlay-label {
+    /* هذا هو الأوڤرلاي نفسه */
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    color: white; 
+    
+    /* يتم التحكم به بالجافاسكريبت (flex / none) */
+    display: none; 
+    
+    justify-content: center; 
+    align-items: center; 
+    font-weight: bold; 
+    border-radius: 50%;
+    opacity: 0.7; /* الشفافية الافتراضية */
+    transition: opacity 0.2s;
+    cursor: pointer; 
+    text-align: center; 
+    font-size: 1rem; 
+}
+
+/* عند الوقوف بالماوس */
+.avatar-wrapper:hover #avatar-overlay-label { 
+    opacity: 1; 
+}
+
+/* إخفاء زر اختيار الملف الأصلي */
+#avatar-upload-input { 
+    display: none; 
+}
+
+/* 2. ستايلات الإعلان الهام */
+.announcement-container {
+    display: none; /* يتم التحكم به بالجافاسكريبت */
+    max-width: 900px; 
+    margin: 2rem auto;
+    padding: 15px 20px; 
+    background-color: #fff3cd; 
+    border: 1px solid #ffeeba; 
+    border-radius: 8px; 
+    text-align: center;
+}
+.announcement-container h3 { 
+    margin: 0 0 10px 0; 
+    color: #856404; 
+}
+#user-announcement-text { 
+    font-size: 1.3em; 
+    color: #333; 
+    font-weight: bold; 
 }
