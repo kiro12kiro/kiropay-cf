@@ -1,3 +1,55 @@
+/* 🛑🛑 ستايل الهيدر الجديد 🛑🛑 */
+.site-header {
+    width: 100%;
+    background-color: #004a99; /* لون أزرق غامق (أو أي لون مناسب) */
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box; /* لضمان عدم تجاوز العرض */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    font-weight: bold; /* تطبيق البولد على الكل */
+}
+
+.header-side {
+    font-size: 1.2em;
+    flex: 1; /* يأخذ مساحة ويساعد في التوسيط */
+}
+
+/* الـ div الأول (كنيسة الانبا تكلا) سيكون على اليمين تلقائياً بسبب dir=rtl */
+.header-side:first-of-type { 
+     text-align: right; 
+}
+
+/* الـ div الأخير (خدمة اعدادي بنين) نريده على الشمال */
+.header-side:last-of-type {
+    text-align: left; 
+}
+
+.header-center {
+    text-align: center;
+    flex: 2; /* نعطيه مساحة أكبر في الوسط */
+}
+
+.header-title-main {
+    font-size: 1.8em; /* خط كبير */
+    margin: 0;
+    line-height: 1.2;
+}
+
+.header-title-sub {
+    font-size: 1.4em; /* خط كبير */
+    margin: 5px 0 0 0;
+    letter-spacing: 1.5px; /* لإعطاء شكل مميز لـ TAKLOPOLY */
+}
+
+/* 🛑🛑 تعديل بسيط: إزاحة المحتوى الرئيسي للأسفل 🛑🛑 */
+.container {
+    margin-top: 0; /* نلغي أي هوامش علوية قديمة */
+}
+
+
 /* General Body Styles */
 body {
     font-family: Arial, sans-serif;
@@ -816,7 +868,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     background-color: #218838;
 }
 
-/* 🛑 الزر الجديد للتحميل كصورة 🛑 */
+/* 🛑 زر تحميل الصورة 🛑 */
 #admin-download-cards-as-image-btn {
     background-color: #ffc107; /* أصفر */
     color: #212529;
@@ -856,8 +908,6 @@ form#admin-add-item-form button[type="submit"]:hover {
     padding: 10px;
     border: 1px dashed #007bff;
     background: #fff;
-    /* 🛑 مهم: التأكد من أن الحاوية فارغة في البداية */
-    min-height: 0; 
 }
 
 .print-card {
@@ -885,7 +935,6 @@ form#admin-add-item-form button[type="submit"]:hover {
     background: white;
     border: 1px solid #eee;
 }
-/* 🛑 ضمان أن الـ QR يملأ الحاوية المخصصة له */
 .print-card-qr img,
 .print-card-qr canvas {
     width: 100% !important;
@@ -970,41 +1019,31 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin: 0;
 }
 
-/* 🛑🛑 ستايلات خاصة بالطباعة (معدلة لتجنب الصفحة البيضاء) 🛑🛑 */
+/* 🛑🛑 ستايلات خاصة بالطباعة (جديدة) 🛑🛑 */
 @media print {
     /* إخفاء كل شيء افتراضياً */
     body > * {
         display: none !important;
     }
     
-    /* * إظهار حاوية الكروت فقط. 
-     * يجب أن تكون الحاوية هي "ابن" مباشر للـ body لضمان عمل هذا الكود.
-     * بما أنها ليست كذلك (هي داخل .admin-panel-container)، سنغير الاستراتيجية.
-    */
-    
-    /* استراتيجية بديلة: إخفاء كل شيء ما عدا الحاوية المطلوبة */
-    body * {
-        visibility: hidden; /* إخفاء كل العناصر */
-    }
-
-    #admin-printable-cards-container, 
-    #admin-printable-cards-container * {
-        visibility: visible; /* إظهار حاوية الطباعة وكل ما بداخلها */
-    }
-
-    #admin-printable-cards-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0;
+    .admin-panel-container, #admin-panel, .print-section, #admin-printable-cards-container {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
         border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+
+    /* إظهار حاوية الكروت فقط */
+    #admin-printable-cards-container {
         display: grid !important;
         grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
         gap: 10px;
+        width: 100%;
     }
 
+    /* تنسيق الكارت للطباعة */
     .print-card {
         display: block !important;
         page-break-inside: avoid; /* منع الكارت من الانقسام بين صفحتين */
@@ -1025,6 +1064,5 @@ form#admin-add-item-form button[type="submit"]:hover {
         width: 100% !important;
         height: 100% !important;
         display: block !important;
-        visibility: visible !important; /* تأكيد إظهارها */
     }
 }
